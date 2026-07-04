@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#2563eb"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/style.css"/>
+<title>Konsultasi DoktrAI — asistenku.pro</title>
+</head>
+<body>
+<div class="container">
+  <div class="chat-topbar">
+    <a href="home.html" style="color:#334155"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></a>
+    <div style="display:flex;align-items:center;gap:10px;flex:1">
+      <div style="width:36px;height:36px;border-radius:50%;overflow:hidden;background:#f5f3ff"><img src="assets/mascot.png?v=2" style="width:100%;height:100%;object-fit:cover"/></div>
+      <div>
+        <h2 style="color:#7c3aed;margin:0;font-size:15px">DoktrAI</h2>
+        <span style="font-size:11px;color:#10b981">● Online</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-body" id="chatBody">
+    <div class="chat-msg">
+      <div class="av"><img src="assets/mascot.png?v=2"/></div>
+      <div class="chat-bubble">Halo! Aku <b>DoktrAI</b>, siap membantu konsultasi seputar kesehatan, pendidikan, hukum, bisnis, teknologi, karier, dan keuangan. Silakan tanya apa saja!</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+      <button class="btn btn-secondary btn-sm" onclick="quickAsk('Bagaimana pola hidup sehat?')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Kesehatan</button>
+      <button class="btn btn-secondary btn-sm" onclick="quickAsk('Bagaimana cara membuat CV yang baik?')">💼 Karier</button>
+      <button class="btn btn-secondary btn-sm" onclick="quickAsk('Ide bisnis modal kecil apa yang recommended?')">💡 Bisnis</button>
+      <button class="btn btn-secondary btn-sm" onclick="quickAsk('Bagaimana cara mengelola keuangan?')">💰 Keuangan</button>
+    </div>
+    <div style="background:#fef3c7;border-radius:12px;padding:10px 12px;font-size:12px;color:#78350f;line-height:1.4">
+      ⚠️ <b>Disclaimer:</b> Jawaban DoktrAI untuk topik kesehatan &amp; hukum bersifat informasi awal, <b>bukan pengganti</b> dokter atau pengacara profesional.
+    </div>
+  </div>
+
+  <form class="chat-input" id="chatForm">
+    <button type="button" class="ic-btn" title="Lampirkan file"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+    <button type="button" class="ic-btn" title="Voice"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg></button>
+    <textarea name="message" placeholder="Tanya apa saja..." oninput="this.style.height='44px';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+    <button class="send-btn" type="submit" style="background:#7c3aed"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+  </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/app.js"></script>
+<script>
+requireAuth();
+attachChat('#chatBody', '#chatForm');
+function quickAsk(text){
+  const ta = document.querySelector('#chatForm textarea');
+  ta.value = text;
+  document.getElementById('chatForm').dispatchEvent(new Event('submit', {cancelable:true}));
+}
+</script>
+</body>
+</html>

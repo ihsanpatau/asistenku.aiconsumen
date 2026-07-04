@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#2563eb"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/style.css"/>
+<title>Beranda — asistenku.pro</title>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <h1 class="logo logo-sm">asistenku<span class="dot-pro">.pro</span></h1>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="bell" aria-label="Notifikasi">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="dot"></span>
+      </button>
+      <div class="topbar-user" onclick="signOut()">
+        <div class="avatar"><img id="userAvatar" src="assets/mascot.png?v=2" alt="User"/></div>
+        <div class="greet">Halo, <span id="userName">Andi</span></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero" style="background:linear-gradient(180deg,#eff6ff 0%,#ffffff 95%)">
+    <div class="hero-inner">
+      <p class="muted" style="margin:0;font-size:14px">Selamat datang di</p>
+      <h1 class="logo" style="font-size:30px;letter-spacing:-1px">asistenku<span class="dot-pro" style="font-size:18px">.pro</span></h1>
+      <p>Asisten AI pintar untuk membantu tugas akademik dan profesionalmu.</p>
+      <span class="quote">“ Kerjakan lebih cepat, lebih mudah, dan hasil lebih berkualitas.”</span>
+    </div>
+    <img class="hero-cat" src="assets/mascot.png?v=2" alt=""/>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="st-top"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><b>12.450+</b></div><span>Pengguna Aktif</span></div>
+    <div class="stat"><div class="st-top"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><b>245.800+</b></div><span>Dokumen Dibuat</span></div>
+    <div class="stat"><div class="st-top"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg><b>99.9%</b></div><span>Aman &amp; Terpercaya</span></div>
+    <div class="stat"><div class="st-top" style="color:#f59e0b"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><b>4.9/5</b></div><span>Rating Pengguna</span></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <h2>3 Menu Utama</h2>
+      <a href="menu1.html" class="link">Lihat Semua</a>
+    </div>
+    <div class="menu-grid">
+      <a href="menu1.html" class="menu-card blue">
+        <div class="thumb"><img src="assets/mascot.png?v=2" alt="Mahasiswa & Siswa"/></div>
+        <div class="body">
+          <h3>Mahasiswa &amp; Siswa</h3>
+          <p>Fitur akademik terstruktur untuk skripsi, jurnal, makalah, dan lainnya.</p>
+          <div class="go"><span>Buka Menu</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+      <a href="menu2.html" class="menu-card green">
+        <div class="thumb"><img src="assets/mascot.png?v=2" alt="Tugas & Project"/></div>
+        <div class="body">
+          <h3>Tugas &amp; Project</h3>
+          <p>Satu halaman serba-bisa untuk tugas apapun &amp; pekerjaan kantor.</p>
+          <div class="go"><span>Buka Menu</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+      <a href="menu3.html" class="menu-card purple">
+        <div class="thumb"><img src="assets/mascot.png?v=2" alt="Konsultasi AI"/></div>
+        <div class="body">
+          <h3>Konsultasi AI (DoktrAI)</h3>
+          <p>Chat AI bebas untuk kesehatan, hukum, bisnis, karier, dan lainnya.</p>
+          <div class="go"><span>Buka Menu</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section" style="padding-top:0">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:0 4px">
+      <h2 style="margin:0;font-size:17px;font-weight:800;color:var(--navy)">Sisa Kuota Hari Ini</h2>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#94a3b8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    </div>
+    <div class="quota-wrap" style="margin:0">
+      <div class="quota-row">
+        <div class="quota-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="quota-info">
+          <div class="lbl"><span>Halaman Dokumen</span><span class="val"><b>6</b> / 10 halaman</span></div>
+          <div class="bar"><span style="width:60%"></span></div>
+        </div>
+      </div>
+      <div class="quota-row">
+        <div class="quota-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div class="quota-info">
+          <div class="lbl"><span>Chat DoktrAI</span><span class="val"><b>8</b> / 20 pesan</span></div>
+          <div class="bar"><span style="width:40%"></span></div>
+        </div>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-head"><span>Paket Anda</span><span class="plan-badge">STANDAR</span></div>
+        <div class="plan-line"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Berlaku hingga</span><b>20 Mei 2026</b></div>
+        <div class="plan-line"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Halaman / hari</span><b>10 halaman</b></div>
+        <div class="plan-line"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat DoktrAI / hari</span><b>20 pesan</b></div>
+      </div>
+
+      <div class="promo-strip">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--brand)"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 4.8 0 0 1 12 8"/><path d="M16.5 8a2.5 2.5 0 0 0 0-5A4.8 4.8 0 0 0 12 8"/></svg>
+        <p>Upgrade paket untuk mendapatkan lebih banyak halaman dan fitur premium lainnya!</p>
+        <a href="upgrade.html" class="btn btn-secondary btn-sm">Lihat Paket <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:20px"></div>
+
+  <div class="bottomnav">
+    <a class="bn-item active" href="home.html"><span class="bn-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Beranda</a>
+    <a class="bn-item" href="#"><span class="bn-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Riwayat</a>
+    <a class="bn-item" href="#"><span class="bn-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>Dokumen Saya</a>
+    <a class="bn-item" href="upgrade.html"><span class="bn-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></span>Kuota Saya</a>
+    <a class="bn-item" href="#" onclick="signOut();return false"><span class="bn-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Profil</a>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/app.js"></script>
+<script>
+(async () => {
+  const session = await requireAuth();
+  if(!session) return;
+  const u = session.user;
+  const name = (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || (u.email ? u.email.split('@')[0] : 'User');
+  document.getElementById('userName').textContent = name.split(' ')[0];
+  const avatarUrl = u.user_metadata && u.user_metadata.avatar_url;
+  if(avatarUrl) document.getElementById('userAvatar').src = avatarUrl;
+})();
+</script>
+</body>
+</html>

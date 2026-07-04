@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#2563eb"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/style.css"/>
+<title>Upgrade Paket — asistenku.pro</title>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="home.html" style="color:#334155;display:inline-flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></a>
+      <h1 class="logo logo-sm">asistenku<span class="dot-pro">.pro</span></h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="bell"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="dot"></span></button>
+      <div class="topbar-user" onclick="signOut()">
+        <div class="avatar"><img id="userAvatar" src="assets/mascot.png?v=2"/></div>
+        <div class="greet">Halo, <span id="userName">Andi</span></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:20px 20px 12px;position:relative;overflow:hidden;min-height:170px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 90%)">
+    <div style="position:relative;z-index:1;max-width:62%">
+      <h1 style="margin:0 0 6px;font-size:26px;font-weight:800;color:var(--navy);letter-spacing:-.5px">Upgrade Paket</h1>
+      <p class="muted" style="font-size:13px;line-height:1.5;margin:0">Pilih paket yang sesuai dengan kebutuhanmu. Belajar lebih cepat, bekerja lebih produktif.</p>
+    </div>
+    <img src="assets/mascot.png?v=2" style="position:absolute;right:-24px;top:8px;width:160px;z-index:0;opacity:.95" alt=""/>
+  </div>
+
+  <div class="price-grid">
+    <div class="price-card">
+      <div class="mascot"><img src="assets/mascot.png?v=2"/></div>
+      <h3 style="color:#64748b">GRATIS</h3>
+      <p class="price">Rp0</p>
+      <ul>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>5 halaman / hari</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>5 Chat DoktrAI</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Semua menu utama</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Riwayat 7 hari</li>
+      </ul>
+      <button class="btn" style="background:#e2e8f0;color:#64748b" disabled>Paket Aktif</button>
+    </div>
+
+    <div class="price-card blue">
+      <div class="mascot"><img src="assets/mascot.png?v=2"/></div>
+      <h3 style="color:var(--brand)">STANDAR</h3>
+      <p class="price">Rp20.000<br/><small>/bulan</small></p>
+      <ul>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>10 halaman / hari</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>20 Chat DoktrAI</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Riwayat tanpa batas</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Prioritas normal</li>
+      </ul>
+      <p class="tag-hot">🔥 Paling Dipilih</p>
+      <button class="btn btn-primary">Beli Sekarang</button>
+    </div>
+
+    <div class="price-card gold" style="margin-top:8px">
+      <div class="ribbon"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TERBAIK</div>
+      <div class="mascot"><img src="assets/mascot.png?v=2"/></div>
+      <h3>PRO</h3>
+      <p class="price">Rp59.000<br/><small>/bulan</small></p>
+      <ul>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>35 halaman / hari</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>50 Chat DoktrAI</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Generate lebih cepat</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Prioritas tinggi</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Cocok untuk skripsi</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Cocok untuk freelancer</li>
+      </ul>
+      <button class="btn btn-gold">Beli Sekarang</button>
+    </div>
+
+    <div class="price-card navy">
+      <div class="mascot"><img src="assets/mascot.png?v=2"/></div>
+      <h3>LANJUTAN</h3>
+      <p class="price">Rp99.000<br/><small>/bulan</small></p>
+      <ul>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>60 halaman / hari</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Chat tanpa batas</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Prioritas tertinggi</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Semua fitur premium</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Cocok untuk tim &amp; profesional</li>
+      </ul>
+      <button class="btn btn-purple">Beli Sekarang</button>
+    </div>
+  </div>
+
+  <div class="compare">
+    <h3>Perbandingan Paket</h3>
+    <table>
+      <thead><tr>
+        <th></th>
+        <th><span class="th-pill gray">Gratis</span></th>
+        <th><span class="th-pill blue">Standar</span></th>
+        <th><span class="th-pill gold">⭐ Pro</span></th>
+        <th><span class="th-pill navy">Lanjutan</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:6px;color:var(--brand)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Halaman / hari</td><td>5</td><td>10</td><td>35</td><td>60</td></tr>
+        <tr><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:6px;color:var(--brand)"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat DoktrAI</td><td>5</td><td>20</td><td>50</td><td>Unlimited</td></tr>
+        <tr><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:6px;color:var(--brand)"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Prioritas</td><td>✖</td><td>⭐</td><td>⭐⭐⭐</td><td>⭐⭐⭐⭐</td></tr>
+        <tr><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:6px;color:var(--brand)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Riwayat</td><td>7 Hari</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="promo-banner">
+    <img src="assets/mascot.png?v=2" alt=""/>
+    <div class="pt">
+      <h4>🎁 Promo Hari Ini!</h4>
+      <p>Upgrade sekarang dan dapat bonus</p>
+      <span class="bonus">7 hari akses PRO</span>
+    </div>
+    <a class="btn btn-secondary btn-sm" href="#" style="color:var(--brand);flex-shrink:0">Beli Paket <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+  </div>
+
+  <div class="faq">
+    <h3>Pertanyaan yang Sering Diajukan</h3>
+    <div class="faq-item open">
+      <div class="faq-q"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Kapan kuota direset?<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+      <div class="faq-a">Kuota direset setiap hari pukul 00.00 WIB.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>Bisa upgrade kapan saja?<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+      <div class="faq-a">Bisa. Kamu dapat upgrade atau downgrade paket kapan pun.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>Jika kuota habis?<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+      <div class="faq-a">Kamu bisa upgrade paket atau tunggu reset kuota di hari berikutnya.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Pembayaran apa saja?<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+      <div class="faq-a">Kami menerima berbagai metode pembayaran aman &amp; terpercaya (QRIS, transfer bank BCA/BRI/Mandiri/BNI, DANA, OVO, GoPay, dll).</div>
+    </div>
+  </div>
+
+  <div class="pay-methods">
+    <h3>Metode Pembayaran</h3>
+    <div class="pay-grid">
+      <div class="pay-pill qris">QRIS</div>
+      <div class="pay-pill bca">BCA</div>
+      <div class="pay-pill bri">BRI</div>
+      <div class="pay-pill mand">mandiri</div>
+      <div class="pay-pill bni">BNI</div>
+      <div class="pay-pill dana">DANA</div>
+      <div class="pay-pill ovo">OVO</div>
+      <div class="pay-pill gopay">gopay</div>
+    </div>
+  </div>
+
+  <div class="secure-bar">
+    <div class="sc-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <div>
+      <h4>Pembayaran Aman</h4>
+      <p>Data dienkripsi dan dilindungi dengan sistem keamanan terbaik.</p>
+    </div>
+    <div class="mid">Didukung oleh <b>midtrans</b></div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/app.js"></script>
+<script>
+(async () => {
+  const session = await requireAuth();
+  if(!session) return;
+  const u = session.user;
+  const name = (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || (u.email ? u.email.split('@')[0] : 'User');
+  document.getElementById('userName').textContent = name.split(' ')[0];
+})();
+</script>
+</body>
+</html>
