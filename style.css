@@ -131,6 +131,17 @@ body {
   overscroll-behavior-y: contain;
   padding-bottom: 80px;
 }
+/* Alias: banyak halaman (mahasiswa, tugas, jurnal, dll) memakai nama "page-content" untuk elemen yang sama */
+.page-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  padding-bottom: 80px;
+}
+.section-header { padding: 0 16px; margin: 18px 0 10px; }
+.section-title { font-size: 15px; font-weight: 700; color: var(--gray-900); }
 
 /* ── Top Navigation ── */
 .topnav {
@@ -377,6 +388,16 @@ body {
 .feature-desc  { font-size: 12px; color: var(--gray-500); margin-top: 2px; line-height: 1.3; }
 .feature-arrow { color: var(--gray-400); flex-shrink: 0; }
 .feature-arrow svg { width: 18px; height: 18px; }
+
+/* Alias untuk markup yang memakai penamaan "feature-row-*" (mahasiswa.html, bantuan.html) */
+.feature-row-icon {
+  width: 46px; height: 46px; border-radius: var(--r);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.feature-row-icon svg { width: 22px; height: 22px; color: #fff; }
+.feature-row-body { flex: 1; min-width: 0; }
+.feature-row-title { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+.feature-row-desc  { font-size: 12px; color: var(--gray-500); margin-top: 2px; line-height: 1.3; }
 
 /* ── Quota Box ── */
 .quota-box {
@@ -779,7 +800,7 @@ body {
 .chat-disclaimer svg { width: 11px; height: 11px; }
 
 /* ── Search Bar ── */
-.search-wrap { position: relative; margin: 0 16px 14px; }
+.search-wrap, .search-bar { position: relative; margin: 0 16px 14px; }
 .search-icon {
   position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
   color: var(--gray-400); pointer-events: none;
