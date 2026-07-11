@@ -2,13 +2,13 @@
 // Satu endpoint backend yang dipakai semua fitur (parafrase, PPT, jurnal, DoktrAI, skripsi, dll)
 // API key disimpan aman di Environment Variables Vercel, TIDAK pernah terlihat di browser.
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { prompt, task, messages, system } = req.body;
+    const { prompt, task, messages, system } = req.body || {};
 
     if (!prompt && !messages) {
       return res.status(400).json({ error: 'Prompt atau messages wajib diisi' });
@@ -39,14 +39,14 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(response.status).json({ error: data.error?.message || 'Terjadi kesalahan dari Anthropic API' });
+      return res.status(response.status).json({ error: (data.error && data.error.message) || 'Terjadi kesalahan dari Anthropic API' });
     }
 
-    const resultText = data.content?.[0]?.text || '';
+    const resultText = (data.content && data.content[0] && data.content[0].text) || '';
     return res.status(200).json({ text: resultText, task, raw: data });
 
   } catch (err) {
     console.error('Generate API error:', err);
-    return res.status(500).json({ error: 'Terjadi kesalahan server' });
+    return res.status(500).json({ error: 'Terjadi kesalahan server: ' + err.message });
   }
-}
+};
