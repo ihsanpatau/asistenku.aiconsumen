@@ -593,8 +593,10 @@ body {
   transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
 }
 .upload-area:hover { border-color: var(--brand-light); background: var(--brand-50); }
-.upload-icon { color: var(--brand-light); }
-.upload-icon svg { width: 30px; height: 30px; }
+.upload-icon { color: var(--brand-light); width: 48px; height: 48px; }
+.feature-row-arrow { width: 20px; height: 20px; flex-shrink: 0; color: var(--gray-400); }
+.arrow-right { width: 20px; height: 20px; flex-shrink: 0; color: var(--gray-400); }
+.chevron-down { width: 18px; height: 18px; flex-shrink: 0; color: var(--gray-400); }
 .upload-title { font-size: 13px; font-weight: 600; color: var(--gray-900); }
 .upload-sub   { font-size: 11px; color: var(--gray-500); }
 
@@ -761,8 +763,8 @@ body {
 .search-icon {
   position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
   color: var(--gray-400); pointer-events: none;
+  width: 17px; height: 17px;
 }
-.search-icon svg { width: 17px; height: 17px; }
 .search-input {
   width: 100%; padding: 10px 14px 10px 40px;
   border: 1.5px solid var(--gray-200); border-radius: var(--r-full);
