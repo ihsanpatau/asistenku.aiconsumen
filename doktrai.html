@@ -4,74 +4,529 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DoktrAI – asistenku.pro</title>
-<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-.doktrai-intro {
-background: linear-gradient(135deg, #F5F3FF, #DDD6FE);
-border-radius: 20px;
-margin: 16px 16px 0;
-padding: 18px;
-position: relative;
-overflow: hidden;
+:root {
+  --blue: #1A3DC2;
+  --blue-light: #3B5BFF;
+  --purple: #7C3AED;
+  --purple-pale: #F5F3FF;
+  --purple-light: #DDD6FE;
+  --dark: #111827;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --white: #ffffff;
+  --radius: 12px;
 }
-.doktrai-features { display: flex; gap: 10px; margin-top: 12px; }
-.doktrai-feat { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; flex: 1; }
-.doktrai-feat-icon { width: 34px; height: 34px; background: rgba(255,255,255,0.7); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-.doktrai-feat-icon svg { width: 17px; height: 17px; }
-.doktrai-feat-label { font-size: 10px; font-weight: 700; color: var(--purple); }
-.doktrai-feat-desc { font-size: 9px; color: var(--gray-500); line-height: 1.3; }
-.date-separator { text-align: center; font-size: 11px; color: var(--gray-400); margin: 8px 0; font-weight: 500; }
-.typing-indicator { display: flex; gap: 4px; align-items: center; padding: 10px 14px; }
-.typing-dot { width: 7px; height: 7px; background: var(--gray-400); border-radius: 50%; animation: typingBounce 1.2s ease-in-out infinite; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F5F3FF; color: var(--dark); }
+
+.app { max-width: 430px; margin: 0 auto; background: #F5F3FF; height: 100vh; display: flex; flex-direction: column; }
+
+/* TOPNAV */
+.backnav {
+  background: linear-gradient(135deg, #6B21A8, #7C3AED);
+  padding: 13px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+  box-shadow: 0 4px 20px rgba(124,58,237,0.35);
+}
+.backnav-left { display: flex; align-items: center; gap: 10px; }
+.back-btn {
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50%; width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.back-btn svg { color: #fff; }
+.backnav-title { font-size: 16px; font-weight: 800; color: #fff; }
+.backnav-sub { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 1px; }
+.history-btn {
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px; padding: 6px 12px;
+  font-size: 12px; font-weight: 600; color: #fff;
+  cursor: pointer; display: flex; align-items: center; gap: 4px;
+  text-decoration: none;
+}
+
+/* INTRO BANNER */
+.doktrai-intro {
+  background: linear-gradient(135deg, #F5F3FF, #EDE9FE);
+  border-bottom: 1px solid var(--purple-light);
+  padding: 16px;
+  display: flex; align-items: center; gap: 14px;
+  flex-shrink: 0;
+}
+.doktrai-intro-img { width: 80px; height: 80px; flex-shrink: 0; }
+.doktrai-intro-img img { width: 100%; height: 100%; object-fit: contain; }
+.doktrai-intro-text h3 { font-size: 16px; font-weight: 800; color: var(--purple); }
+.doktrai-intro-text p { font-size: 11px; color: var(--gray-500); margin-top: 4px; line-height: 1.5; }
+
+/* FEATURES */
+.doktrai-feats {
+  display: flex; gap: 8px; padding: 10px 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--gray-200);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.feat-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--purple-pale); border: 1px solid var(--purple-light);
+  border-radius: 20px; padding: 5px 10px;
+  white-space: nowrap;
+}
+.feat-chip svg { width: 13px; height: 13px; color: var(--purple); flex-shrink: 0; }
+.feat-chip span { font-size: 10px; font-weight: 700; color: var(--purple); }
+
+/* CHAT AREA */
+.chat-area {
+  flex: 1; overflow-y: auto;
+  padding: 12px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  background: #F5F3FF;
+}
+.date-sep {
+  text-align: center; font-size: 11px; color: var(--gray-400);
+  font-weight: 500; margin: 4px 0;
+}
+.chat-msg { display: flex; align-items: flex-end; gap: 8px; }
+.chat-msg.user { flex-direction: row-reverse; }
+.chat-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  overflow: hidden; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(124,58,237,0.2);
+}
+.chat-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.chat-bubble {
+  max-width: 78%;
+  padding: 11px 14px;
+  border-radius: 18px;
+  font-size: 13px; line-height: 1.65;
+}
+.chat-msg.user .chat-bubble {
+  background: linear-gradient(135deg, #7C3AED, #6B21A8);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 3px 12px rgba(124,58,237,0.3);
+}
+.chat-msg.bot .chat-bubble {
+  background: #fff;
+  color: var(--dark);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid var(--gray-200);
+}
+.chat-time { font-size: 10px; color: var(--gray-400); margin-top: 4px; padding: 0 2px; }
+.chat-msg.user .chat-time { text-align: right; }
+.chat-actions { display: flex; gap: 6px; margin-top: 6px; }
+.chat-action-btn {
+  background: var(--gray-100); border: none; border-radius: 8px;
+  padding: 5px 8px; cursor: pointer; display: flex; align-items: center;
+  color: var(--gray-500);
+}
+.chat-action-btn:hover { background: var(--gray-200); color: var(--dark); }
+.chat-action-btn svg { width: 14px; height: 14px; }
+
+/* TYPING */
+.typing-indicator { display: flex; gap: 4px; align-items: center; padding: 4px 2px; }
+.typing-dot { width: 7px; height: 7px; background: var(--purple); opacity: 0.5; border-radius: 50%; animation: tb 1.2s ease-in-out infinite; }
 .typing-dot:nth-child(2) { animation-delay: 0.2s; }
 .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes typingBounce { 0%,80%,100%{transform:scale(0.7);opacity:0.5} 40%{transform:scale(1);opacity:1} }
-.chat-area-doktrai { flex: 1; overflow-y: auto; padding: 10px 16px 0; display: flex; flex-direction: column; gap: 10px; }
-.send-btn-doktrai { width: 44px; height: 44px; background: var(--purple); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
-.send-btn-doktrai svg { width: 20px; height: 20px; color: #fff; }
-.chat-list-item { display: flex; gap: 4px; font-size: 14px; line-height: 1.6; }
-.chat-list-item::before { content: counter(list) '.'; counter-increment: list; color: var(--purple); font-weight: 700; flex-shrink: 0; }
-.bot-list { counter-reset: list; display: flex; flex-direction: column; gap: 4px; margin: 6px 0; }
+@keyframes tb { 0%,80%,100%{transform:scale(0.7);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+
+/* QUICK REPLIES */
+.quick-replies {
+  display: flex; gap: 7px; overflow-x: auto;
+  padding: 8px 16px; flex-shrink: 0;
+  scrollbar-width: none;
+}
+.quick-replies::-webkit-scrollbar { display: none; }
+.quick-reply {
+  background: #fff; border: 1.5px solid var(--purple-light);
+  border-radius: 20px; padding: 7px 14px;
+  font-size: 12px; font-weight: 600; color: var(--purple);
+  white-space: nowrap; cursor: pointer;
+  transition: background 0.15s;
+}
+.quick-reply:hover { background: var(--purple-pale); }
+
+/* CHAT INPUT */
+.chat-input-area {
+  background: #fff;
+  border-top: 1px solid var(--gray-200);
+  padding: 10px 16px 14px;
+  flex-shrink: 0;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.05);
+}
+.chat-input-row { display: flex; gap: 8px; align-items: flex-end; }
+.chat-input {
+  flex: 1; border: 1.5px solid var(--gray-200); border-radius: 20px;
+  padding: 11px 16px; font-family: inherit;
+  font-size: 13px; color: var(--dark); resize: none;
+  outline: none; max-height: 100px; min-height: 44px;
+  transition: border-color 0.2s;
+  background: var(--gray-100);
+}
+.chat-input:focus { border-color: var(--purple); background: #fff; }
+.send-btn {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #7C3AED, #6B21A8);
+  border: none; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  box-shadow: 0 3px 12px rgba(124,58,237,0.4);
+  transition: transform 0.1s;
+}
+.send-btn:active { transform: scale(0.92); }
+.send-btn svg { width: 18px; height: 18px; color: #fff; }
+.chat-disclaimer {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px; color: var(--gray-400);
+  margin-top: 7px; text-align: center; justify-content: center;
+}
+.chat-disclaimer svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  background: #fff;
+  border-top: 1px solid var(--gray-200);
+  display: flex; justify-content: space-around;
+  padding: 8px 0 12px;
+  flex-shrink: 0;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  text-decoration: none; color: var(--gray-400);
+  font-size: 10px; font-weight: 600; padding: 2px 12px;
+}
+.nav-item svg { width: 22px; height: 22px; }
+.nav-item.active { color: var(--purple); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+  background: #1a1a2e; color: #fff;
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 600;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s; z-index: 999; white-space: nowrap;
+}
+.toast.show { opacity: 1; }
 </style>
 </head>
 <body>
-<div class="app" style="display:flex;flex-direction:column;height:100vh;">
-<div class="backnav">
-<div class="backnav-left">
-<button class="back-btn" onclick="history.back()">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
-</button>
-<div>
-<div class="backnav-title">DoktrAI</div>
-<div class="backnav-sub">Dokter AI pribadi untuk membantumu</div>
-</div>
-</div>
-<div style="display:flex;gap:6px;">
-<a href="riwayat.html" style="background:var(--gray-100);border:none;border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--dark);cursor:pointer;display:flex;align-items:center;gap:4px;text-decoration:none;">
-<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-Riwayat Chat
-</a>
-<button onclick="clearChat()" style="background:var(--gray-100);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
-</button>
-</div>
+<div class="app">
+  <!-- Topnav -->
+  <div class="backnav">
+    <div class="backnav-left">
+      <button class="back-btn" onclick="history.back()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <div>
+        <div class="backnav-title">DoktrAI</div>
+        <div class="backnav-sub">Asisten AI untuk semua pertanyaanmu</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <a href="riwayat.html" class="history-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Riwayat
+      </a>
+      <button onclick="clearChat()" class="history-btn" style="padding:6px 10px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Intro (visible saat belum ada chat) -->
+  <div id="introBanner">
+    <div class="doktrai-intro">
+      <div class="doktrai-intro-img">
+        <img src="img/cat-doktrai.png" alt="DoktrAI Mascot">
+      </div>
+      <div class="doktrai-intro-text">
+        <h3>Hai! Saya DoktrAI 👋</h3>
+        <p>Tanya apa saja — akademik, penelitian, kesehatan, hukum, bisnis, karier. Saya siap membantu!</p>
+      </div>
+    </div>
+    <div class="doktrai-feats">
+      <div class="feat-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span>Cepat &amp; Akurat</span>
+      </div>
+      <div class="feat-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Privasi Terjaga</span>
+      </div>
+      <div class="feat-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Chat Bebas</span>
+      </div>
+      <div class="feat-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        <span>Tersedia 24/7</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Area -->
+  <div class="chat-area" id="chatArea">
+    <div class="date-sep">Hari ini</div>
+  </div>
+
+  <!-- Quick Replies (hanya muncul di awal) -->
+  <div class="quick-replies" id="quickReplies">
+    <button class="quick-reply" onclick="sendQuick(this)">Cara membuat rumusan masalah</button>
+    <button class="quick-reply" onclick="sendQuick(this)">Tips menulis skripsi cepat</button>
+    <button class="quick-reply" onclick="sendQuick(this)">Perbedaan penelitian kualitatif dan kuantitatif</button>
+    <button class="quick-reply" onclick="sendQuick(this)">Cara sitasi referensi yang benar</button>
+  </div>
+
+  <!-- Input Area -->
+  <div class="chat-input-area">
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chatInput"
+        placeholder="Ketik pertanyaanmu di sini..." rows="1"
+        onkeydown="handleKey(event)"
+        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      <button class="send-btn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+    <div class="chat-disclaimer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      DoktrAI dapat membuat kesalahan. Periksa kembali informasi penting.
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a href="beranda.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span style="font-size:9px;font-weight:600;">Beranda</span>
+    </a>
+    <a href="mahasiswa.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/></svg>
+      <span style="font-size:9px;font-weight:600;">Mahasiswa</span>
+    </a>
+    <a href="tugas.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      <span style="font-size:9px;font-weight:600;">Tugas</span>
+    </a>
+    <a href="doktrai.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span style="font-size:9px;font-weight:600;">DoktrAI</span>
+    </a>
+    <a href="profil.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span style="font-size:9px;font-weight:600;">Profil</span>
+    </a>
+  </nav>
 </div>
 
-<div id="introBanner" style="overflow-y:auto;flex-shrink:0;">
-<div class="doktrai-intro">
-<div style="display:flex;justify-content:space-between;align-items:flex-start;">
-<div>
-<div style="font-size:18px;font-weight:800;color:var(--dark);">Hai! 👋<br>Saya DoktrAI</div>
-<p style="font-size:12px;color:var(--gray-500);margin-top:6px;max-width:190px;line-height:1.4;">Dokter AI siap membantumu menjawab pertanyaan seputar akademik, penelitian, penulisan, dan banyak lagi.</p>
-</div>
-<div style="width:100px;flex-shrink:0;">
-<svg viewBox="0 0 150 170" fill="none">
-<ellipse cx="75" cy="148" rx="44" ry="26" fill="#7C3AED" opacity="0.3"/>
-<ellipse cx="75" cy="118" rx="32" ry="33" fill="#F5F5F5"/>
-<ellipse cx="75" cy="77" rx="33" ry="31" fill="#F5F5F5"/>
-<polygon points="53,62 42,42 65,57" fill="#F5F5F5"/>
-<polygon points="97,62 108,42 85,57" fill="#F5F5F5"/>
-<ellipse cx="63" cy="78" rx="7" ry="8" fill="#1A90FF"/>
+<div class="toast" id="toast"></div>
+
+<script>
+// Auth check
+if (!localStorage.getItem('ak_token')) {
+  window.location.href = 'login.html';
+}
+
+function showToast(msg, d=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), d);
+}
+
+let chatHistory = [];
+let isFirstMessage = true;
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function getTime() {
+  const n = new Date();
+  return `${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`;
+}
+
+function addUserMsg(text) {
+  const area = document.getElementById('chatArea');
+  const escaped = text.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  area.innerHTML += `
+    <div class="chat-msg user">
+      <div>
+        <div class="chat-bubble">${escaped}</div>
+        <div class="chat-time">${getTime()} ✓✓</div>
+      </div>
+    </div>`;
+  area.scrollTop = area.scrollHeight;
+  chatHistory.push({ role: 'user', content: text });
+}
+
+// Format teks AI - bersih tanpa markdown/hashtag
+function formatAIText(text) {
+  // Hapus semua # (heading markdown)
+  text = text.replace(/^#{1,6}\s+/gm, '');
+  // Hapus bold markdown (**text** -> <strong>text</strong>)
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Hapus italic *text*
+  text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  // Konversi baris baru ke HTML
+  text = text.replace(/\n\n/g, '<br><br>');
+  text = text.replace(/\n/g, '<br>');
+  // Konversi list - bullet yang umum dipakai AI
+  text = text.replace(/<br>[-•]\s+/g, '<br>• ');
+  // Konversi numbered list sederhana: "1. " -> tetap tapi di dalam paragraf
+  return text;
+}
+
+function addBotMsg(text) {
+  const area = document.getElementById('chatArea');
+  const html = formatAIText(text);
+  const id = 'msg_' + Date.now();
+  area.innerHTML += `
+    <div class="chat-msg bot">
+      <div class="chat-avatar">
+        <img src="img/cat-doktrai.png" alt="DoktrAI">
+      </div>
+      <div>
+        <div class="chat-bubble" id="${id}">${html}</div>
+        <div class="chat-time">${getTime()}</div>
+        <div class="chat-actions">
+          <button class="chat-action-btn" onclick="copyBubble('${id}')" title="Salin">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <button class="chat-action-btn" onclick="showToast('Terima kasih! 👍')" title="Suka">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`;
+  chatHistory.push({ role: 'assistant', content: text });
+  area.scrollTop = area.scrollHeight;
+}
+
+function showTyping() {
+  const area = document.getElementById('chatArea');
+  area.innerHTML += `
+    <div class="chat-msg bot" id="typingIndicator">
+      <div class="chat-avatar">
+        <img src="img/cat-doktrai.png" alt="DoktrAI">
+      </div>
+      <div class="chat-bubble" style="background:#fff;border:1px solid #E5E7EB;padding:12px 16px;">
+        <div class="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+    </div>`;
+  area.scrollTop = area.scrollHeight;
+}
+
+async function sendMessage() {
+  const inp = document.getElementById('chatInput');
+  const msg = inp.value.trim();
+  if (!msg) return;
+
+  inp.value = '';
+  inp.style.height = 'auto';
+
+  // Sembunyikan intro & quick replies saat pertama kali kirim
+  if (isFirstMessage) {
+    document.getElementById('introBanner').style.display = 'none';
+    document.getElementById('quickReplies').style.display = 'none';
+    isFirstMessage = false;
+  }
+
+  addUserMsg(msg);
+  showTyping();
+
+  // Cek kuota chat
+  const SUPABASE_URL = 'https://dkpztybbcvvzatgwhano.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm';
+  const token = localStorage.getItem('ak_token');
+  const user = JSON.parse(localStorage.getItem('ak_user') || '{}');
+
+  try {
+    // Panggil Anthropic API
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: `Kamu adalah DoktrAI, asisten AI dari asistenku.pro. Kamu membantu menjawab pertanyaan tentang akademik, penelitian, penulisan, kesehatan umum, hukum dasar, bisnis, dan karier dalam Bahasa Indonesia.
+
+ATURAN PENTING CARA MENJAWAB:
+- Gunakan bahasa yang ramah, natural, dan mudah dipahami
+- JANGAN gunakan tanda pagar (#) sama sekali dalam jawaban
+- JANGAN gunakan format markdown seperti **teks** atau *teks* — tulis saja langsung tanpa formatting khusus
+- Pisahkan paragraf dengan baris kosong saja
+- Untuk daftar poin, cukup gunakan angka (1, 2, 3) atau tanda dash (-) yang wajar
+- Jawab langsung ke inti pertanyaan, tidak perlu basa-basi berlebihan
+- Jika ada poin penting, tulis dalam paragraf biasa atau nomor sederhana`,
+        messages: chatHistory
+      })
+    });
+
+    const data = await res.json();
+    document.getElementById('typingIndicator')?.remove();
+
+    if (data.content?.[0]?.text) {
+      const reply = data.content[0].text;
+      addBotMsg(reply);
+
+      // Update kuota chat di Supabase
+      if (user.id) {
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/rpc/increment_chat_quota`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ p_user_id: user.id })
+          });
+        } catch(e) { /* silent */ }
+      }
+    } else if (data.error) {
+      document.getElementById('typingIndicator')?.remove();
+      addBotMsg('Maaf, terjadi kesalahan: ' + (data.error.message || 'Coba lagi sebentar.'));
+    }
+
+  } catch(e) {
+    document.getElementById('typingIndicator')?.remove();
+    addBotMsg('Gagal terhubung ke AI. Pastikan koneksi internet kamu aktif, lalu coba lagi.');
+  }
+}
+
+function sendQuick(btn) {
+  document.getElementById('chatInput').value = btn.textContent;
+  document.getElementById('quickReplies').style.display = 'none';
+  sendMessage();
+}
+
+function copyBubble(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    navigator.clipboard.writeText(el.innerText).then(() => showToast('Teks berhasil disalin!'));
+  }
+}
+
+function clearChat() {
+  if (!confirm('Hapus semua percakapan ini?')) return;
+  chatHistory = [];
+  isFirstMessage = true;
+  document.getElementById('chatArea').innerH<ellipse cx="63" cy="78" rx="7" ry="8" fill="#1A90FF"/>
 <ellipse cx="87" cy="78" rx="7" ry="8" fill="#1A90FF"/>
 <ellipse cx="63" cy="79" rx="4" ry="5" fill="#0A2060"/>
 <ellipse cx="87" cy="79" rx="4" ry="5" fill="#0A2060"/>
