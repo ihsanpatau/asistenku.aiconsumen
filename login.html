@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<!-- Supabase JS client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 .auth-page { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 
@@ -83,16 +85,15 @@
 }
 .error-msg svg { width: 16px; height: 16px; flex-shrink: 0; }
 
-/* --- Google sign-in additions --- */
-.or-divider { display:flex; align-items:center; gap:10px; margin:18px 0; color:#9CA3AF; font-size:12px; }
-.or-divider::before, .or-divider::after { content:''; flex:1; height:1px; background:#E5E7EB; }
-.btn-google {
+.oauth-btn {
   width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
   padding:12px; border:1px solid #E5E7EB; border-radius:10px; background:#fff;
   font-size:14px; font-weight:600; color:#374151; cursor:pointer;
 }
-.btn-google:hover { background:#F9FAFB; }
-.btn-google:disabled { opacity:.6; cursor:default; }
+.oauth-btn:hover { background:#F9FAFB; }
+.oauth-btn:disabled { opacity:.6; cursor:default; }
+.divider { display:flex; align-items:center; gap:10px; margin:18px 0; color:#9CA3AF; font-size:12px; }
+.divider::before, .divider::after { content:''; flex:1; height:1px; background:#E5E7EB; }
 </style>
 </head>
 <body>
@@ -103,7 +104,6 @@
     <div class="auth-logo">asistenku<span class="auth-logo-pro">.pro</span></div>
     <p class="auth-tagline">Asisten AI pintar untuk membantu<br>tugas akademik dan profesionalmu.</p>
 
-    <!-- Cat mascot (graduation) -->
     <div class="auth-mascot">
 <svg viewBox="0 0 200 220" style="width:100%;max-width:190px;" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -128,48 +128,27 @@
       <stop offset="100%" stop-color="#F5A623"/>
     </linearGradient>
   </defs>
-
-  <!-- soft shadow -->
   <ellipse cx="100" cy="203" rx="62" ry="10" fill="#1A2B6D" opacity=".12"/>
-
-  <!-- tail -->
   <path d="M150 150 C182 148 190 118 178 96 C173 88 163 90 163 100 C163 116 158 132 140 140 Z" fill="url(#furBody)"/>
-
-  <!-- gown body -->
   <path d="M100 108 C140 108 158 138 158 172 C158 192 132 200 100 200 C68 200 42 192 42 172 C42 138 60 108 100 108 Z" fill="url(#gown)"/>
-  <!-- gown trim -->
   <path d="M100 108 C118 108 132 118 140 132 L124 140 C118 126 110 118 100 118 C90 118 82 126 76 140 L60 132 C68 118 82 108 100 108 Z" fill="#3B57B8" opacity=".55"/>
-
-  <!-- front paws -->
   <ellipse cx="76" cy="188" rx="15" ry="12" fill="url(#furBody)"/>
   <ellipse cx="124" cy="188" rx="15" ry="12" fill="url(#furBody)"/>
-
-  <!-- badge medallion -->
   <circle cx="100" cy="152" r="15" fill="url(#badge)"/>
   <text x="100" y="158" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">a</text>
   <path d="M92 138 L100 152 L108 138" stroke="#5B7CFF" stroke-width="3" fill="none"/>
-
-  <!-- raised waving paw -->
   <g>
     <path d="M52 140 C36 132 26 112 34 92 C38 82 50 82 52 94 C54 106 58 118 68 126 Z" fill="url(#furBody)"/>
     <ellipse cx="38" cy="98" rx="9" ry="11" fill="#FFD3D3" opacity=".7"/>
   </g>
-
-  <!-- head -->
   <ellipse cx="100" cy="66" rx="54" ry="50" fill="url(#furBody)"/>
-
-  <!-- ears -->
   <path d="M56 38 L44 6 L78 26 Z" fill="url(#furBody)"/>
   <path d="M58 32 L52 14 L72 26 Z" fill="#FFC9D6" opacity=".8"/>
   <path d="M144 38 L156 6 L122 26 Z" fill="url(#furBody)"/>
   <path d="M142 32 L148 14 L128 26 Z" fill="#FFC9D6" opacity=".8"/>
-
-  <!-- fur tufts on head -->
   <path d="M78 22 q4 -10 8 0" stroke="#C9CDD9" stroke-width="2.5" fill="none" stroke-linecap="round"/>
   <path d="M92 18 q3 -10 7 0" stroke="#C9CDD9" stroke-width="2.5" fill="none" stroke-linecap="round"/>
   <path d="M106 18 q3 -10 7 0" stroke="#C9CDD9" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-
-  <!-- graduation cap -->
   <g>
     <path d="M100 8 L168 34 L100 60 L32 34 Z" fill="url(#cap)"/>
     <ellipse cx="100" cy="34" rx="16" ry="6" fill="#0F1A48"/>
@@ -178,16 +157,10 @@
     <circle cx="140" cy="60" r="4" fill="url(#tassel)"/>
     <path d="M140 60 L134 76 L146 76 Z" fill="url(#tassel)"/>
   </g>
-
-  <!-- blush -->
   <ellipse cx="70" cy="80" rx="10" ry="6" fill="#FFB3C0" opacity=".65"/>
   <ellipse cx="130" cy="80" rx="10" ry="6" fill="#FFB3C0" opacity=".65"/>
-
-  <!-- eyebrows -->
   <path d="M74 54 q8 -6 16 -1" stroke="#8A8FA3" stroke-width="2.5" fill="none" stroke-linecap="round"/>
   <path d="M110 53 q8 -5 16 1" stroke="#8A8FA3" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-
-  <!-- eyes -->
   <g>
     <ellipse cx="82" cy="68" rx="11" ry="13" fill="#1E3A8A"/>
     <ellipse cx="82" cy="68" rx="11" ry="13" fill="none" stroke="#0F2159" stroke-width="1"/>
@@ -200,20 +173,14 @@
     <circle cx="115" cy="63" r="3.4" fill="#fff"/>
     <circle cx="122" cy="72" r="1.6" fill="#fff" opacity=".8"/>
   </g>
-
-  <!-- nose + mouth -->
   <path d="M96 82 Q100 86 104 82 Q100 88 96 82 Z" fill="#FF8FA3"/>
   <path d="M100 87 Q100 93 92 94" stroke="#C97A8A" stroke-width="2" fill="none" stroke-linecap="round"/>
   <path d="M100 87 Q100 93 108 94" stroke="#C97A8A" stroke-width="2" fill="none" stroke-linecap="round"/>
   <path d="M92 94 Q100 100 108 94" stroke="#C97A8A" stroke-width="2" fill="none" stroke-linecap="round"/>
-
-  <!-- whiskers -->
   <line x1="40" y1="76" x2="62" y2="80" stroke="#D8DAE5" stroke-width="1.5"/>
   <line x1="40" y1="86" x2="62" y2="86" stroke="#D8DAE5" stroke-width="1.5"/>
   <line x1="160" y1="76" x2="138" y2="80" stroke="#D8DAE5" stroke-width="1.5"/>
   <line x1="160" y1="86" x2="138" y2="86" stroke="#D8DAE5" stroke-width="1.5"/>
-
-  <!-- sparkles -->
   <path d="M22 100 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z" fill="#8FA6FF" opacity=".85"/>
   <path d="M176 118 l2.4 6.4 6.4 2.4 -6.4 2.4 -2.4 6.4 -2.4 -6.4 -6.4 -2.4 6.4 -2.4z" fill="#B7C4FF" opacity=".8"/>
 </svg>
@@ -230,6 +197,18 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
       <span id="errText">Email atau kata sandi salah</span>
     </div>
+
+    <button class="oauth-btn" id="googleBtn" onclick="handleGoogle()">
+      <svg viewBox="0 0 48 48" width="18" height="18">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      Masuk dengan Google
+    </button>
+
+    <div class="divider">atau</div>
 
     <!-- Email -->
     <div class="form-group">
@@ -254,13 +233,6 @@
     </div>
 
     <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Masuk</button>
-
-    <div class="or-divider"><span>atau</span></div>
-
-    <button class="btn-google" type="button" id="googleBtn" onclick="loginWithGoogle()">
-      <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.66-.22-2.45H12v4.64h6.47c-.28 1.5-1.13 2.77-2.4 3.62v3h3.88c2.27-2.09 3.57-5.17 3.57-8.81z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.92l-3.88-3c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.1C3.25 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.27c-.24-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27v-3.1H1.27A11.98 11.98 0 0 0 0 12c0 1.94.46 3.77 1.27 5.37z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.27 6.63l3.99 3.1C6.22 6.86 8.87 4.75 12 4.75z"/></svg>
-      Masuk dengan Google
-    </button>
 
     <p class="auth-switch">Belum punya akun? <a href="register.html" class="link">Daftar di sini</a></p>
   </div>
@@ -300,6 +272,7 @@
 <script>
 const SB_URL = 'https://dkpztybbcvvzatgwhano.supabase.co';
 const SB_KEY = 'sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm';
+const _sb = window.supabase.createClient(SB_URL, SB_KEY);
 
 function toast(msg, d=2600) {
   const el = document.getElementById('toast');
@@ -317,14 +290,31 @@ function showErr(msg) {
 }
 function hideErr() { document.getElementById('errMsg').style.display = 'none'; }
 
-// --- Google OAuth login (Supabase) ---
-function loginWithGoogle() {
+// --- Google OAuth login ---
+async function handleGoogle() {
   const btn = document.getElementById('googleBtn');
   btn.disabled = true;
-  const redirectTo = encodeURIComponent(location.origin + '/beranda.html');
-  location.href = `${SB_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectTo}`;
+  const { error } = await _sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin + '/beranda.html' }
+  });
+  if (error) { toast('Gagal masuk dengan Google: ' + error.message); btn.disabled = false; }
 }
 
+// Kalau balik dari Google dengan token di URL hash, simpan sesi lalu redirect
+async function bridgeSupabaseSession() {
+  const { data } = await _sb.auth.getSession();
+  if (data && data.session) {
+    localStorage.setItem('ak_token', data.session.access_token);
+    localStorage.setItem('ak_user',  JSON.stringify(data.session.user));
+    location.href = 'beranda.html';
+    return true;
+  }
+  return false;
+}
+if (window.location.hash.includes('access_token')) { bridgeSupabaseSession(); }
+
+// --- Email & password login ---
 async function doLogin() {
   hideErr();
   const email    = document.getElementById('email').value.trim();
@@ -361,7 +351,9 @@ document.getElementById('password').addEventListener('keypress', e => {
 });
 
 // Kalau sudah login sebelumnya, langsung ke beranda
-if (localStorage.getItem('ak_token')) location.href = 'beranda.html';
+if (localStorage.getItem('ak_token') && !window.location.hash.includes('access_token')) {
+  location.href = 'beranda.html';
+}
 </script>
 </body>
 </html>
