@@ -7,71 +7,524 @@
 <title>Beranda – asistenku.pro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
 <style>
-/* Hero banner home */
-.home-hero {
-  margin: 16px 16px 0;
-  background: linear-gradient(135deg,#EEF2FF 0%,#C7D5FF 100%);
-  border-radius: 22px;
-  padding: 20px 20px 0;
+:root {
+  --blue: #1A3DC2;
+  --blue-light: #3B5BFF;
+  --blue-mid: #4F6EFF;
+  --blue-pale: #EEF2FF;
+  --blue-shine: #2251E8;
+  --dark: #111827;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --white: #ffffff;
+  --green: #16A34A;
+  --purple: #7C3AED;
+  --red: #EF4444;
+  --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #F0F4FF;
+  color: var(--dark);
+  min-height: 100vh;
+}
+.app {
+  max-width: 430px;
+  margin: 0 auto;
+  background: #F0F4FF;
+  min-height: 100vh;
   position: relative;
-  overflow: hidden;
-  min-height: 175px;
-}
-.home-hero-text {}
-.home-hero-label { font-size: 12px; font-weight: 700; color: #3B5BFF; margin-bottom: 4px; }
-.home-hero-title {
-  font-size: 24px; font-weight: 800; color: #1A3DC2; line-height: 1.1;
-  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
-}
-.home-hero-title .pro-pill {
-  background: #3B5BFF; color: #fff;
-  font-size: 14px; font-weight: 700;
-  padding: 2px 8px; border-radius: 6px;
-}
-.home-hero-sub { font-size: 12px; color: #6B7280; margin-top: 6px; line-height: 1.4; }
-.home-hero-quote {
-  background: rgba(255,255,255,.75);
-  border-left: 3px solid #3B5BFF;
-  border-radius: 8px; padding: 8px 12px;
-  font-size: 12px; font-style: italic; font-weight: 500;
-  color: #1A3DC2; margin-top: 10px;
-}
-.home-hero-mascot {
-  position: absolute; right: -8px; bottom: 0; width: 150px;
+  padding-bottom: 80px;
 }
 
-/* Menu 3 cards */
+/* TOP NAV */
+.topnav {
+  background: linear-gradient(135deg, #1A3DC2, #2251E8);
+  padding: 14px 16px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 4px 20px rgba(26,61,194,0.4);
+}
+.logo {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+.logo-pro {
+  background: rgba(255,255,255,0.2);
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-size: 14px;
+  margin-left: 2px;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.topnav-right { display: flex; align-items: center; gap: 8px; }
+.icon-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50%;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #fff; position: relative;
+}
+.icon-btn svg { width: 18px; height: 18px; }
+.notif-dot {
+  position: absolute; top: 5px; right: 5px;
+  width: 8px; height: 8px;
+  background: #FF3B30; border-radius: 50%;
+  border: 1.5px solid #1A3DC2;
+}
+.user-chip {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px; padding: 5px 12px 5px 5px;
+  cursor: pointer;
+}
+.user-chip-avatar {
+  width: 28px; height: 28px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 13px; font-weight: 700; color: #fff;
+}
+.user-chip-name { font-size: 13px; font-weight: 600; color: #fff; }
+.chevron { width: 14px; height: 14px; color: rgba(255,255,255,0.7); }
+
+/* PAGE BODY */
+.page-body { padding-bottom: 20px; }
+
+/* HERO BANNER */
+.home-hero {
+  margin: 16px 16px 0;
+  background: linear-gradient(135deg, #1A3DC2 0%, #2251E8 50%, #4F6EFF 100%);
+  border-radius: 22px;
+  padding: 22px 20px 0;
+  position: relative;
+  overflow: hidden;
+  min-height: 185px;
+  box-shadow: 0 8px 32px rgba(26,61,194,0.4);
+}
+.home-hero::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.home-hero-label {
+  font-size: 11px; font-weight: 700;
+  color: rgba(255,255,255,0.75);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.home-hero-title {
+  font-size: 26px; font-weight: 800; color: #fff;
+  line-height: 1.0;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.home-hero-title .pro-pill {
+  background: rgba(255,255,255,0.2);
+  color: #fff; font-size: 15px; font-weight: 700;
+  padding: 2px 10px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.home-hero-sub {
+  font-size: 12px; color: rgba(255,255,255,0.8);
+  margin-top: 8px; max-width: 185px; line-height: 1.45;
+}
+.home-hero-quote {
+  background: rgba(255,255,255,0.15);
+  border-left: 3px solid rgba(255,255,255,0.5);
+  border-radius: 8px; padding: 8px 12px;
+  font-size: 11px; font-style: italic; font-weight: 500;
+  color: rgba(255,255,255,0.9); margin-top: 10px;
+  max-width: 195px;
+  backdrop-filter: blur(4px);
+}
+.home-hero-mascot {
+  position: absolute; right: -8px; bottom: 0; width: 155px;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+}
+.home-hero-mascot img { width: 100%; height: auto; display: block; }
+
+/* STATS ROW */
+.stats-row {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 8px; margin: 14px 16px 0;
+  background: #fff;
+  border-radius: 18px; padding: 14px 10px;
+  box-shadow: 0 2px 16px rgba(26,61,194,0.08);
+}
+.stat-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.stat-icon { color: var(--blue-light); }
+.stat-icon svg { width: 18px; height: 18px; }
+.stat-val { font-size: 12px; font-weight: 800; color: var(--dark); text-align: center; }
+.stat-lbl { font-size: 9px; color: var(--gray-500); text-align: center; line-height: 1.2; }
+
+/* SECTION HEADER */
+.sec-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px 8px;
+}
+.sec-title { font-size: 16px; font-weight: 800; color: var(--dark); }
+.sec-link { font-size: 13px; font-weight: 600; color: var(--blue-light); text-decoration: none; }
+
+/* MENU 3 CARDS */
 .menu3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; padding: 0 16px; }
 .menu3-card {
   background: #fff;
-  border: 1px solid #E5E7EB;
-  border-radius: 16px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 18px;
   overflow: hidden;
   cursor: pointer; text-decoration: none;
   display: flex; flex-direction: column;
-  transition: box-shadow .2s, transform .1s;
+  transition: box-shadow .2s, transform .15s;
+  box-shadow: 0 2px 8px rgba(26,61,194,0.06);
 }
-.menu3-card:hover { box-shadow: 0 8px 24px rgba(27,61,194,.1); transform: translateY(-2px); }
-.menu3-card:active { transform: scale(.98); }
-.menu3-img { height: 86px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.menu3-body { padding: 9px; }
-.menu3-title { font-size: 11px; font-weight: 700; color: #111827; line-height: 1.2; }
-.menu3-desc  { font-size: 9px; color: #6B7280; margin-top: 2px; line-height: 1.3; }
-.menu3-cta   { font-size: 10px; font-weight: 600; display: flex; align-items: center; gap: 2px; margin-top: 5px; }
+.menu3-card:hover { box-shadow: 0 8px 28px rgba(27,61,194,.15); transform: translateY(-3px); }
+.menu3-card:active { transform: scale(.97); }
+.menu3-img {
+  height: 90px; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; position: relative;
+}
+.menu3-img img { width: 80px; height: 80px; object-fit: contain; }
+.menu3-body { padding: 10px; }
+.menu3-title { font-size: 11px; font-weight: 800; color: var(--dark); line-height: 1.2; }
+.menu3-desc { font-size: 9px; color: var(--gray-500); margin-top: 3px; line-height: 1.3; }
+.menu3-cta { font-size: 10px; font-weight: 700; display: flex; align-items: center; gap: 2px; margin-top: 6px; }
 
-/* Upgrade banner */
-.upgrade-cta {
-  margin: 12px 16px 0;
-  background: linear-gradient(135deg,#EEF2FF,#C7D5FF);
-  border: 1px solid #C7D5FF;
-  border-radius: 14px;
-  padding: 13px 15px;
-  display: flex; align-items: center; gap: 10px;
+/* QUOTA BOX */
+.sec-header-info {
+  display: flex; align-items: center; gap: 4px;
+  padding: 16px 16px 8px;
 }
-.upgrade-cta-text { flex: 1; font-size: 12px; color: #1A3DC2; line-height: 1.4; }
-.upgrade-cta-text strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 1px; }
+.sec-header-info .sec-title { flex: 1; }
+.quota-box {
+  margin: 0 16px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 2px 16px rgba(26,61,194,0.08);
+  border: 1px solid var(--gray-200);
+}
+.quota-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.quota-heading { font-size: 13px; font-weight: 700; color: var(--dark); }
+.plan-pill {
+  background: linear-gradient(135deg, #1A3DC2, #3B5BFF);
+  color: #fff; font-size: 10px; font-weight: 800;
+  padding: 3px 10px; border-radius: 20px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(59,91,255,0.35);
+}
+.plan-pill.gratis { background: linear-gradient(135deg, #6B7280, #9CA3AF); }
+.quota-item { margin-bottom: 12px; }
+.quota-item:last-child { margin-bottom: 0; }
+.quota-label-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px;
+}
+.quota-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: var(--dark);
+}
+.quota-label svg { width: 14px; height: 14px; color: var(--blue-light); }
+.quota-val { font-size: 12px; font-weight: 700; color: var(--blue-light); }
+.progress-track {
+  background: var(--gray-100); border-radius: 6px; height: 7px; overflow: hidden;
+}
+.progress-fill {
+  background: linear-gradient(90deg, #1A3DC2, #3B5BFF);
+  height: 100%; border-radius: 6px;
+  transition: width 0.6s ease;
+  box-shadow: 0 0 8px rgba(59,91,255,0.4);
+}
+
+/* UPGRADE BANNER */
+.upgrade-cta {
+  margin: 14px 16px 0;
+  background: linear-gradient(135deg, #1A3DC2, #2251E8);
+  border-radius: 16px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 4px 20px rgba(26,61,194,0.3);
+}
+.upgrade-cta-text { flex: 1; }
+.upgrade-cta-text strong { display: block; font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 2px; }
+.upgrade-cta-text span { font-size: 11px; color: rgba(255,255,255,0.8); line-height: 1.4; }
+.btn-upgrade {
+  background: #fff; color: var(--blue); font-size: 11px; font-weight: 800;
+  border: none; border-radius: 10px; padding: 8px 14px;
+  cursor: pointer; white-space: nowrap;
+  display: flex; align-items: center; gap: 4px;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  background: #fff;
+  border-top: 1px solid var(--gray-200);
+  display: flex; justify-content: space-around;
+  padding: 8px 0 12px;
+  z-index: 100;
+  box-shadow: 0 -4px 20px rgba(26,61,194,0.1);
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  text-decoration: none; color: var(--gray-400);
+  font-size: 10px; font-weight: 600; padding: 2px 14px;
+  transition: color 0.2s;
+}
+.nav-item svg { width: 22px; height: 22px; }
+.nav-item.active { color: var(--blue-light); }
+.nav-item.active svg { filter: drop-shadow(0 0 4px rgba(59,91,255,0.4)); }
+.nav-label { font-size: 9px; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+  background: #1a1a2e; color: #fff;
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 600;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s; z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+.spacer-20 { height: 20px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Top Nav -->
+  <header class="topnav">
+    <a href="beranda.html" class="logo">asistenku<span class="logo-pro">.pro</span></a>
+    <div class="topnav-right">
+      <button class="icon-btn" onclick="toast('Tidak ada notifikasi baru')" aria-label="Notifikasi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-dot"></span>
+      </button>
+      <div class="user-chip" onclick="location.href='profil.html'">
+        <div class="user-chip-avatar" id="ua">A</div>
+        <span class="user-chip-name" id="un">Halo, Andi</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-body">
+    <!-- Hero Banner -->
+    <div class="home-hero">
+      <div class="home-hero-text">
+        <div class="home-hero-label">Selamat datang di</div>
+        <div class="home-hero-title">
+          asistenku<span class="pro-pill">.pro</span>
+        </div>
+        <p class="home-hero-sub">Asisten AI pintar untuk membantu tugas akademik dan profesionalmu.</p>
+        <div class="home-hero-quote">"Kerjakan lebih cepat, lebih mudah, dan hasil lebih berkualitas."</div>
+      </div>
+      <div class="home-hero-mascot">
+        <img src="img/cat-main.png" alt="Maskot asistenku.pro">
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="stat-val">12.450+</div>
+        <div class="stat-lbl">Pengguna Aktif</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="stat-val">245.800+</div>
+        <div class="stat-lbl">Dokumen Dibuat</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="stat-val">99.9%</div>
+        <div class="stat-lbl">Aman &amp; Terpercaya</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon" style="color:#F59E0B;"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div class="stat-val">4.9/5</div>
+        <div class="stat-lbl">Rating Pengguna</div>
+      </div>
+    </div>
+
+    <!-- 3 Menu Utama -->
+    <div class="sec-header">
+      <span class="sec-title">3 Menu Utama</span>
+      <a href="mahasiswa.html" class="sec-link">Lihat Semua</a>
+    </div>
+
+    <div class="menu3">
+      <!-- Mahasiswa -->
+      <a href="mahasiswa.html" class="menu3-card">
+        <div class="menu3-img" style="background: linear-gradient(135deg,#EEF2FF,#C7D5FF);">
+          <img src="img/cat-main.png" alt="Mahasiswa" style="width:75px;height:75px;object-fit:contain;">
+        </div>
+        <div class="menu3-body">
+          <div class="menu3-title">Mahasiswa &amp; Siswa</div>
+          <div class="menu3-desc">Fitur akademik terstruktur untuk skripsi, jurnal, makalah.</div>
+          <div class="menu3-cta" style="color:#3B5BFF;">Buka Menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><path d="m9 18 6-6-6-6"/></svg></div>
+        </div>
+      </a>
+
+      <!-- Tugas -->
+      <a href="tugas.html" class="menu3-card">
+        <div class="menu3-img" style="background: linear-gradient(135deg,#ECFDF5,#A7F3D0);">
+          <img src="img/cat-tugas.png" alt="Tugas" style="width:75px;height:75px;object-fit:contain;">
+        </div>
+        <div class="menu3-body">
+          <div class="menu3-title">Tugas &amp; Project</div>
+          <div class="menu3-desc">Satu halaman serba-bisa untuk tugas apapun.</div>
+          <div class="menu3-cta" style="color:#16A34A;">Buka Menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><path d="m9 18 6-6-6-6"/></svg></div>
+        </div>
+      </a>
+
+      <!-- DoktrAI -->
+      <a href="doktrai.html" class="menu3-card">
+        <div class="menu3-img" style="background: linear-gradient(135deg,#F5F3FF,#DDD6FE);">
+          <img src="img/cat-doktrai.png" alt="DoktrAI" style="width:75px;height:75px;object-fit:contain;">
+        </div>
+        <div class="menu3-body">
+          <div class="menu3-title">Konsultasi AI (DoktrAI)</div>
+          <div class="menu3-desc">Chat AI bebas untuk semua topik.</div>
+          <div class="menu3-cta" style="color:#7C3AED;">Buka Menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><path d="m9 18 6-6-6-6"/></svg></div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Kuota Hari Ini -->
+    <div class="sec-header-info">
+      <span class="sec-title">Sisa Kuota Hari Ini</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    </div>
+
+    <div class="quota-box">
+      <div class="quota-header">
+        <div>
+          <div class="quota-heading">Paket Anda</div>
+          <div style="font-size:11px;color:#9CA3AF;margin-top:2px;" id="expiry">Berlaku hingga –</div>
+        </div>
+        <span class="plan-pill gratis" id="planBadge">GRATIS</span>
+      </div>
+
+      <div class="quota-item">
+        <div class="quota-label-row">
+          <div class="quota-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Halaman Dokumen
+          </div>
+          <div class="quota-val" id="qDoc">0 / 5 halaman</div>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="pDoc" style="width:0%"></div></div>
+      </div>
+
+      <div class="quota-item">
+        <div class="quota-label-row">
+          <div class="quota-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Chat DoktrAI
+          </div>
+          <div class="quota-val" id="qChat">0 / 5 pesan</div>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="pChat" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Upgrade Banner -->
+    <div class="upgrade-cta">
+      <div style="font-size:24px;">🎁</div>
+      <div class="upgrade-cta-text">
+        <strong>Upgrade paket</strong>
+        <span>Dapatkan lebih banyak halaman dan fitur premium!</span>
+      </div>
+      <a href="upgrade.html" class="btn-upgrade">
+        Lihat Paket <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+    </div>
+
+    <div class="spacer-20"></div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a href="beranda.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span class="nav-label">Beranda</span>
+    </a>
+    <a href="mahasiswa.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/></svg>
+      <span class="nav-label">Mahasiswa</span>
+    </a>
+    <a href="tugas.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      <span class="nav-label">Tugas &amp; Project</span>
+    </a>
+    <a href="doktrai.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="nav-label">DoktrAI</span>
+    </a>
+    <a href="profil.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="nav-label">Profil</span>
+    </a>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(msg, d=2500) {
+  const e = document.getElementById('toast');
+  e.textContent = msg;
+  e.classList.add('show');
+  setTimeout(() => e.classList.remove('show'), d);
+}
+
+// Auth check
+if (!localStorage.getItem('ak_token')) {
+  location.href = 'login.html';
+}
+
+// Load user info
+const user = JSON.parse(localStorage.getItem('ak_user') || '{}');
+const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Pengguna';
+const firstName = name.split(' ')[0];
+document.getElementById('ua').textContent = firstName[0]?.toUpperCase() || 'A';
+document.getElementById('un').textContent = 'Halo, ' + firstName;
+
+// Load quota from Supabase
+const SUPABASE_URL = 'https://dkpztybbcvvzatgwhano.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm';
+
+async function loadQuota() {
+  try {
+    const userId = user.id;
+    if (!userId) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/user_quota?user_id=eq.${userId}&select=*`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authori.upgrade-cta-text strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 1px; }
 </style>
 </head>
 <body>
