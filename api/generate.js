@@ -2,6 +2,8 @@
 // Satu endpoint backend yang dipakai semua fitur (parafrase, PPT, jurnal, DoktrAI, skripsi, dll)
 // API key disimpan aman di Environment Variables Vercel, TIDAK pernah terlihat di browser.
 
+const GAYA_PENULISAN = 'Tulis jawabanmu dalam gaya percakapan biasa yang rapi dan enak dibaca, seperti orang menjelaskan langsung. ATURAN PENTING: JANGAN gunakan tanda pagar (#, ##, ###) untuk judul/heading apapun. JANGAN membuat daftar bernomor atau bullet point kecuali benar-benar dibutuhkan (misal langkah-langkah teknis yang wajib berurutan). JANGAN gunakan format markdown yang berlebihan. Tulis dalam bentuk paragraf mengalir dengan bahasa Indonesia yang natural, hangat, dan mudah dipahami, seperti sedang berbicara langsung ke orangnya.';
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -19,12 +21,16 @@ module.exports = async (req, res) => {
       return res.status(500).json({ error: 'API key belum dikonfigurasi di server' });
     }
 
+    const finalSystem = system
+      ? `${system}\n\n${GAYA_PENULISAN}`
+      : GAYA_PENULISAN;
+
     const body = {
       model: 'claude-sonnet-4-5',
       max_tokens: 4096,
+      system: finalSystem,
       messages: messages && messages.length ? messages : [{ role: 'user', content: prompt }],
     };
-    if (system) body.system = system;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
