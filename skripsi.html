@@ -151,6 +151,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
 }
 .ai-suggest-card:hover { background: #dce5ff; transform: translateY(-1px); }
 .ai-suggest-card:active { transform: scale(0.97); }
+.ai-suggest-card.active { background: var(--blue-light); color: #fff; }
+.ai-suggest-card.active .ai-card-desc { color: rgba(255,255,255,0.85); }
+.ai-suggest-card.active svg { color: #fff; }
 .ai-suggest-card svg { width: 18px; height: 18px; color: var(--blue-light); flex-shrink: 0; margin-top: 1px; }
 .ai-card-title { font-size: 12px; font-weight: 700; color: var(--blue); }
 .ai-card-desc { font-size: 10px; color: var(--gray-500); margin-top: 2px; line-height: 1.3; }
@@ -405,6 +408,30 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
       </select>
     </div>
 
+    <div class="form-group">
+      <div class="form-label">Outline</div>
+      <div class="ai-suggest-row">
+        <div class="ai-suggest-card active" id="cardOutlineAI" onclick="pilihModeOutline('ai')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <div>
+            <div class="ai-card-title">Dibuatkan AI ✨</div>
+            <div class="ai-card-desc">AI susun outline otomatis</div>
+          </div>
+        </div>
+        <div class="ai-suggest-card" id="cardOutlineSendiri" onclick="pilihModeOutline('sendiri')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <div>
+            <div class="ai-card-title">Outline Sendiri</div>
+            <div class="ai-card-desc">Saya sudah punya outline</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" id="outlineSendiriWrap" style="display:none;margin-top:8px;">
+        <textarea class="form-textarea" id="outlineSendiri" rows="5" placeholder="Tempel outline kamu di sini, misalnya:&#10;BAB I PENDAHULUAN&#10;1.1 Latar Belakang&#10;1.2 Rumusan Masalah&#10;...&#10;BAB II KAJIAN PUSTAKA&#10;..."></textarea>
+        <div style="font-size:11px;color:var(--gray-400);margin-top:4px;">AI akan mengikuti struktur outline ini saat membuat BAB 1/2/3.</div>
+      </div>
+    </div>
+
     <div class="grid-2">
       <div class="form-group" style="margin:0;">
         <div class="form-label">Apa yang ingin dibuat?</div>
@@ -416,20 +443,25 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
           <option value="judul">5 Opsi Judul</option>
           <option value="abstrak">Abstrak</option>
           <option value="rumusan">Rumusan Masalah</option>
+          <option value="pustaka">Daftar Pustaka</option>
         </select>
       </div>
       <div class="form-group" style="margin:0;">
         <div class="form-label">Target Halaman</div>
-        <select class="form-select" id="targetHalaman">
-          <option value="10">10 halaman</option>
+        <select class="form-select" id="targetHalaman" onchange="cekBatasHalaman(this)">
+          <option value="5">5 halaman</option>
+          <option value="10" selected>10 halaman</option>
           <option value="20">20 halaman</option>
-          <option value="30" selected>30 halaman</option>
+          <option value="30">30 halaman</option>
           <option value="50">50 halaman</option>
+          <option value="60">60 halaman</option>
           <option value="80">80 halaman</option>
           <option value="100">100+ halaman</option>
         </select>
+        <div id="halamanLockNote" style="display:none;font-size:11px;color:#B45309;margin-top:4px;"></div>
       </div>
     </div>
+
 
     <div class="info-banner" style="margin-top:14px;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
@@ -465,6 +497,10 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
         </div>
       </div>
       <div class="hasil-content" id="hasilText"></div>
+
+      <div style="margin-top:12px;background:#FEF3C7;border-radius:10px;padding:10px 12px;font-size:11px;color:#92400E;line-height:1.5;">
+        <strong>Penting:</strong> AI dapat membuat kutipan/referensi yang terlihat meyakinkan tapi sebenarnya tidak nyata (halusinasi). Selalu verifikasi setiap sumber di Google Scholar/perpustakaan sebelum dipakai di skripsi aslimu.
+      </div>
 
       <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
         <button class="hasil-action-btn" onclick="downloadHasil('word')">
@@ -608,6 +644,36 @@ Jangan ada teks lain, hanya JSON.`
   btn.disabled = false;
 }
 
+// Batas jumlah halaman per paket (halaman: user_plan)
+const PLAN_HALAMAN_LIMIT = { gratis: 10, standar: 30, pro: 80, lanjutan: 999 };
+const PLAN_LABEL = { gratis: 'Gratis', standar: 'Standar', pro: 'Pro', lanjutan: 'Lanjutan' };
+function getUserPlan(){ return localStorage.getItem('user_plan') || 'gratis'; }
+
+function cekBatasHalaman(select){
+  const val = parseInt(select.value, 10);
+  const plan = getUserPlan();
+  const limit = PLAN_HALAMAN_LIMIT[plan] ?? 10;
+  const note = document.getElementById('halamanLockNote');
+  if (val > limit) {
+    // Cari paket minimum yang mencukupi
+    let paketDibutuhkan = 'Lanjutan';
+    if (val <= PLAN_HALAMAN_LIMIT.standar) paketDibutuhkan = 'Standar';
+    else if (val <= PLAN_HALAMAN_LIMIT.pro) paketDibutuhkan = 'Pro';
+    note.style.display = 'block';
+    note.innerHTML = `🔒 Paket ${PLAN_LABEL[plan]} maksimal ${limit} halaman. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade ke paket ${paketDibutuhkan}</a> untuk membuka ${val} halaman.`;
+    // Kembalikan ke nilai maksimum yang diizinkan paket saat ini
+    select.value = String(limit <= 10 ? 10 : (limit <= 30 ? 30 : (limit <= 80 ? 80 : 100)));
+  } else {
+    note.style.display = 'none';
+  }
+}
+
+function pilihModeOutline(mode){
+  document.getElementById('cardOutlineAI').classList.toggle('active', mode==='ai');
+  document.getElementById('cardOutlineSendiri').classList.toggle('active', mode==='sendiri');
+  document.getElementById('outlineSendiriWrap').style.display = mode==='sendiri' ? 'block' : 'none';
+}
+
 async function generateSkripsi() {
   const judul = document.getElementById('judulSkripsi').value.trim();
   const jenis = document.querySelector('.type-pill.active')?.textContent.trim() || 'Kuantitatif';
@@ -615,6 +681,8 @@ async function generateSkripsi() {
   const bidang = document.getElementById('bidang').value;
   const jenisDokumen = document.getElementById('jenisDokumen').value;
   const halaman = document.getElementById('targetHalaman').value;
+  const outlineMode = document.getElementById('cardOutlineSendiri').classList.contains('active') ? 'sendiri' : 'ai';
+  const outlineCustom = document.getElementById('outlineSendiri').value.trim();
 
   if (!judul && jenisDokumen !== 'judul') {
     showToast('Isi judul skripsi terlebih dahulu');
@@ -654,6 +722,15 @@ Jenis penelitian: ${jenis}
 ${deskripsi ? 'Deskripsi: ' + deskripsi : ''}
 
 Buat 3-4 rumusan masalah dalam bentuk pertanyaan dan tujuan penelitian yang sesuai.`;
+  } else if (jenisDokumen === 'pustaka') {
+    const tahunSekarang = new Date().getFullYear();
+    prompt = `Buatkan Daftar Pustaka (format APA edisi ke-7) untuk skripsi dengan:
+Judul: "${judul}"
+Jenis penelitian: ${jenis}
+Bidang studi: ${bidang || 'umum'}
+${deskripsi ? 'Deskripsi: ' + deskripsi : ''}
+
+Buat 12-15 entri referensi yang relevan dengan topik di atas (kombinasi buku, jurnal, dan sumber resmi/pemerintah). Prioritaskan tahun terbit ${tahunSekarang - 5}-${tahunSekarang} (5 tahun terakhir), boleh menyertakan beberapa sumber teori klasik yang lebih lama bila memang relevan. Urutkan berdasarkan abjad nama penulis. Tulis dalam format APA yang benar (Nama Penulis. (Tahun). Judul karya. Nama Penerbit/Jurnal.). Tulis judul karya apa adanya tanpa tanda bintang atau markdown apapun. Satu referensi per baris.`;
   } else {
     // BAB 1, 2, atau 3
     const babDesc = {
@@ -669,6 +746,8 @@ Jenis penelitian: ${jenis}
 Bidang studi: ${bidang || 'umum'}
 ${deskripsi ? 'Deskripsi tambahan: ' + deskripsi : ''}
 Target: sekitar ${halaman} halaman untuk keseluruhan skripsi
+${(outlineMode==='sendiri' && outlineCustom) ? `\nPENTING: Ikuti STRUKTUR OUTLINE berikut ini apa adanya (jangan buat sub-bab baru di luar ini), dan tulis hanya bagian yang relevan dengan ${jenisDokumen}:\n${outlineCustom}\n` : ''}
+WAJIB: Sertakan kutipan dalam teks (in-text citation) format (Nama, Tahun) untuk setiap klaim, data, teori, atau pernyataan yang membutuhkan sumber — terutama di bagian latar belakang dan kajian pustaka. Prioritaskan sumber terbitan ${new Date().getFullYear()-5}-${new Date().getFullYear()} (5 tahun terakhir); teori klasik yang lebih lama boleh dipakai bila memang relevan dan penting. Jangan menulis klaim/statistik tanpa kutipan pendukung.
 
 Tulis dalam Bahasa Indonesia yang formal dan akademis. Isi harus detail, substantif, dan relevan dengan judul. Jangan gunakan format markdown atau tanda pagar.`;
   }
@@ -687,7 +766,8 @@ ATURAN PENULISAN PENTING:
 - Untuk judul bab atau sub-bab, tulis langsung dengan huruf kapital (contoh: "BAB I PENDAHULUAN" bukan "# BAB I")
 - Pisahkan paragraf dengan baris kosong
 - Untuk sub-bab, tulis dengan format: "1.1 Latar Belakang" (bukan "## 1.1 Latar Belakang")
-- Konten harus substantif, informatif, dan sesuai standar akademik Indonesia`,
+- Konten harus substantif, informatif, dan sesuai standar akademik Indonesia
+- WAJIB menyertakan kutipan (Nama, Tahun) untuk klaim, data, teori, atau pernyataan yang membutuhkan sumber. Utamakan sumber 5 tahun terakhir, boleh gunakan teori klasik yang lebih lama bila relevan.`,
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -726,18 +806,70 @@ function copyHasil() {
   navigator.clipboard.writeText(text).then(() => showToast('Teks berhasil disalin!'));
 }
 
+function escapeHtmlSkripsi(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Detect BAB headers, section titles (ALL CAPS), and numbered sub-headings (1.1, 2.3, ...)
+// so the exported document looks like a real academic paper, not a wall of plain paragraphs.
+function formatSkripsiBody(text){
+  const lines = text.split('\n');
+  let html = '';
+  let paraBuffer = [];
+  function flushPara(){
+    if(paraBuffer.length){
+      const joined = paraBuffer.join(' ').trim();
+      if(joined) html += `<p style="margin:0 0 12px;text-align:justify;text-indent:1.25cm;">${escapeHtmlSkripsi(joined)}</p>`;
+      paraBuffer = [];
+    }
+  }
+  lines.forEach(raw=>{
+    const line = raw.trim();
+    if(!line){ flushPara(); return; }
+    if(/^BAB\s+[IVXLC]+/i.test(line)){
+      flushPara();
+      html += `<div style="font-weight:700;font-size:14px;text-align:center;margin-top:26px;">${escapeHtmlSkripsi(line.toUpperCase())}</div>`;
+    } else if(/^[A-Z][A-Z\s]{3,59}$/.test(line) && line.split(' ').length <= 6){
+      flushPara();
+      html += `<div style="font-weight:700;font-size:14px;text-align:center;margin-bottom:14px;">${escapeHtmlSkripsi(line)}</div>`;
+    } else if(/^\d+(\.\d+){1,2}\s+\S/.test(line)){
+      flushPara();
+      html += `<div style="font-weight:700;font-size:13px;margin:14px 0 6px;">${escapeHtmlSkripsi(line)}</div>`;
+    } else {
+      paraBuffer.push(line);
+    }
+  });
+  flushPara();
+  return html;
+}
+
+function buildCoverHtmlSkripsi(judul, jenis, bidang){
+  return `<div style="text-align:center;padding:50px 10px 30px;">
+    <div style="font-size:15px;font-weight:800;text-transform:uppercase;line-height:1.5;margin-bottom:36px;">${escapeHtmlSkripsi(judul)}</div>
+    <div style="font-size:12px;margin-bottom:4px;">PROPOSAL SKRIPSI</div>
+    ${jenis?`<div style="font-size:12px;">Jenis Penelitian: ${escapeHtmlSkripsi(jenis)}</div>`:''}
+    ${bidang?`<div style="font-size:12px;margin-bottom:36px;">${escapeHtmlSkripsi(bidang)}</div>`:'<div style="margin-bottom:36px;"></div>'}
+    <div style="font-size:12px;">Disusun oleh:</div>
+    <div style="font-size:13px;font-weight:700;">......................................</div>
+    <div style="font-size:11px;margin-top:2px;">NIM. ......................................</div>
+  </div>`;
+}
+
 function downloadHasil(type) {
   const text = document.getElementById('hasilText').textContent;
   if (!text) { showToast('Belum ada hasil untuk diunduh'); return; }
   const judul = document.getElementById('judulSkripsi').value.trim() || 'Skripsi';
+  const jenis = document.querySelector('.type-pill.active')?.textContent.trim() || '';
+  const bidang = document.getElementById('bidang').value;
+  const jenisDokumen = document.getElementById('jenisDokumen').value;
   const filename = judul.substring(0, 40).replace(/[^a-z0-9]+/gi, '_');
-  const bodyHtml = text.split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g, '<br>').replace(/</g, '&lt;')}</p>`).join('');
+
+  const includeCover = ['BAB 1','BAB 2','BAB 3','outline'].includes(jenisDokumen);
+  const bodyHtml = (includeCover ? buildCoverHtmlSkripsi(judul, jenis, bidang) + '<hr style="margin:22px 0;border:none;border-top:1px dashed #ccc;">' : '')
+    + formatSkripsiBody(text);
 
   if (type === 'pdf') {
     const win = window.open('', '_blank');
     win.document.write(`<html><head><title>${judul}</title><meta charset="utf-8"><style>
-      body{font-family:'Times New Roman',serif;font-size:12pt;line-height:1.8;padding:40px;text-align:justify;}
-      p{margin:0 0 14px;text-indent:1.25cm;}
+      body{font-family:'Times New Roman',serif;font-size:12pt;line-height:1.8;padding:40px;}
     </style></head><body>${bodyHtml}</body></html>`);
     win.document.close();
     win.focus();
