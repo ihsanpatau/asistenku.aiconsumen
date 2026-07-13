@@ -79,7 +79,7 @@
 
     <!-- Tab Bar -->
     <div class="tab-bar" style="margin-top:16px;">
-      <button class="tab-item active" onclick="switchTab('ringkasan',this)" style="color:var(--green);border-bottom-color:var(--green);">Hasil Ringkasan</button>
+      <button class="tab-item active" onclick="switchTab('ringkasan',this)">Hasil Ringkasan</button>
       <button class="tab-item" onclick="switchTab('preview',this)">Preview Dokumen</button>
       <button class="tab-item" onclick="switchTab('pengecekan',this)">Detail Pengecekan</button>
       <button class="tab-item" onclick="switchTab('referensi',this)">Sumber Referensi</button>
@@ -185,57 +185,199 @@ const now=new Date();
 document.getElementById('hasilTanggalTugas').textContent=`${now.getDate()} ${['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'][now.getMonth()]} ${now.getFullYear()}, ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} WIB`;
 const prompt=localStorage.getItem('task_prompt');
 const fullPromptOverride=localStorage.getItem('task_full_prompt');
+const taskType=localStorage.getItem('task_type')||'umum';
 if(prompt){
   document.getElementById('hasilJudulTugas').textContent=prompt.substring(0,30)+(prompt.length>30?'...':'');
   document.getElementById('namaFileTugas').textContent=prompt.substring(0,30).replace(/\s/g,'_')+'.docx';
 }
 
 let hasilTugasFull = '';
+let makalahParts = null;
 
 function setLoadingUI(isLoading, errorMsg){
   document.getElementById('statusError').style.display = errorMsg ? 'block' : 'none';
   document.getElementById('statusError').textContent = errorMsg || '';
   document.getElementById('retryWrap').style.display = errorMsg ? 'block' : 'none';
   if(isLoading){
-    document.getElementById('ringkasanTugas').textContent = '⏳ AI sedang memproses tugasmu, mohon tunggu (bisa 10–30 detik)...';
+    document.getElementById('ringkasanTugas').textContent = '⏳ AI sedang memproses tugasmu, mohon tunggu (bisa 10–40 detik)...';
   }
+}
+
+function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function paragraphize(text){
+  return (text||'').split(/\n{2,}/).map(p=>`<p style="margin:0 0 12px;text-align:justify;text-indent:1.25cm;">${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('');
+}
+
+// Build a proper makalah document (sampul, daftar isi, bab, daftar pustaka) from structured AI JSON
+function buildMakalahParts(doc, meta){
+  const judul = doc.judul || meta.judul || 'Makalah';
+  const penulis = meta.penulis || 'Nama Mahasiswa';
+  const bidang = meta.bidang || '';
+  const babDefs = [
+    {nomor:'BAB I', judul:'PENDAHULUAN', sub: doc.bab1_sub||[]},
+    {nomor:'BAB II', judul:'PEMBAHASAN', sub: doc.bab2_sub||[]},
+    {nomor:'BAB III', judul:'PENUTUP', sub: doc.bab3_sub||[]},
+  ];
+  const pustaka = doc.daftar_pustaka || [];
+
+  const coverHtml = `<div style="text-align:center;padding:50px 10px 30px;">
+    <div style="font-size:15px;font-weight:800;text-transform:uppercase;line-height:1.5;margin-bottom:36px;">${escapeHtml(judul)}</div>
+    <div style="font-size:12px;margin-bottom:4px;">MAKALAH</div>
+    ${bidang?`<div style="font-size:12px;margin-bottom:36px;">${escapeHtml(bidang)}</div>`:'<div style="margin-bottom:36px;"></div>'}
+    <div style="font-size:12px;">Disusun oleh:</div>
+    <div style="font-size:13px;font-weight:700;">${escapeHtml(penulis)}</div>
+  </div>`;
+
+  let daftarIsiHtml = '<div style="font-weight:700;font-size:14px;text-align:center;margin-bottom:14px;">DAFTAR ISI</div><div style="line-height:2.1;font-size:12px;">';
+  daftarIsiHtml += `<div>Kata Pengantar</div>`;
+  babDefs.forEach(b=>{
+    daftarIsiHtml += `<div style="margin-top:8px;font-weight:700;">${b.nomor} ${escapeHtml(b.judul)}</div>`;
+    (b.sub||[]).forEach(s=> daftarIsiHtml += `<div style="padding-left:18px;">${escapeHtml(s.judul)}</div>`);
+  });
+  daftarIsiHtml += `<div style="margin-top:8px;">Daftar Pustaka</div></div>`;
+
+  const kataPengantarHtml = `<div style="margin-top:6px;"><div style="font-weight:700;font-size:14px;text-align:center;margin-bottom:14px;">KATA PENGANTAR</div>${paragraphize(doc.kata_pengantar)}</div>`;
+
+  let babHtml = '';
+  babDefs.forEach(b=>{
+    babHtml += `<div style="margin-top:26px;"><div style="font-weight:700;font-size:14px;text-align:center;">${b.nomor}</div><div style="font-weight:700;font-size:14px;text-align:center;margin-bottom:14px;">${escapeHtml(b.judul)}</div>`;
+    (b.sub||[]).forEach(s=>{
+      babHtml += `<div style="font-weight:700;font-size:13px;margin:14px 0 6px;">${escapeHtml(s.judul)}</div>${paragraphize(s.isi)}`;
+    });
+    babHtml += `</div>`;
+  });
+
+  let pustakaHtml = '<div style="margin-top:26px;"><div style="font-weight:700;font-size:14px;text-align:center;margin-bottom:14px;">DAFTAR PUSTAKA</div>';
+  pustaka.forEach(p=> pustakaHtml += `<p style="margin:0 0 10px;padding-left:1.4em;text-indent:-1.4em;font-size:12px;">${escapeHtml(p)}</p>`);
+  pustakaHtml += '</div>';
+
+  const previewHtml = coverHtml
+    + '<hr style="margin:18px 0;border:none;border-top:1px dashed #ccc;">'
+    + daftarIsiHtml
+    + '<hr style="margin:18px 0;border:none;border-top:1px dashed #ccc;">'
+    + kataPengantarHtml + babHtml + pustakaHtml;
+
+  let plain = `${judul}\n\nMAKALAH\n${bidang?bidang+'\n':''}\nDisusun oleh: ${penulis}\n\n`;
+  plain += 'DAFTAR ISI\nKata Pengantar\n';
+  babDefs.forEach(b=>{ plain+=`${b.nomor} ${b.judul}\n`; (b.sub||[]).forEach(s=>plain+='  '+s.judul+'\n'); });
+  plain += 'Daftar Pustaka\n\n';
+  plain += 'KATA PENGANTAR\n'+(doc.kata_pengantar||'')+'\n\n';
+  babDefs.forEach(b=>{
+    plain += `${b.nomor}\n${b.judul}\n\n`;
+    (b.sub||[]).forEach(s=>{ plain += s.judul+'\n'+(s.isi||'')+'\n\n'; });
+  });
+  plain += 'DAFTAR PUSTAKA\n'+pustaka.join('\n');
+
+  return {previewHtml, plain, coverHtml, daftarIsiHtml, kataPengantarHtml, babHtml, pustakaHtml, judul};
+}
+
+function renderMakalah(doc, meta){
+  makalahParts = buildMakalahParts(doc, meta);
+  hasilTugasFull = makalahParts.plain;
+  document.getElementById('ringkasanTugas').textContent = doc.kata_pengantar || 'Makalah berhasil dibuat oleh AI.';
+  const previewEl = document.getElementById('previewFullTugas');
+  previewEl.style.whiteSpace = 'normal';
+  previewEl.innerHTML = makalahParts.previewHtml;
+  const wc = makalahParts.plain.trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById('jumlahKataTugas').textContent = wc.toLocaleString('id-ID')+' kata';
+  document.getElementById('jumlahKataCard').textContent = wc.toLocaleString('id-ID')+' kata';
+  document.getElementById('deskripsiPreviewTugas').textContent = (doc.kata_pengantar||'').substring(0,150)+((doc.kata_pengantar||'').length>150?'...':'');
+  document.getElementById('namaFileTugas').textContent = (makalahParts.judul||prompt||'Makalah').substring(0,40).replace(/\s/g,'_')+'.docx';
+}
+
+function renderGeneric(fullText, ringkasanText){
+  hasilTugasFull = fullText;
+  document.getElementById('ringkasanTugas').textContent = ringkasanText || (fullText.substring(0,300)+(fullText.length>300?'...':''));
+  document.getElementById('previewFullTugas').style.whiteSpace = 'pre-wrap';
+  document.getElementById('previewFullTugas').textContent = fullText;
+  const wc = fullText.trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById('jumlahKataTugas').textContent = wc.toLocaleString('id-ID')+' kata';
+  document.getElementById('jumlahKataCard').textContent = wc.toLocaleString('id-ID')+' kata';
+  document.getElementById('deskripsiPreviewTugas').textContent = fullText.substring(0,150)+(fullText.length>150?'...':'');
 }
 
 async function generateContent(){
   const p=localStorage.getItem('task_prompt');
-  if(!p){ setLoadingUI(false,'Tidak ada data tugas ditemukan. Kembali ke halaman Tugas & Project.'); return; }
+  if(!p){ setLoadingUI(false,'Tidak ada data tugas ditemukan. Kembali ke halaman sebelumnya.'); return; }
+
+  // Use cached result if this task was already generated (avoids re-calling AI / changing result on refresh)
+  if(taskType==='makalah'){
+    const cachedDoc = localStorage.getItem('task_result_structured');
+    if(cachedDoc){
+      try{ renderMakalah(JSON.parse(cachedDoc), JSON.parse(localStorage.getItem('makalah_meta')||'{}')); setLoadingUI(false,null); return; }catch(e){}
+    }
+  } else {
+    const cached = localStorage.getItem('task_result');
+    if(cached){ renderGeneric(cached, null); setLoadingUI(false,null); return; }
+  }
+
   setLoadingUI(true, null);
   const promptToSend = fullPromptOverride || `Kerjakan tugas berikut dalam Bahasa Indonesia. Tulis lengkap: seluruh isi/hasil tugasnya (bukan ringkasan), lalu di baris paling akhir tambahkan satu baris ringkasan diawali dengan tanda '---RINGKASAN---'. Tugas: "${p}". Mulai langsung dengan konten, tanpa preamble.`;
   try{
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:promptToSend}]})});
     const data=await res.json();
     if(!res.ok){ throw new Error(data.error || `Server error (${res.status})`); }
-    const full=data.text||'';
-    if(!full.trim()){ throw new Error('AI mengembalikan hasil kosong. Coba lagi.'); }
-    const parts=full.split('---RINGKASAN---');
-    const ringkasan=(parts[1]||'').trim();
-    hasilTugasFull = parts[0].trim() || full;
-    localStorage.setItem('task_result', hasilTugasFull);
+    const full=(data.text||'').trim();
+    if(!full){ throw new Error('AI mengembalikan hasil kosong. Coba lagi.'); }
 
-    // Populate all real content
-    document.getElementById('ringkasanTugas').textContent = ringkasan || (hasilTugasFull.substring(0,300)+(hasilTugasFull.length>300?'...':''));
-    document.getElementById('previewFullTugas').textContent = hasilTugasFull;
-    const wc = hasilTugasFull.trim().split(/\s+/).filter(Boolean).length;
-    document.getElementById('jumlahKataTugas').textContent = wc.toLocaleString('id-ID')+' kata';
-    document.getElementById('jumlahKataCard').textContent = wc.toLocaleString('id-ID')+' kata';
-    document.getElementById('deskripsiPreviewTugas').textContent = hasilTugasFull.substring(0,150)+(hasilTugasFull.length>150?'...':'');
+    if(taskType==='makalah'){
+      let jsonText = full.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
+      let doc;
+      try{ doc = JSON.parse(jsonText); }
+      catch(parseErr){ throw new Error('AI tidak mengembalikan format makalah yang valid. Klik "Coba Lagi".'); }
+      const meta = JSON.parse(localStorage.getItem('makalah_meta')||'{}');
+      localStorage.setItem('task_result_structured', JSON.stringify(doc));
+      renderMakalah(doc, meta);
+    } else {
+      const parts=full.split('---RINGKASAN---');
+      const ringkasan=(parts[1]||'').trim();
+      const bodyText = parts[0].trim() || full;
+      localStorage.setItem('task_result', bodyText);
+      renderGeneric(bodyText, ringkasan);
+    }
     setLoadingUI(false, null);
   }catch(e){
     console.error('generateContent error:', e);
-    setLoadingUI(false, 'Gagal menghasilkan tugas: '+e.message+'. Cek koneksi internet, atau pastikan API key sudah diatur di server, lalu klik "Coba Lagi".');
+    setLoadingUI(false, 'Gagal menghasilkan tugas: '+e.message+' Cek koneksi internet, atau pastikan API key sudah diatur di server, lalu klik "Coba Lagi".');
   }
 }
 generateContent();
 
 function downloadHasilTugas(type){
+  const judul = (prompt||'Tugas').substring(0,40).replace(/[^a-z0-9]+/gi,'_');
+
+  if(taskType==='makalah'){
+    if(!makalahParts){ showToast('Konten masih diproses, tunggu sebentar lagi'); return; }
+    const fullDocHtml = `<div>${makalahParts.coverHtml}</div><div style="margin-top:30px;">${makalahParts.daftarIsiHtml}</div>${makalahParts.kataPengantarHtml}${makalahParts.babHtml}${makalahParts.pustakaHtml}`;
+    if(type==='pdf'){
+      const win=window.open('','_blank');
+      win.document.write(`<html><head><title>${judul}</title><meta charset="utf-8"><style>body{font-family:'Times New Roman',serif;font-size:12pt;line-height:1.8;padding:40px;}</style></head><body>${fullDocHtml}</body></html>`);
+      win.document.close(); win.focus();
+      setTimeout(()=>win.print(),400);
+    } else if(type==='word'){
+      const html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>${judul}</title></head><body style="font-family:'Times New Roman';font-size:12pt;line-height:1.8;">${fullDocHtml}</body></html>`;
+      const blob=new Blob(['\ufeff',html],{type:'application/msword'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download=judul+'.doc';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('File Word berhasil diunduh!');
+    } else if(type==='txt'){
+      const blob=new Blob([makalahParts.plain],{type:'text/plain;charset=utf-8'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download=judul+'.txt';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('File TXT berhasil diunduh!');
+    } else {
+      showToast(type.toUpperCase()+' export belum didukung, gunakan Word/PDF/TXT untuk saat ini.');
+    }
+    return;
+  }
+
+  // Generic (tugas/jurnal) flow
   const text = hasilTugasFull || localStorage.getItem('task_result') || '';
   if(!text){ showToast('Konten masih diproses, tunggu sebentar lagi'); return; }
-  const judul = (prompt||'Tugas').substring(0,40).replace(/[^a-z0-9]+/gi,'_');
   const bodyHtml = text.split(/\n{2,}/).map(p=>`<p>${p.replace(/\n/g,'<br>').replace(/</g,'&lt;')}</p>`).join('');
 
   if(type==='pdf'){
@@ -264,8 +406,8 @@ function downloadHasilTugas(type){
 }
 
 function switchTab(tab,btn){
-  document.querySelectorAll('.tab-item').forEach(b=>{b.classList.remove('active');b.style.color='';b.style.borderBottomColor='';});
-  btn.classList.add('active');btn.style.color='var(--green)';btn.style.borderBottomColor='var(--green)';
+  document.querySelectorAll('.tab-item').forEach(b=>{b.classList.remove('active');});
+  btn.classList.add('active');
   ['ringkasan','preview','pengecekan','referensi'].forEach(t=>document.getElementById('tab-'+t).style.display='none');
   document.getElementById('tab-'+tab).style.display='block';
 }
