@@ -219,6 +219,10 @@ async function kirimTugas(){
   if(!task){showToast('Tulis perintah terlebih dahulu');return;}
   showToast('Memproses tugas...');
   // Redirect to hasil
+  localStorage.removeItem('task_result');
+  localStorage.removeItem('task_result_structured');
+  localStorage.removeItem('task_type');
+  localStorage.removeItem('task_full_prompt');
   localStorage.setItem('task_prompt',task);
   setTimeout(()=>window.location.href='hasil-tugas.html',1500);
 }
