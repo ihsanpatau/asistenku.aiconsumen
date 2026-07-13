@@ -68,11 +68,11 @@
         </div>
         <div style="background:rgba(255,255,255,0.7);border-radius:8px;padding:8px;font-size:11px;">
           <div style="color:var(--gray-500);display:flex;align-items:center;gap:4px;margin-bottom:2px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg>Metode AI</div>
-          <div style="font-weight:700;color:var(--dark);">GPT-4o (Advanced)</div>
+          <div style="font-weight:700;color:var(--dark);">Claude AI</div>
         </div>
         <div style="background:rgba(255,255,255,0.7);border-radius:8px;padding:8px;font-size:11px;">
           <div style="color:var(--gray-500);display:flex;align-items:center;gap:4px;margin-bottom:2px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/></svg>Kata</div>
-          <div style="font-weight:700;color:var(--dark);">2.150 kata</div>
+          <div style="font-weight:700;color:var(--dark);" id="jumlahKataTugas">–</div>
         </div>
       </div>
     </div>
@@ -88,95 +88,31 @@
     <!-- Ringkasan Tab -->
     <div id="tab-ringkasan" style="padding:16px;">
       <div style="font-size:14px;font-weight:700;color:var(--dark);margin-bottom:8px;">Ringkasan Hasil</div>
-      <div style="font-size:13px;color:var(--gray-700);line-height:1.6;margin-bottom:14px;" id="ringkasanTugas">AI telah menganalisis data penjualan yang Anda berikan dan menghasilkan laporan lengkap sesuai dengan permintaan.</div>
-
-      <!-- Score Cards -->
-      <div class="score-grid">
-        <div class="score-card">
-          <div class="score-label">Skor Kualitas</div>
-          <div class="score-val">94%</div>
-          <div class="score-sub">Sangat Baik</div>
-          <div class="score-bar"><div class="score-fill" style="width:94%;"></div></div>
-        </div>
-        <div class="score-card">
-          <div class="score-label">Keaslian (Plagiarisme)</div>
-          <div class="score-val">98%</div>
-          <div class="score-sub">Aman</div>
-          <div class="score-bar"><div class="score-fill" style="width:98%;"></div></div>
-        </div>
-        <div class="score-card">
-          <div class="score-label">Struktur</div>
-          <div class="score-val">91%</div>
-          <div class="score-sub">Baik</div>
-          <div class="score-bar"><div class="score-fill" style="width:91%;"></div></div>
-        </div>
-        <div class="score-card">
-          <div class="score-label">Kelengkapan</div>
-          <div class="score-val">100%</div>
-          <div class="score-sub">Lengkap</div>
-          <div class="score-bar"><div class="score-fill" style="width:100%;"></div></div>
-        </div>
-      </div>
-
-      <!-- AI Conclusion -->
-      <div style="margin-top:12px;background:var(--green-pale);border:1px solid #A7F3D0;border-radius:12px;padding:12px;display:flex;align-items:flex-start;gap:8px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:3px;">Kesimpulan AI</div>
-          <div style="font-size:12px;color:var(--gray-700);line-height:1.4;">Tugas Anda sudah sangat baik dan siap dikumpulkan. Struktur jelas, analisis data akurat, dan tidak terdeteksi plagiarisme.</div>
-        </div>
+      <div style="font-size:13px;color:var(--gray-700);line-height:1.6;margin-bottom:14px;" id="ringkasanTugas">⏳ AI sedang memproses tugasmu, mohon tunggu...</div>
+      <div id="statusError" style="display:none;margin-bottom:14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;padding:12px;font-size:12px;color:#B91C1C;"></div>
+      <div id="retryWrap" style="display:none;">
+        <button class="btn btn-outline" onclick="generateContent()">Coba Lagi</button>
       </div>
     </div>
 
     <!-- Preview Tab -->
     <div id="tab-preview" style="display:none;padding:16px;">
       <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:8px;padding:20px;">
-        <div style="font-family:'Times New Roman',serif;font-size:12px;line-height:1.7;color:var(--dark);">
-          <div style="text-align:center;margin-bottom:16px;">
-            <div style="font-size:14px;font-weight:700;text-transform:uppercase;margin-bottom:8px;" id="previewTitleTugas">LAPORAN ANALISIS DATA PENJUALAN</div>
-            <div style="font-size:11px;color:var(--gray-500);">Disusun oleh: AI Assistant | asistenku.pro</div>
-          </div>
-          <div style="margin-bottom:12px;">
-            <div style="font-weight:700;font-size:13px;margin-bottom:4px;">I. PENDAHULUAN</div>
-            <p>Laporan ini merupakan hasil analisis data penjualan yang diberikan oleh pengguna. Analisis dilakukan menggunakan metode statistik deskriptif untuk mengidentifikasi tren dan pola yang signifikan dalam data.</p>
-          </div>
-          <div style="margin-bottom:12px;">
-            <div style="font-weight:700;font-size:13px;margin-bottom:4px;">II. ANALISIS DATA</div>
-            <p>Berdasarkan data yang diberikan, terdapat peningkatan penjualan sebesar 18% dibandingkan periode sebelumnya. Produk kategori A menjadi kontributor terbesar dengan pangsa pasar 42%...</p>
-          </div>
-        </div>
+        <div style="font-family:'Times New Roman',serif;font-size:12px;line-height:1.7;color:var(--dark);white-space:pre-wrap;" id="previewFullTugas">Konten sedang diproses...</div>
       </div>
     </div>
 
     <!-- Detail Pengecekan Tab -->
     <div id="tab-pengecekan" style="display:none;padding:16px;">
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:10px;padding:12px;">
-          <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:4px;">✅ Tata Bahasa</div>
-          <div style="font-size:12px;color:var(--gray-500);">Tidak ditemukan kesalahan tata bahasa yang signifikan. Penulisan sudah sesuai EYD.</div>
-        </div>
-        <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:10px;padding:12px;">
-          <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:4px;">✅ Plagiarisme</div>
-          <div style="font-size:12px;color:var(--gray-500);">Keaslian konten: 98%. Tidak terdeteksi plagiarisme yang signifikan.</div>
-        </div>
-        <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:10px;padding:12px;">
-          <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:4px;">✅ Struktur Dokumen</div>
-          <div style="font-size:12px;color:var(--gray-500);">Struktur dokumen lengkap dan sesuai format yang diminta.</div>
-        </div>
-        <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:10px;padding:12px;">
-          <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:4px;">⚠️ Saran Perbaikan</div>
-          <div style="font-size:12px;color:var(--gray-500);">Pertimbangkan untuk menambahkan grafik visual pada bagian analisis data untuk memperkuat temuan.</div>
-        </div>
+      <div style="background:#FEF3C7;border-radius:10px;padding:12px 14px;font-size:12px;color:#92400E;line-height:1.5;">
+        <strong>Catatan:</strong> Fitur pengecekan tata bahasa/plagiarisme otomatis belum tersedia di aplikasi ini. Selalu baca ulang dan verifikasi sendiri hasil AI sebelum dikumpulkan.
       </div>
     </div>
 
     <!-- Sumber Referensi Tab -->
     <div id="tab-referensi" style="display:none;padding:16px;">
-      <div style="font-size:13px;color:var(--gray-500);margin-bottom:10px;">Referensi yang digunakan AI dalam menghasilkan dokumen ini:</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:10px;padding:12px;font-size:12px;line-height:1.5;color:var(--dark);">Kotler, P., & Keller, K. L. (2016). <em>Marketing Management</em> (15th ed.). Pearson Education.</div>
-        <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:10px;padding:12px;font-size:12px;line-height:1.5;color:var(--dark);">Sugiyono. (2019). <em>Metode Penelitian Kuantitatif, Kualitatif, dan R&D</em>. Alfabeta.</div>
-        <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:10px;padding:12px;font-size:12px;line-height:1.5;color:var(--dark);">BPS Indonesia. (2025). <em>Statistik Penjualan Ritel 2024</em>. Badan Pusat Statistik.</div>
+      <div style="background:#FEF3C7;border-radius:10px;padding:12px 14px;font-size:12px;color:#92400E;line-height:1.5;">
+        <strong>Penting:</strong> AI dapat membuat referensi/sitasi yang terlihat meyakinkan tapi sebenarnya tidak nyata (halusinasi). Jangan salin daftar pustaka dari AI tanpa memverifikasi sumbernya benar-benar ada.
       </div>
     </div>
 
@@ -186,10 +122,10 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2B579A" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       </div>
       <div style="flex:1;">
-        <div style="font-size:13px;font-weight:700;color:var(--dark);" id="namaFileTugas">Analisis Data Penjualan.docx</div>
-        <div style="font-size:11px;color:var(--gray-400);margin-top:2px;">24 halaman • 2.150 kata</div>
-        <div style="font-size:12px;color:var(--gray-500);margin-top:4px;line-height:1.4;">Laporan ini berisi analisis menyeluruh mengenai data penjualan selama periode Januari – April 2026. Hasil analisis menunjukkan tren peningkatan penjualan sebesar 18%...</div>
-        <button onclick="showToast('Membuka preview lengkap...')" style="margin-top:8px;background:none;border:1.5px solid var(--gray-200);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;color:var(--dark);cursor:pointer;font-family:inherit;">Lihat Preview Lengkap</button>
+        <div style="font-size:13px;font-weight:700;color:var(--dark);" id="namaFileTugas">Tugas.docx</div>
+        <div style="font-size:11px;color:var(--gray-400);margin-top:2px;" id="jumlahKataCard">Sedang diproses...</div>
+        <div style="font-size:12px;color:var(--gray-500);margin-top:4px;line-height:1.4;" id="deskripsiPreviewTugas">Konten sedang diproses oleh AI...</div>
+        <button onclick="switchTab('preview', document.querySelectorAll('.tab-item')[1])" style="margin-top:8px;background:none;border:1.5px solid var(--gray-200);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;color:var(--dark);cursor:pointer;font-family:inherit;">Lihat Preview Lengkap</button>
       </div>
     </div>
 
@@ -249,28 +185,49 @@ const now=new Date();
 document.getElementById('hasilTanggalTugas').textContent=`${now.getDate()} ${['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'][now.getMonth()]} ${now.getFullYear()}, ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} WIB`;
 const prompt=localStorage.getItem('task_prompt');
 const fullPromptOverride=localStorage.getItem('task_full_prompt');
-if(prompt){document.getElementById('hasilJudulTugas').textContent=prompt.substring(0,30)+(prompt.length>30?'...':'');document.getElementById('namaFileTugas').textContent=prompt.substring(0,20).replace(/\s/g,'_')+'.docx';document.getElementById('previewTitleTugas').textContent=prompt.toUpperCase();document.getElementById('ringkasanTugas').textContent='⏳ AI sedang memproses tugasmu, mohon tunggu...';}
+if(prompt){
+  document.getElementById('hasilJudulTugas').textContent=prompt.substring(0,30)+(prompt.length>30?'...':'');
+  document.getElementById('namaFileTugas').textContent=prompt.substring(0,30).replace(/\s/g,'_')+'.docx';
+}
 
 let hasilTugasFull = '';
 
-// Auto-generate content
+function setLoadingUI(isLoading, errorMsg){
+  document.getElementById('statusError').style.display = errorMsg ? 'block' : 'none';
+  document.getElementById('statusError').textContent = errorMsg || '';
+  document.getElementById('retryWrap').style.display = errorMsg ? 'block' : 'none';
+  if(isLoading){
+    document.getElementById('ringkasanTugas').textContent = '⏳ AI sedang memproses tugasmu, mohon tunggu (bisa 10–30 detik)...';
+  }
+}
+
 async function generateContent(){
   const p=localStorage.getItem('task_prompt');
-  if(!p)return;
+  if(!p){ setLoadingUI(false,'Tidak ada data tugas ditemukan. Kembali ke halaman Tugas & Project.'); return; }
+  setLoadingUI(true, null);
   const promptToSend = fullPromptOverride || `Kerjakan tugas berikut dalam Bahasa Indonesia. Tulis lengkap: seluruh isi/hasil tugasnya (bukan ringkasan), lalu di baris paling akhir tambahkan satu baris ringkasan diawali dengan tanda '---RINGKASAN---'. Tugas: "${p}". Mulai langsung dengan konten, tanpa preamble.`;
   try{
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:promptToSend}]})});
     const data=await res.json();
-    if(!res.ok){ throw new Error(data.error||'Gagal terhubung ke server'); }
+    if(!res.ok){ throw new Error(data.error || `Server error (${res.status})`); }
     const full=data.text||'';
+    if(!full.trim()){ throw new Error('AI mengembalikan hasil kosong. Coba lagi.'); }
     const parts=full.split('---RINGKASAN---');
-    const text=(parts[1]||parts[0]).trim();
+    const ringkasan=(parts[1]||'').trim();
     hasilTugasFull = parts[0].trim() || full;
     localStorage.setItem('task_result', hasilTugasFull);
-    if(text) document.getElementById('ringkasanTugas').textContent=text.substring(0,300)+(text.length>300?'...':'');
+
+    // Populate all real content
+    document.getElementById('ringkasanTugas').textContent = ringkasan || (hasilTugasFull.substring(0,300)+(hasilTugasFull.length>300?'...':''));
+    document.getElementById('previewFullTugas').textContent = hasilTugasFull;
+    const wc = hasilTugasFull.trim().split(/\s+/).filter(Boolean).length;
+    document.getElementById('jumlahKataTugas').textContent = wc.toLocaleString('id-ID')+' kata';
+    document.getElementById('jumlahKataCard').textContent = wc.toLocaleString('id-ID')+' kata';
+    document.getElementById('deskripsiPreviewTugas').textContent = hasilTugasFull.substring(0,150)+(hasilTugasFull.length>150?'...':'');
+    setLoadingUI(false, null);
   }catch(e){
-    document.getElementById('ringkasanTugas').textContent='Gagal menghasilkan tugas. Periksa koneksi internet lalu coba lagi dari halaman sebelumnya.';
-    showToast('Gagal terhubung ke AI');
+    console.error('generateContent error:', e);
+    setLoadingUI(false, 'Gagal menghasilkan tugas: '+e.message+'. Cek koneksi internet, atau pastikan API key sudah diatur di server, lalu klik "Coba Lagi".');
   }
 }
 generateContent();
