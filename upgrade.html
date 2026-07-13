@@ -419,12 +419,19 @@ function toggleFaq(el){el.classList.toggle('open');}
 function beliPaket(name,harga){
   document.getElementById('payPaket').textContent=name;
   document.getElementById('payHarga').textContent='Rp'+parseInt(harga).toLocaleString('id-ID');
+  document.getElementById('payModal').dataset.planKey=name.toLowerCase();
   document.getElementById('payModal').classList.add('open');
 }
 function selectPay(btn){document.querySelectorAll('.pay-method').forEach(b=>{b.style.borderColor='var(--gray-200)';b.style.background='#fff';b.style.color='var(--dark)';});btn.style.borderColor='var(--blue-light)';btn.style.background='var(--blue-pale)';btn.style.color='var(--blue)';}
 function prosesPayment(){
   showToast('Memproses pembayaran... Integrasi Midtrans segera hadir!');
-  setTimeout(()=>document.getElementById('payModal').classList.remove('open'),1500);
+  const planKey=document.getElementById('payModal').dataset.planKey||'standar';
+  setTimeout(()=>{
+    // NOTE: pembayaran sungguhan belum terintegrasi (Midtrans). Untuk sekarang paket langsung aktif secara lokal.
+    localStorage.setItem('user_plan', planKey);
+    document.getElementById('payModal').classList.remove('open');
+    showToast('Paket '+planKey.charAt(0).toUpperCase()+planKey.slice(1)+' aktif!');
+  },1500);
 }
 document.getElementById('payModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 </script>
