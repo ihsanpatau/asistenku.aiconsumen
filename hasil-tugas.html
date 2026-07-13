@@ -11,7 +11,7 @@
   <div class="backnav">
     <div class="backnav-left">
       <button class="back-btn" onclick="history.back()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></button>
-      <div><div class="backnav-title">Hasil Tugas</div><div class="backnav-sub">Tugas sudah selesai diproses oleh AI</div></div>
+      <div><div class="backnav-title">Hasil Tugas</div><div class="backnav-sub" id="backnavSub">Sedang diproses oleh AI...</div></div>
     </div>
     <div style="display:flex;gap:6px;">
       <button onclick="showToast('Link disalin!')" style="background:var(--gray-100);border:none;border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--dark);cursor:pointer;display:flex;align-items:center;gap:4px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Bagikan</button>
@@ -20,14 +20,14 @@
   </div>
   <div class="page-content">
     <!-- Success Banner -->
-    <div style="margin:16px 16px 0;background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border-radius:20px;padding:16px;position:relative;overflow:hidden;">
+    <div id="statusBanner" style="margin:16px 16px 0;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:20px;padding:16px;position:relative;overflow:hidden;">
       <div style="display:flex;align-items:flex-start;gap:12px;">
-        <div style="width:40px;height:40px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        <div id="statusIconWrap" style="width:40px;height:40px;border-radius:50%;background:#D97706;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg id="statusIconSvg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
         <div>
-          <div style="font-size:18px;font-weight:800;color:var(--green);">Tugas selesai!</div>
-          <div style="font-size:12px;color:var(--gray-500);margin-top:2px;">AI telah memproses tugasmu dengan sukses.</div>
+          <div id="statusTitle" style="font-size:18px;font-weight:800;color:#B45309;">Sedang diproses...</div>
+          <div id="statusSub" style="font-size:12px;color:var(--gray-500);margin-top:2px;">AI sedang mengerjakan tugasmu, mohon tunggu.</div>
         </div>
         <div style="position:absolute;right:10px;top:10px;width:90px;">
           <svg viewBox="0 0 120 140" fill="none">
@@ -194,13 +194,60 @@ if(prompt){
 let hasilTugasFull = '';
 let makalahParts = null;
 
+function setBanner(state, msg){
+  // state: 'loading' | 'done' | 'error'
+  const banner=document.getElementById('statusBanner');
+  const iconWrap=document.getElementById('statusIconWrap');
+  const iconSvg=document.getElementById('statusIconSvg');
+  const title=document.getElementById('statusTitle');
+  const sub=document.getElementById('statusSub');
+  const backnavSub=document.getElementById('backnavSub');
+  if(state==='loading'){
+    banner.style.background='linear-gradient(135deg,#FEF3C7,#FDE68A)';
+    iconWrap.style.background='#D97706';
+    iconSvg.innerHTML='<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>';
+    title.textContent='Sedang diproses...'; title.style.color='#B45309';
+    sub.textContent=msg||'AI sedang mengerjakan tugasmu, mohon tunggu.';
+    backnavSub.textContent='Sedang diproses oleh AI...';
+  } else if(state==='done'){
+    banner.style.background='linear-gradient(135deg,#ECFDF5,#D1FAE5)';
+    iconWrap.style.background='var(--green)';
+    iconSvg.innerHTML='<polyline points="20 6 9 17 4 12"/>';
+    title.textContent='Tugas selesai!'; title.style.color='var(--green)';
+    sub.textContent='AI telah memproses tugasmu dengan sukses.';
+    backnavSub.textContent='Tugas sudah selesai diproses oleh AI';
+  } else {
+    banner.style.background='linear-gradient(135deg,#FEF2F2,#FECACA)';
+    iconWrap.style.background='#DC2626';
+    iconSvg.innerHTML='<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
+    title.textContent='Gagal memproses'; title.style.color='#B91C1C';
+    sub.textContent=msg||'Terjadi kesalahan saat memproses tugas.';
+    backnavSub.textContent='Gagal diproses — coba lagi';
+  }
+}
+
 function setLoadingUI(isLoading, errorMsg){
   document.getElementById('statusError').style.display = errorMsg ? 'block' : 'none';
   document.getElementById('statusError').textContent = errorMsg || '';
   document.getElementById('retryWrap').style.display = errorMsg ? 'block' : 'none';
   if(isLoading){
     document.getElementById('ringkasanTugas').textContent = '⏳ AI sedang memproses tugasmu, mohon tunggu (bisa 10–40 detik)...';
+    setBanner('loading');
+  } else if(errorMsg){
+    setBanner('error', 'AI gagal menghasilkan tugas. Klik "Coba Lagi" di bawah.');
+  } else {
+    setBanner('done');
   }
+}
+
+// Extract & parse JSON robustly even if the AI wraps it in code fences or adds stray text
+function parseAIJson(raw){
+  let t=(raw||'').trim();
+  t=t.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/,'').trim();
+  const start=t.indexOf('{'); const end=t.lastIndexOf('}');
+  if(start!==-1 && end!==-1 && end>start){ t=t.substring(start,end+1); }
+  t=t.replace(/,(\s*[}\]])/g,'$1'); // remove trailing commas
+  return JSON.parse(t);
 }
 
 function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -312,19 +359,33 @@ async function generateContent(){
   }
 
   setLoadingUI(true, null);
-  const promptToSend = fullPromptOverride || `Kerjakan tugas berikut dalam Bahasa Indonesia. Tulis lengkap: seluruh isi/hasil tugasnya (bukan ringkasan), lalu di baris paling akhir tambahkan satu baris ringkasan diawali dengan tanda '---RINGKASAN---'. Tugas: "${p}". Mulai langsung dengan konten, tanpa preamble.`;
-  try{
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:promptToSend}]})});
+  const basePrompt = fullPromptOverride || `Kerjakan tugas berikut dalam Bahasa Indonesia. Tulis lengkap: seluruh isi/hasil tugasnya (bukan ringkasan), lalu di baris paling akhir tambahkan satu baris ringkasan diawali dengan tanda '---RINGKASAN---'. Tugas: "${p}". Mulai langsung dengan konten, tanpa preamble.`;
+
+  async function callAI(promptText){
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:promptText}]})});
     const data=await res.json();
     if(!res.ok){ throw new Error(data.error || `Server error (${res.status})`); }
     const full=(data.text||'').trim();
-    if(!full){ throw new Error('AI mengembalikan hasil kosong. Coba lagi.'); }
+    if(!full){ throw new Error('AI mengembalikan hasil kosong.'); }
+    return full;
+  }
+
+  try{
+    let full = await callAI(basePrompt);
 
     if(taskType==='makalah'){
-      let jsonText = full.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
       let doc;
-      try{ doc = JSON.parse(jsonText); }
-      catch(parseErr){ throw new Error('AI tidak mengembalikan format makalah yang valid. Klik "Coba Lagi".'); }
+      try{
+        doc = parseAIJson(full);
+      }catch(parseErr){
+        // Auto-retry once with a stricter instruction
+        try{
+          full = await callAI(basePrompt + '\n\nPENTING: Balas HANYA dengan JSON valid tanpa satupun teks/komentar/blok kode di luar JSON tersebut.');
+          doc = parseAIJson(full);
+        }catch(retryErr){
+          throw new Error('AI tidak mengembalikan format makalah yang valid setelah 2 percobaan. Klik "Coba Lagi".');
+        }
+      }
       const meta = JSON.parse(localStorage.getItem('makalah_meta')||'{}');
       localStorage.setItem('task_result_structured', JSON.stringify(doc));
       renderMakalah(doc, meta);
