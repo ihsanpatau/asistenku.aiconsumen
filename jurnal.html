@@ -96,6 +96,9 @@ function generate(){
     prompt=`Buatkan jurnal akademik lengkap dengan format ${gaya} untuk bidang ilmu ${bidang}. Judul: "${judul}". ${abstrakInput?('Ringkasan penelitian: '+abstrakInput):''}\nSertakan: Judul, Abstrak (Bahasa Indonesia & Inggris), Kata Kunci, Pendahuluan, Metode Penelitian, Hasil dan Pembahasan, Kesimpulan, dan Daftar Pustaka. Tulis dalam Bahasa Indonesia yang formal dan akademis.`;
   }
 
+  localStorage.removeItem('task_result');
+  localStorage.removeItem('task_result_structured');
+  localStorage.removeItem('task_type');
   localStorage.setItem('task_prompt', judul || (isKonversi ? 'Jurnal dari Skripsi' : 'Jurnal Akademik'));
   localStorage.setItem('task_full_prompt', prompt);
   showToast('Memproses jurnal dengan AI...');
