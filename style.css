@@ -595,14 +595,14 @@ body {
   overflow-x: auto; scrollbar-width: none;
 }
 .tab-bar::-webkit-scrollbar { display: none; }
-.tab-btn {
+.tab-btn, .tab-item {
   padding: 10px 16px; border: none; border-bottom: 2px solid transparent;
   margin-bottom: -2px; background: none; font-family: inherit;
   font-size: 13px; font-weight: 600; color: var(--gray-400); cursor: pointer;
   white-space: nowrap;
   transition: color var(--fast) var(--ease), border-color var(--fast) var(--ease);
 }
-.tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+.tab-btn.active, .tab-item.active { color: var(--green); border-bottom-color: var(--green); }
 
 /* ── Step Indicator ── */
 .steps { display: flex; align-items: flex-start; padding: 14px 16px; }
