@@ -21,9 +21,9 @@
     </div>
     <div style="padding:16px;">
       <div class="form-group"><label class="form-label">Judul Makalah <span style="color:var(--red)">*</span></label><input type="text" class="form-input" id="judulMakalah" placeholder="Masukkan judul makalah..."></div>
-      <div class="form-group"><label class="form-label">Mata Kuliah / Bidang Studi</label><input type="text" class="form-input" placeholder="Contoh: Manajemen Pemasaran"></div>
+      <div class="form-group"><label class="form-label">Mata Kuliah / Bidang Studi</label><input type="text" class="form-input" id="bidangMakalah" placeholder="Contoh: Manajemen Pemasaran"></div>
       <div class="form-group"><label class="form-label">Jenis Makalah</label>
-        <div class="type-pills">
+        <div class="type-pills" id="jenisMakalahPills">
           <button class="type-pill active" onclick="selectPill(this)">Deskriptif</button>
           <button class="type-pill" onclick="selectPill(this)">Argumentatif</button>
           <button class="type-pill" onclick="selectPill(this)">Analitis</button>
@@ -31,7 +31,7 @@
         </div>
       </div>
       <div class="form-group"><label class="form-label">Target Halaman</label>
-        <div class="type-pills">
+        <div class="type-pills" id="halamanMakalahPills">
           <button class="type-pill active" onclick="selectPill(this)">10 hal</button>
           <button class="type-pill" onclick="selectPill(this)">15 hal</button>
           <button class="type-pill" onclick="selectPill(this)">20 hal</button>
@@ -46,8 +46,9 @@
           <input type="file" id="makalahFile" style="display:none" onchange="showToast('File: '+this.files[0]?.name)">
         </div>
       </div>
-      <div class="form-group"><label class="form-label">Catatan Tambahan (Opsional)</label><textarea class="form-textarea" placeholder="Instruksi khusus atau poin yang harus dimasukkan..." rows="2"></textarea></div>
-      <button class="btn btn-primary" onclick="generate()" style="background:var(--purple);">
+      <div class="form-group"><label class="form-label">Catatan Tambahan (Opsional)</label><textarea class="form-textarea" id="catatanMakalah" placeholder="Instruksi khusus atau poin yang harus dimasukkan..." rows="2"></textarea></div>
+      <div class="form-group"><label class="form-label">Nama Penulis (untuk sampul)</label><input type="text" class="form-input" id="namaPenulisMakalah" placeholder="Nama lengkap Anda"></div>
+      <button class="btn btn-primary" id="btnGenerateMakalah" onclick="generate()" style="background:var(--purple);">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         Generate Makalah
       </button>
@@ -65,7 +66,44 @@
 <script>
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function selectPill(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active');}
-function generate(){const j=document.getElementById('judulMakalah').value.trim();if(!j){showToast('Isi judul makalah');return;}localStorage.setItem('task_prompt',j);showToast('Memproses makalah...');setTimeout(()=>window.location.href='hasil-tugas.html',1500);}
+function generate(){
+  const judul=document.getElementById('judulMakalah').value.trim();
+  if(!judul){showToast('Isi judul makalah terlebih dahulu');return;}
+  const bidang=document.getElementById('bidangMakalah').value.trim()||'Umum';
+  const jenis=document.querySelector('#jenisMakalahPills .type-pill.active')?.textContent||'Deskriptif';
+  const halaman=document.querySelector('#halamanMakalahPills .type-pill.active')?.textContent||'10 hal';
+  const catatan=document.getElementById('catatanMakalah').value.trim();
+  const penulis=document.getElementById('namaPenulisMakalah').value.trim()||'Nama Mahasiswa';
+
+  const jumlahSubBab = halaman.includes('20') || halaman.includes('25') ? 4 : (halaman.includes('15') ? 3 : 2);
+
+  const prompt=`Buatkan konten makalah akademik ${jenis} lengkap dengan judul: "${judul}", untuk mata kuliah/bidang: ${bidang}.${catatan?(' Catatan tambahan dari penulis: '+catatan):''}
+
+Balas HANYA dengan JSON valid (tanpa blok kode markdown, tanpa teks lain di luar JSON) sesuai struktur berikut PERSIS:
+{
+  "judul": "judul makalah huruf kapital",
+  "kata_pengantar": "1-2 paragraf kata pengantar formal",
+  "bab1_sub": [{"judul":"1.1 Latar Belakang","isi":"paragraf isi"}, {"judul":"1.2 Rumusan Masalah","isi":"paragraf isi, boleh berbentuk poin bernomor dalam teks biasa"}, {"judul":"1.3 Tujuan Penulisan","isi":"paragraf isi"}],
+  "bab2_sub": [${Array(jumlahSubBab).fill(0).map((_,i)=>`{"judul":"2.${i+1} [sub-topik pembahasan relevan]","isi":"paragraf isi mendalam"}`).join(', ')}],
+  "bab3_sub": [{"judul":"3.1 Kesimpulan","isi":"paragraf isi"}, {"judul":"3.2 Saran","isi":"paragraf isi"}],
+  "daftar_pustaka": ["referensi format APA 1", "referensi format APA 2", "referensi format APA 3", "referensi format APA 4"]
+}
+
+ATURAN PENTING:
+- Semua teks di dalam nilai "isi" dan "kata_pengantar" HARUS berupa paragraf biasa dalam Bahasa Indonesia akademik formal.
+- JANGAN gunakan tanda pagar (#), tanda bintang (**), atau format markdown apapun di dalam teks.
+- Bab 2 (Pembahasan) berisi ${jumlahSubBab} sub-bab dengan topik yang relevan dan spesifik terhadap judul makalah (ganti [sub-topik pembahasan relevan] dengan topik nyata).
+- Daftar pustaka harus realistis dan dalam format APA, gunakan nama penulis dan tahun yang masuk akal untuk bidang ilmu terkait.`;
+
+  localStorage.removeItem('task_result');
+  localStorage.removeItem('task_result_structured');
+  localStorage.setItem('task_prompt', judul);
+  localStorage.setItem('task_type', 'makalah');
+  localStorage.setItem('task_full_prompt', prompt);
+  localStorage.setItem('makalah_meta', JSON.stringify({judul, bidang, jenis, penulis}));
+  showToast('Memproses makalah dengan AI...');
+  setTimeout(()=>window.location.href='hasil-tugas.html',500);
+}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
 </script>
 </body>
