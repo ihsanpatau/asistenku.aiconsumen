@@ -218,7 +218,60 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
 .hasil-action-btn svg { width: 13px; height: 13px; }
 .hasil-content {
   font-size: 13px; line-height: 1.75; color: var(--dark);
-  white-space: pre-wrap; word-break: break-word;
+  word-break: break-word;
+}
+.hasil-content .bab-heading {
+  font-size: 15px; font-weight: 800; text-align: center;
+  color: var(--dark); margin: 22px 0 6px; text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.hasil-content .sub-heading {
+  font-size: 14px; font-weight: 700; color: var(--dark);
+  margin: 16px 0 6px;
+}
+.hasil-content .sub-sub-heading {
+  font-size: 13px; font-weight: 700; color: var(--gray-700);
+  margin: 12px 0 4px;
+}
+.hasil-content .para {
+  margin: 0 0 10px; text-align: justify; text-indent: 1.2em;
+}
+.hasil-content .bullet-list {
+  margin: 6px 0 10px; padding-left: 20px; list-style: disc;
+}
+.hasil-content .bullet-list li {
+  margin-bottom: 4px; font-size: 13px; line-height: 1.65;
+}
+.hasil-content .numbered-list {
+  margin: 6px 0 10px; padding-left: 20px; list-style: decimal;
+}
+.hasil-content .numbered-list li {
+  margin-bottom: 4px; font-size: 13px; line-height: 1.65;
+}
+.hasil-content .ai-table-wrap {
+  overflow-x: auto; margin: 12px 0;
+}
+.hasil-content .ai-table {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+.hasil-content .ai-table th {
+  background: var(--blue-light); color: #fff;
+  border: 1px solid #1d6fa4; padding: 7px 10px;
+  font-weight: 700; text-align: center;
+}
+.hasil-content .ai-table td {
+  border: 1px solid var(--gray-200); padding: 6px 10px;
+  vertical-align: top;
+}
+.hasil-content .ai-table tr:nth-child(even) td {
+  background: #f0f6ff;
+}
+.hasil-content .ai-table-title {
+  font-size: 12px; font-weight: 700; text-align: center;
+  color: var(--dark); margin-bottom: 4px;
+}
+.hasil-content strong, .hasil-content b {
+  font-weight: 700; color: var(--dark);
 }
 .loading-state {
   text-align: center; padding: 24px;
@@ -453,15 +506,12 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
       </div>
       <div class="form-group" style="margin:0;">
         <div class="form-label">Target Halaman</div>
+        <div id="paketHalamanInfo" style="background:var(--blue-pale);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:11px;color:var(--blue);font-weight:600;display:flex;align-items:center;gap:6px;">
+          <span id="paketBadge">⭐ Gratis</span>
+          <span style="font-weight:400;color:var(--gray-500);">— maks. <span id="paketMaksHal">5</span> hal/hari</span>
+        </div>
         <select class="form-select" id="targetHalaman" onchange="cekBatasHalaman(this)">
-          <option value="5">5 halaman</option>
-          <option value="10" selected>10 halaman</option>
-          <option value="20">20 halaman</option>
-          <option value="30">30 halaman</option>
-          <option value="50">50 halaman</option>
-          <option value="60">60 halaman</option>
-          <option value="80">80 halaman</option>
-          <option value="100">100+ halaman</option>
+          <!-- Diisi dinamis oleh JS sesuai paket aktif -->
         </select>
         <div id="halamanLockNote" style="display:none;font-size:11px;color:#B45309;margin-top:4px;"></div>
       </div>
@@ -619,6 +669,9 @@ if (!localStorage.getItem('ak_token')) {
   window.location.href = 'login.html';
 }
 
+// Init dropdown halaman sesuai paket saat halaman dimuat
+document.addEventListener('DOMContentLoaded', () => { initHalamanDropdown(); });
+
 function showToast(msg, d=2500) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -690,29 +743,89 @@ Jangan ada teks lain, hanya JSON.`
   btn.disabled = false;
 }
 
-// Batas jumlah halaman per paket (halaman: user_plan)
-const PLAN_HALAMAN_LIMIT = { gratis: 10, standar: 30, pro: 80, lanjutan: 999 };
+// =====================================================================
+// SISTEM PAKET — sesuai blueprint asistenku.pro
+// Gratis: 5 hal/hari | Standar: 10 | Pro: 35 | Lanjutan: 60
+// =====================================================================
+const PAKET_CONFIG = {
+  gratis:   { label: '⭐ Gratis',         maks: 5,  harga: 'Gratis',        color: '#6B7280', opsi: [
+    { v: 5,  t: '5 halaman (maks paket Gratis)' }
+  ]},
+  standar:  { label: '🔵 Standar',        maks: 10, harga: 'Rp 20.000/bln', color: '#2563EB', opsi: [
+    { v: 5,  t: '5 halaman' },
+    { v: 10, t: '10 halaman (maks paket Standar)' }
+  ]},
+  pro:      { label: '🟡 Pro',            maks: 35, harga: 'Rp 59.000/bln', color: '#D97706', opsi: [
+    { v: 5,  t: '5 halaman' },
+    { v: 10, t: '10 halaman' },
+    { v: 15, t: '15 halaman' },
+    { v: 20, t: '20 halaman' },
+    { v: 25, t: '25 halaman' },
+    { v: 35, t: '35 halaman (maks paket Pro)' }
+  ]},
+  lanjutan: { label: '🔴 Lanjutan',       maks: 60, harga: 'Rp 99.000/bln', color: '#DC2626', opsi: [
+    { v: 5,  t: '5 halaman' },
+    { v: 10, t: '10 halaman' },
+    { v: 15, t: '15 halaman' },
+    { v: 20, t: '20 halaman' },
+    { v: 25, t: '25 halaman' },
+    { v: 30, t: '30 halaman' },
+    { v: 35, t: '35 halaman' },
+    { v: 40, t: '40 halaman' },
+    { v: 50, t: '50 halaman' },
+    { v: 60, t: '60 halaman (maks paket Lanjutan)' }
+  ]}
+};
 const PLAN_LABEL = { gratis: 'Gratis', standar: 'Standar', pro: 'Pro', lanjutan: 'Lanjutan' };
 function getUserPlan(){ return localStorage.getItem('user_plan') || 'gratis'; }
+
+// Isi dropdown Target Halaman sesuai paket aktif
+function initHalamanDropdown(){
+  const plan = getUserPlan();
+  const cfg = PAKET_CONFIG[plan] || PAKET_CONFIG.gratis;
+  // Update badge info
+  document.getElementById('paketBadge').textContent = cfg.label;
+  document.getElementById('paketMaksHal').textContent = cfg.maks;
+  // Isi select
+  const sel = document.getElementById('targetHalaman');
+  sel.innerHTML = '';
+  cfg.opsi.forEach((o, i) => {
+    const opt = document.createElement('option');
+    opt.value = o.v;
+    opt.textContent = o.t;
+    if (i === cfg.opsi.length - 1) opt.selected = true; // default ke maksimum paket
+    sel.appendChild(opt);
+  });
+  // Jika hanya 1 pilihan (gratis), informasikan
+  const note = document.getElementById('halamanLockNote');
+  if (plan === 'gratis') {
+    note.style.display = 'block';
+    note.style.color = '#B45309';
+    note.innerHTML = `ℹ️ Paket Gratis hanya 5 halaman. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade ke Standar</a> untuk lebih banyak halaman.`;
+  } else {
+    note.style.display = 'none';
+  }
+}
 
 function cekBatasHalaman(select){
   const val = parseInt(select.value, 10);
   const plan = getUserPlan();
-  const limit = PLAN_HALAMAN_LIMIT[plan] ?? 10;
+  const cfg = PAKET_CONFIG[plan] || PAKET_CONFIG.gratis;
   const note = document.getElementById('halamanLockNote');
-  if (val > limit) {
-    // Cari paket minimum yang mencukupi
-    let paketDibutuhkan = 'Lanjutan';
-    if (val <= PLAN_HALAMAN_LIMIT.standar) paketDibutuhkan = 'Standar';
-    else if (val <= PLAN_HALAMAN_LIMIT.pro) paketDibutuhkan = 'Pro';
+  // Semua pilihan sudah dibatasi sesuai paket, tapi tetap validasi
+  if (val > cfg.maks) {
     note.style.display = 'block';
-    note.innerHTML = `🔒 Paket ${PLAN_LABEL[plan]} maksimal ${limit} halaman. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade ke paket ${paketDibutuhkan}</a> untuk membuka ${val} halaman.`;
-    // Kembalikan ke nilai maksimum yang diizinkan paket saat ini
-    select.value = String(limit <= 10 ? 10 : (limit <= 30 ? 30 : (limit <= 80 ? 80 : 100)));
+    note.style.color = '#B45309';
+    // Cari paket minimum yang bisa
+    let upgrade = 'Lanjutan';
+    if (val <= 10) upgrade = 'Standar';
+    else if (val <= 35) upgrade = 'Pro';
+    note.innerHTML = `🔒 Paket ${cfg.label} maks. ${cfg.maks} halaman. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade ke ${upgrade}</a>.`;
+    select.value = String(cfg.maks);
   } else if (val > 20) {
     note.style.display = 'block';
     note.style.color = 'var(--gray-500)';
-    note.innerHTML = `ℹ️ Satu kali generate punya batas teknis ±6.000 kata (~20 halaman) per BAB. AI akan menulis sepanjang mungkin, tapi untuk target di atas itu hasil per-BAB mungkin tidak mencapai jumlah persis — generate BAB berikutnya untuk melanjutkan.`;
+    note.innerHTML = `ℹ️ Target di atas 20 halaman: AI akan menulis sepanjang mungkin. Generate BAB berikutnya untuk melanjutkan jika perlu.`;
   } else {
     note.style.display = 'none';
   }
@@ -849,6 +962,11 @@ Buat 12-15 entri referensi yang relevan dengan topik di atas (kombinasi buku, ju
     const tabelInstruksi = jenisDokumen==='BAB 4' ? `\nWAJIB sertakan minimal 2-3 tabel data pendukung (misalnya distribusi responden, statistik deskriptif, atau ringkasan hasil uji) menggunakan format PERSIS berikut (jangan pakai format tabel lain):\n[TABEL]\nJudul Tabel\nKolom1 | Kolom2 | Kolom3\nBaris1 | Data | Data\nBaris2 | Data | Data\n[/TABEL]\nIsi data dengan angka/perkiraan yang masuk akal dan konsisten dengan narasi (bukan data kosong), agar tabel benar-benar terisi.\n` : '';
     const kataPerHalaman = 300;
     const targetKata = parseInt(halaman, 10) * kataPerHalaman;
+    const plan = getUserPlan();
+    const cfg = PAKET_CONFIG[plan] || PAKET_CONFIG.gratis;
+    const isMaksimum = parseInt(halaman, 10) >= cfg.maks;
+    const subBabCount = jenisDokumen === 'BAB 1' ? 5 : 4;
+    const kataPerSubBab = Math.floor(targetKata / subBabCount);
 
     prompt = `Tulis ${babDesc[jenisDokumen]} untuk skripsi berikut:
 
@@ -856,15 +974,18 @@ Judul: "${judul}"
 Jenis penelitian: ${jenis}
 Bidang studi: ${bidang || 'umum'}
 ${deskripsi ? 'Deskripsi tambahan: ' + deskripsi : ''}
-${(outlineMode==='sendiri' && outlineCustom) ? `\nPENTING: Ikuti STRUKTUR OUTLINE berikut ini apa adanya (jangan buat sub-bab baru di luar ini), dan tulis hanya bagian yang relevan dengan ${jenisDokumen}:\n${outlineCustom}\n` : ''}
-${tabelInstruksi}${fileLanjutanText ? `\nBerikut isi dokumen skripsi yang SUDAH ADA sebelumnya (hasil BAB sebelumnya atau draf yang perlu dilanjutkan/diperbaiki). Lanjutkan dengan gaya bahasa dan konteks yang KONSISTEN dengan ini, jangan mengulang isi yang sudah ada:\n"""\n${fileLanjutanText.substring(0,6000)}\n"""\n` : ''}
-TARGET PANJANG: tulis sepanjang mungkin mendekati ${targetKata.toLocaleString('id-ID')} kata (setara ${halaman} halaman). Kembangkan setiap sub-bab secara mendalam dan substantif untuk mencapai target ini, jangan disingkat.
-${jenisDokumen==='BAB 1' ? `\nKHUSUS LATAR BELAKANG: tulis secara DEDUKTIF dan LINEAR — mulai dari konteks paling umum/luas (isu besar/global atau nasional), menyempit ke konteks yang lebih spesifik (bidang/lokasi/objek penelitian), lalu ke masalah spesifik yang diteliti, dan tutup dengan celah penelitian (research gap) yang mengarah ke rumusan masalah. Jangan melompat-lompat antar topik yang tidak berurutan.\n` : ''}
-WAJIB: Sertakan kutipan dalam teks (in-text citation) format (Nama, Tahun) untuk setiap klaim, data, teori, atau pernyataan yang membutuhkan sumber. Prioritaskan sumber terbitan ${new Date().getFullYear()-5}-${new Date().getFullYear()} (5 tahun terakhir); teori klasik yang lebih lama boleh dipakai bila memang relevan dan penting. Jangan menulis klaim/statistik tanpa kutipan pendukung.
+${(outlineMode==='sendiri' && outlineCustom) ? `\nPENTING: Ikuti STRUKTUR OUTLINE berikut ini apa adanya, tulis hanya bagian yang relevan dengan ${jenisDokumen}:\n${outlineCustom}\n` : ''}
+${tabelInstruksi}${fileLanjutanText ? `\nBerikut isi dokumen skripsi yang SUDAH ADA (lanjutkan konsisten, jangan ulangi):\n\"\"\"\n${fileLanjutanText.substring(0,6000)}\n\"\"\"\n` : ''}
+TARGET PANJANG: ${targetKata.toLocaleString('id-ID')} kata (\u00b1${halaman} halaman, spasi 1.5 TNR 12pt).
 
-WAJIB: Di akhir tulisan, tambahkan bagian "DAFTAR PUSTAKA" (tulis persis dengan huruf kapital seperti itu di baris tersendiri) berisi SEMUA sumber yang dikutip di atas, format APA edisi ke-7, satu referensi per baris, diurutkan berdasarkan abjad nama penulis. Jangan lewatkan bagian ini walau hanya menulis satu BAB.
-
-Tulis dalam Bahasa Indonesia yang formal dan akademis. Isi harus detail, substantif, dan relevan dengan judul. Jangan gunakan format markdown atau tanda pagar.`;
+ATURAN KETAT HALAMAN:
+- SEMUA sub-bab WAJIB ada dan LENGKAP \u2014 jangan hilangkan satu pun sub-bab
+- Sesuaikan KEDALAMAN teks agar total mendekati ${halaman} halaman
+- ${isMaksimum ? 'Kembangkan semaksimal mungkin \u2014 ini batas maksimum paket pengguna' : `Karena target hanya ${halaman} halaman, tulis setiap sub-bab RINGKAS namun substantif \u2014 targetkan \u00b1${kataPerSubBab} kata per sub-bab`}
+${jenisDokumen==='BAB 1' ? `\nKHUSUS LATAR BELAKANG: tulis DEDUKTIF dan LINEAR \u2014 dari konteks umum/global, menyempit ke spesifik, lalu ke research gap yang mengarah ke rumusan masalah.` : ''}
+WAJIB: Kutipan (Nama, Tahun) untuk setiap klaim/data/teori. Prioritaskan sumber ${new Date().getFullYear()-5}-${new Date().getFullYear()}.
+WAJIB: Akhiri dengan bagian DAFTAR PUSTAKA (huruf kapital) berisi semua sumber, format APA edisi ke-7, urut abjad.
+Tulis dalam Bahasa Indonesia formal dan akademis. Jangan gunakan format markdown atau tanda pagar.`;
   }
 
   try {
@@ -893,7 +1014,9 @@ ATURAN PENULISAN PENTING:
 
     if (data.text) {
       const result = data.text;
-      document.getElementById('hasilText').textContent = result;
+      const hasilEl = document.getElementById('hasilText');
+      hasilEl.dataset.rawText = result; // simpan teks asli untuk copy/download
+      hasilEl.innerHTML = renderHasilHTML(result); // render rapi bergaya akademik
       document.getElementById('hasilContent').style.display = 'block';
       setStep(3);
       highlightFormatButton();
@@ -914,13 +1037,173 @@ ATURAN PENULISAN PENTING:
   } catch(e) {
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('hasilContent').style.display = 'block';
-    document.getElementById('hasilText').textContent = 'Gagal menghubungi AI. Pastikan koneksi internetmu aktif lalu coba lagi.';
+    document.getElementById('hasilText').innerHTML = '<p style="color:var(--red);text-align:center;padding:16px;">Gagal menghubungi AI. Pastikan koneksi internetmu aktif lalu coba lagi.</p>';
     setStep(1);
   }
 }
 
+// =====================================================================
+// RENDER HASIL AI — Konversi teks plain jadi HTML rapi bergaya akademik
+// =====================================================================
+function renderHasilHTML(text) {
+  const lines = text.split('\n');
+  let html = '';
+  let paraBuffer = [];
+  let bulletBuffer = [];
+  let numberedBuffer = [];
+  let inTable = false;
+  let tableRows = [];
+  let tableTitle = '';
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function applyInline(s) {
+    // Bold: **teks** atau __teks__
+    s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/__(.+?)__/g, '<strong>$1</strong>');
+    // Italic: *teks* atau _teks_
+    s = s.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    return s;
+  }
+  function flushPara() {
+    if (paraBuffer.length) {
+      const joined = paraBuffer.join(' ').trim();
+      if (joined) html += `<p class="para">${applyInline(esc(joined))}</p>`;
+      paraBuffer = [];
+    }
+  }
+  function flushBullets() {
+    if (bulletBuffer.length) {
+      html += '<ul class="bullet-list">' + bulletBuffer.map(b => `<li>${applyInline(esc(b))}</li>`).join('') + '</ul>';
+      bulletBuffer = [];
+    }
+  }
+  function flushNumbered() {
+    if (numberedBuffer.length) {
+      html += '<ol class="numbered-list">' + numberedBuffer.map(b => `<li>${applyInline(esc(b))}</li>`).join('') + '</ol>';
+      numberedBuffer = [];
+    }
+  }
+  function flushTable() {
+    if (tableRows.length) {
+      let out = '';
+      if (tableTitle) out += `<div class="ai-table-title">${esc(tableTitle)}</div>`;
+      out += '<div class="ai-table-wrap"><table class="ai-table">';
+      tableRows.forEach((row, ri) => {
+        const cells = row.split('|').map(c => c.trim()).filter(c => c !== '');
+        if (!cells.length) return;
+        out += '<tr>' + cells.map(c => ri === 0
+          ? `<th>${esc(c)}</th>`
+          : `<td>${applyInline(esc(c))}</td>`
+        ).join('') + '</tr>';
+      });
+      out += '</table></div>';
+      html += out;
+      tableRows = []; tableTitle = '';
+    }
+    inTable = false;
+  }
+
+  lines.forEach(raw => {
+    const line = raw.trimEnd();
+    const trimmed = line.trim();
+
+    // Tabel markdown: baris dengan pipe
+    if (/^\|.+\|/.test(trimmed)) {
+      flushPara(); flushBullets(); flushNumbered();
+      // Skip separator rows: |---|---|
+      if (/^\|[\s\-:]+\|/.test(trimmed)) return;
+      if (!inTable) inTable = true;
+      tableRows.push(trimmed.replace(/^\||\|$/g, ''));
+      return;
+    }
+    if (inTable) flushTable();
+
+    // Kosong
+    if (!trimmed) {
+      flushPara(); flushBullets(); flushNumbered();
+      return;
+    }
+
+    // Judul Tabel (pola: "Tabel 1. ..." atau "Tabel 1 ...")
+    const tabelMatch = trimmed.match(/^(Tabel\s+\d[\d.]*[\s.]+.+)/i);
+    if (tabelMatch && !inTable) {
+      tableTitle = tabelMatch[1];
+      return;
+    }
+
+    // BAB heading (prioritas tertinggi)
+    if (/^(BAB\s+[IVXLC0-9]+)/i.test(trimmed)) {
+      flushPara(); flushBullets(); flushNumbered();
+      html += `<div class="bab-heading">${esc(trimmed.replace(/^#+\s*/, ''))}</div>`;
+      return;
+    }
+
+    // Markdown heading #, ##, ###
+    const h1 = trimmed.match(/^#\s+(.+)/);
+    const h2 = trimmed.match(/^##\s+(.+)/);
+    const h3 = trimmed.match(/^###\s+(.+)/);
+    if (h1) {
+      flushPara(); flushBullets(); flushNumbered();
+      html += `<div class="bab-heading">${esc(h1[1])}</div>`;
+      return;
+    }
+    if (h2) {
+      flushPara(); flushBullets(); flushNumbered();
+      html += `<div class="sub-heading">${esc(h2[1])}</div>`;
+      return;
+    }
+    if (h3) {
+      flushPara(); flushBullets(); flushNumbered();
+      html += `<div class="sub-sub-heading">${esc(h3[1])}</div>`;
+      return;
+    }
+
+    // Sub-bab angka: "1.1 Latar Belakang" atau "2.1.1 ..."
+    if (/^\d+(\.\d+){1,3}\s+\S/.test(trimmed)) {
+      flushPara(); flushBullets(); flushNumbered();
+      const isDeep = /^\d+(\.\d+){2,}/.test(trimmed);
+      html += `<div class="${isDeep ? 'sub-sub-heading' : 'sub-heading'}">${esc(trimmed)}</div>`;
+      return;
+    }
+
+    // Huruf kapital semua (≤8 kata) — sub-heading tanpa angka
+    if (/^[A-Z][A-Z\s\d]{3,79}$/.test(trimmed) && trimmed.split(' ').length <= 8 && !/[.,!?;:()]/.test(trimmed)) {
+      flushPara(); flushBullets(); flushNumbered();
+      html += `<div class="sub-heading">${esc(trimmed)}</div>`;
+      return;
+    }
+
+    // Bullet: - atau * atau •
+    if (/^[-*•]\s+/.test(trimmed)) {
+      flushPara(); flushNumbered();
+      bulletBuffer.push(trimmed.replace(/^[-*•]\s+/, ''));
+      return;
+    }
+
+    // Numbered list: "1. " atau "a. "
+    if (/^[0-9a-z]+[.)]\s+/.test(trimmed) && trimmed.length < 200) {
+      flushPara(); flushBullets();
+      numberedBuffer.push(trimmed.replace(/^[0-9a-z]+[.)]\s+/, ''));
+      return;
+    }
+
+    // Paragraf biasa — kumpulkan
+    flushBullets(); flushNumbered();
+    paraBuffer.push(trimmed);
+  });
+
+  flushPara(); flushBullets(); flushNumbered();
+  if (inTable) flushTable();
+
+  return html;
+}
+
 function copyHasil() {
-  const text = document.getElementById('hasilText').textContent;
+  // Ambil teks asli dari data attribute (bukan dari innerHTML)
+  const el = document.getElementById('hasilText');
+  const text = el.dataset.rawText || el.innerText;
   navigator.clipboard.writeText(text).then(() => showToast('Teks berhasil disalin!'));
 }
 
@@ -1116,7 +1399,8 @@ function buildCoverHtmlSkripsi(judul, jenis, bidang, penulis){
 }
 
 async function downloadHasil(type) {
-  const text = document.getElementById('hasilText').textContent;
+  const hasilEl = document.getElementById('hasilText');
+  const text = hasilEl.dataset.rawText || hasilEl.innerText;
   if (!text) { showToast('Belum ada hasil untuk diunduh'); return; }
   const judul = document.getElementById('judulSkripsi').value.trim() || 'Skripsi';
   const jenis = document.querySelector('#jenisPenelitianPills .type-pill.active')?.textContent.trim() || '';

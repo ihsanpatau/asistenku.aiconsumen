@@ -98,7 +98,7 @@
     <!-- Preview Tab -->
     <div id="tab-preview" style="display:none;padding:16px;">
       <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:8px;padding:20px;">
-        <div style="font-family:'Times New Roman',serif;font-size:12px;line-height:1.7;color:var(--dark);white-space:pre-wrap;" id="previewFullTugas">Konten sedang diproses...</div>
+        <div style="font-family:'Times New Roman',serif;font-size:12px;line-height:1.7;color:var(--dark);" id="previewFullTugas">Konten sedang diproses...</div>
       </div>
     </div>
 
@@ -180,6 +180,38 @@
 <div class="toast" id="toast"></div>
 <script>
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+
+// Render teks AI jadi HTML rapi (shared dengan skripsi.html)
+function renderHasilHTML(text) {
+  const lines = text.split('\n');
+  let html = '', paraBuffer = [], bulletBuffer = [], numberedBuffer = [];
+  let inTable = false, tableRows = [], tableTitle = '';
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function applyInline(s){s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');s=s.replace(/__(.+?)__/g,'<strong>$1</strong>');s=s.replace(/\*(.+?)\*/g,'<em>$1</em>');return s;}
+  function flushPara(){if(paraBuffer.length){const j=paraBuffer.join(' ').trim();if(j)html+=`<p style="margin:0 0 10px;text-align:justify;text-indent:1.2em;">${applyInline(esc(j))}</p>`;paraBuffer=[];}}
+  function flushBullets(){if(bulletBuffer.length){html+='<ul style="margin:6px 0 10px;padding-left:20px;">'+bulletBuffer.map(b=>`<li style="margin-bottom:4px;">${applyInline(esc(b))}</li>`).join('')+'</ul>';bulletBuffer=[];}}
+  function flushNumbered(){if(numberedBuffer.length){html+='<ol style="margin:6px 0 10px;padding-left:20px;">'+numberedBuffer.map(b=>`<li style="margin-bottom:4px;">${applyInline(esc(b))}</li>`).join('')+'</ol>';numberedBuffer=[];}}
+  function flushTable(){if(tableRows.length){let out='';if(tableTitle)out+=`<div style="font-size:12px;font-weight:700;text-align:center;margin-bottom:4px;">${esc(tableTitle)}</div>`;out+='<div style="overflow-x:auto;margin:12px 0"><table style="width:100%;border-collapse:collapse;font-size:12px;">';tableRows.forEach((row,ri)=>{const cells=row.split('|').map(c=>c.trim()).filter(c=>c!=='');if(!cells.length)return;out+='<tr>'+cells.map(c=>ri===0?`<th style="background:#1a6fa4;color:#fff;border:1px solid #1a6fa4;padding:7px 10px;font-weight:700;text-align:center;">${esc(c)}</th>`:`<td style="border:1px solid #e5e7eb;padding:6px 10px;${ri%2===0?'background:#f0f6ff;':''}">${applyInline(esc(c))}</td>`).join('')+'</tr>';});out+='</table></div>';html+=out;tableRows=[];tableTitle='';}inTable=false;}
+  lines.forEach(raw=>{
+    const trimmed=raw.trim();
+    if(/^\|.+\|/.test(trimmed)){flushPara();flushBullets();flushNumbered();if(/^\|[\s\-:]+\|/.test(trimmed))return;inTable=true;tableRows.push(trimmed.replace(/^\||\|$/g,''));return;}
+    if(inTable)flushTable();
+    if(!trimmed){flushPara();flushBullets();flushNumbered();return;}
+    const tabelM=trimmed.match(/^(Tabel\s+\d[\d.]*[\s.]+.+)/i);if(tabelM&&!inTable){tableTitle=tabelM[1];return;}
+    if(/^(BAB\s+[IVXLC0-9]+)/i.test(trimmed)){flushPara();flushBullets();flushNumbered();html+=`<div style="font-size:15px;font-weight:800;text-align:center;margin:22px 0 6px;text-transform:uppercase;">${esc(trimmed.replace(/^#+\s*/,''))}</div>`;return;}
+    const h1=trimmed.match(/^#\s+(.+)/),h2=trimmed.match(/^##\s+(.+)/),h3=trimmed.match(/^###\s+(.+)/);
+    if(h1){flushPara();flushBullets();flushNumbered();html+=`<div style="font-size:15px;font-weight:800;text-align:center;margin:22px 0 6px;text-transform:uppercase;">${esc(h1[1])}</div>`;return;}
+    if(h2){flushPara();flushBullets();flushNumbered();html+=`<div style="font-size:14px;font-weight:700;margin:16px 0 6px;">${esc(h2[1])}</div>`;return;}
+    if(h3){flushPara();flushBullets();flushNumbered();html+=`<div style="font-size:13px;font-weight:700;margin:12px 0 4px;">${esc(h3[1])}</div>`;return;}
+    if(/^\d+(\.\d+){1,3}\s+\S/.test(trimmed)){flushPara();flushBullets();flushNumbered();const isDeep=/^\d+(\.\d+){2,}/.test(trimmed);html+=`<div style="font-size:${isDeep?'13':'14'}px;font-weight:700;margin:${isDeep?'12':'16'}px 0 6px;">${esc(trimmed)}</div>`;return;}
+    if(/^[A-Z][A-Z\s\d]{3,79}$/.test(trimmed)&&trimmed.split(' ').length<=8&&!/[.,!?;:()]/.test(trimmed)){flushPara();flushBullets();flushNumbered();html+=`<div style="font-size:14px;font-weight:700;margin:16px 0 6px;">${esc(trimmed)}</div>`;return;}
+    if(/^[-*•]\s+/.test(trimmed)){flushPara();flushNumbered();bulletBuffer.push(trimmed.replace(/^[-*•]\s+/,''));return;}
+    if(/^[0-9a-z]+[.)]\s+/.test(trimmed)&&trimmed.length<200){flushPara();flushBullets();numberedBuffer.push(trimmed.replace(/^[0-9a-z]+[.)]\s+/,''));return;}
+    flushBullets();flushNumbered();paraBuffer.push(trimmed);
+  });
+  flushPara();flushBullets();flushNumbered();if(inTable)flushTable();
+  return html;
+}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
 const now=new Date();
 document.getElementById('hasilTanggalTugas').textContent=`${now.getDate()} ${['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'][now.getMonth()]} ${now.getFullYear()}, ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} WIB`;
@@ -335,8 +367,10 @@ function renderMakalah(doc, meta){
 function renderGeneric(fullText, ringkasanText){
   hasilTugasFull = fullText;
   document.getElementById('ringkasanTugas').textContent = ringkasanText || (fullText.substring(0,300)+(fullText.length>300?'...':''));
-  document.getElementById('previewFullTugas').style.whiteSpace = 'pre-wrap';
-  document.getElementById('previewFullTugas').textContent = fullText;
+  const previewEl = document.getElementById('previewFullTugas');
+  previewEl.style.whiteSpace = 'normal';
+  previewEl.dataset.rawText = fullText;
+  previewEl.innerHTML = renderHasilHTML(fullText);
   const wc = fullText.trim().split(/\s+/).filter(Boolean).length;
   document.getElementById('jumlahKataTugas').textContent = wc.toLocaleString('id-ID')+' kata';
   document.getElementById('jumlahKataCard').textContent = wc.toLocaleString('id-ID')+' kata';
