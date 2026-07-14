@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Skripsi, Tesis & Disertasi – asistenku.pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/index.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.2/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -550,8 +550,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
         <button class="type-pill active" onclick="pilihFormatHasil(this,'word')" data-format="word">📄 Word</button>
         <button class="type-pill" onclick="pilihFormatHasil(this,'pdf')" data-format="pdf">📕 PDF</button>
         <button class="type-pill" onclick="pilihFormatHasil(this,'excel')" data-format="excel">📊 Excel</button>
+        <button class="type-pill" onclick="pilihFormatHasil(this,'teks')" data-format="teks">📝 Teks</button>
       </div>
-      <div id="formatHasilNote" style="font-size:11px;color:var(--gray-400);margin-top:4px;">File Word akan dibuat rapi lengkap dengan bab bold-tengah, sampul, dan spasi sesuai pengaturan.</div>
+      <div id="formatHasilNote" style="font-size:11px;color:var(--gray-400);margin-top:4px;">Setelah AI selesai menulis, file Word langsung siap diunduh — rapi lengkap dengan bab bold-tengah, sampul, dan spasi sesuai pengaturan.</div>
     </div>
 
     <div class="info-banner" style="margin-top:14px;">
@@ -593,7 +594,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
         <strong>Penting:</strong> AI dapat membuat kutipan/referensi yang terlihat meyakinkan tapi sebenarnya tidak nyata (halusinasi). Selalu verifikasi setiap sumber di Google Scholar/perpustakaan sebelum dipakai di skripsi aslimu.
       </div>
 
-      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+      <div id="downloadReadyCard" style="margin-top:14px;"></div>
+      <div style="gap:8px;margin-top:10px;flex-wrap:wrap;display:none;" id="downloadFormatButtons">
         <button class="hasil-action-btn" id="btnDownloadWord" onclick="downloadHasil('word')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3M12 15l-4-4M12 15l4-4"/><path d="M20 21H4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2z"/></svg>
           Unduh Word
@@ -606,10 +608,13 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
           Unduh Excel
         </button>
-        <button class="hasil-action-btn" onclick="downloadHasil('txt')">
+        <button class="hasil-action-btn" id="btnDownloadTxt" onclick="downloadHasil('txt')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
           Unduh TXT
         </button>
+      </div>
+      <div id="downloadFormatToggle" style="margin-top:6px;">
+        <a href="#" onclick="toggleFormatLain(event)" style="font-size:11px;color:var(--gray-400);text-decoration:underline;">Mau format lain?</a>
       </div>
 
 
@@ -865,20 +870,91 @@ function pilihModeOutline(mode){
   document.getElementById('outlineSendiriWrap').style.display = mode==='sendiri' ? 'block' : 'none';
 }
 
-function highlightFormatButton(){
-  const map = { word:'btnDownloadWord', pdf:'btnDownloadPdf', excel:'btnDownloadExcel' };
-  ['btnDownloadWord','btnDownloadPdf','btnDownloadExcel'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el){ el.style.background=''; el.style.color=''; el.style.borderColor=''; }
-  });
-  const targetId = map[formatHasilTerpilih];
-  const target = targetId && document.getElementById(targetId);
-  if(target){
-    target.style.background = 'var(--blue)';
-    target.style.color = '#fff';
-    target.style.borderColor = 'var(--blue)';
-  }
+function fmtBytes(n){
+  if(n < 1024) return n + ' B';
+  if(n < 1024*1024) return (n/1024).toFixed(0) + ' KB';
+  return (n/1024/1024).toFixed(1) + ' MB';
 }
+
+function fileCardHtml({href, download, icon, iconBg, title, subtitle, isButton, onclick}){
+  const tag = isButton ? 'button' : 'a';
+  const attrs = isButton
+    ? `onclick="${onclick}"`
+    : `href="${href}" download="${download}"`;
+  return `<${tag} ${attrs} style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid var(--gray-200);border-radius:12px;padding:12px 14px;cursor:pointer;text-decoration:none;">
+    <div style="width:38px;height:38px;flex-shrink:0;border-radius:9px;background:${iconBg};display:flex;align-items:center;justify-content:center;font-size:18px;">${icon}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:13px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${title}</div>
+      <div style="font-size:11px;color:var(--gray-400);">${subtitle}</div>
+    </div>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" style="flex-shrink:0;"><path d="M12 15V3M12 15l-4-4M12 15l4-4"/><path d="M20 21H4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2z"/></svg>
+  </${tag}>`;
+}
+
+async function renderDownloadCard(){
+  const card = document.getElementById('downloadReadyCard');
+  const toggle = document.getElementById('downloadFormatToggle');
+  if(!card) return;
+  card.innerHTML = '';
+
+  if(formatHasilTerpilih === 'teks'){
+    // Preview di atas SUDAH jadi hasil akhirnya — tidak perlu file terpisah
+    if(toggle) toggle.style.display = '';
+    return;
+  }
+
+  if(formatHasilTerpilih === 'pdf'){
+    card.innerHTML = fileCardHtml({
+      isButton: true,
+      onclick: "downloadHasil('pdf')",
+      icon: '📕', iconBg: '#FEE2E2',
+      title: 'Cetak / Simpan sebagai PDF',
+      subtitle: 'Pilih "Save as PDF" di dialog cetak yang muncul'
+    });
+    if(toggle) toggle.style.display = '';
+    return;
+  }
+
+  card.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;color:var(--gray-400);font-size:12px;"><div class="loading-spinner" style="width:16px;height:16px;border-width:2px;"></div>Menyiapkan file ${formatHasilTerpilih==='word'?'Word':'Excel'}...</div>`;
+  try {
+    const { blob, filename } = await buildFileBlob(formatHasilTerpilih);
+    const url = URL.createObjectURL(blob);
+    if(formatHasilTerpilih === 'word'){
+      card.innerHTML = fileCardHtml({
+        href: url, download: filename,
+        icon: '📄', iconBg: '#DBEAFE',
+        title: filename,
+        subtitle: `Word · ${fmtBytes(blob.size)} · Siap diunduh`
+      });
+    } else {
+      card.innerHTML = fileCardHtml({
+        href: url, download: filename,
+        icon: '📊', iconBg: '#DCFCE7',
+        title: filename,
+        subtitle: `Excel · ${fmtBytes(blob.size)} · Siap diunduh`
+      });
+    }
+  } catch(e){
+    console.error('Gagal menyiapkan file:', e);
+    card.innerHTML = fileCardHtml({
+      isButton: true,
+      onclick: `downloadHasil('${formatHasilTerpilih}')`,
+      icon: '⚠️', iconBg: '#FEF3C7',
+      title: 'Coba unduh manual',
+      subtitle: 'Penyiapan otomatis gagal, klik untuk coba lagi'
+    });
+  }
+  if(toggle) toggle.style.display = '';
+}
+
+function toggleFormatLain(e){
+  e.preventDefault();
+  const row = document.getElementById('downloadFormatButtons');
+  if(row) row.style.display = 'flex';
+  const toggle = document.getElementById('downloadFormatToggle');
+  if(toggle) toggle.style.display = 'none';
+}
+
 
 function setStep(n){
   for(let i=1;i<=3;i++){
@@ -913,6 +989,12 @@ async function generateSkripsi() {
   document.getElementById('loadingState').style.display = 'flex';
   document.getElementById('hasilContent').style.display = 'none';
   document.getElementById('hasilLabel').textContent = `Hasil: ${jenisDokumen}`;
+  const oldCard = document.getElementById('downloadReadyCard');
+  if(oldCard) oldCard.innerHTML = '';
+  const oldToggle = document.getElementById('downloadFormatToggle');
+  if(oldToggle) oldToggle.style.display = 'none';
+  const oldRow = document.getElementById('downloadFormatButtons');
+  if(oldRow) oldRow.style.display = 'none';
   setStep(2);
 
   // Scroll ke bawah
@@ -980,11 +1062,13 @@ TARGET PANJANG: ${targetKata.toLocaleString('id-ID')} kata (\u00b1${halaman} hal
 
 ATURAN KETAT HALAMAN:
 - SEMUA sub-bab WAJIB ada dan LENGKAP \u2014 jangan hilangkan satu pun sub-bab
-- Sesuaikan KEDALAMAN teks agar total mendekati ${halaman} halaman
+- Sesuaikan KEDALAMAN teks agar total mendekati ${halaman} halaman, TAPI ini batas MAKSIMAL, bukan target yang harus dipaksakan \u2014 DAFTAR PUSTAKA yang lengkap dan utuh lebih penting daripada mengejar jumlah kata persis
 - ${isMaksimum ? 'Kembangkan semaksimal mungkin \u2014 ini batas maksimum paket pengguna' : `Karena target hanya ${halaman} halaman, tulis setiap sub-bab RINGKAS namun substantif \u2014 targetkan \u00b1${kataPerSubBab} kata per sub-bab`}
+- WAJIB SISAKAN RUANG untuk DAFTAR PUSTAKA lengkap: sebelum menulis, perkirakan berapa banyak sumber (Nama, Tahun) yang akan kamu kutip di sepanjang bab ini, lalu sisakan sekitar 25\u201340 kata per entri pustaka dari total target kata. Jika ruang mulai menipis saat menulis, PERSINGKAT narasi/sub-bab yang belum ditulis \u2014 JANGAN memotong atau memperpendek DAFTAR PUSTAKA
+- Setiap entri yang disebut di badan teks WAJIB muncul utuh (nama, tahun, judul, penerbit/jurnal lengkap) di DAFTAR PUSTAKA \u2014 tidak boleh berhenti di tengah entri atau di tengah kalimat
 ${jenisDokumen==='BAB 1' ? `\nKHUSUS LATAR BELAKANG: tulis DEDUKTIF dan LINEAR \u2014 dari konteks umum/global, menyempit ke spesifik, lalu ke research gap yang mengarah ke rumusan masalah.` : ''}
 WAJIB: Kutipan (Nama, Tahun) untuk setiap klaim/data/teori. Prioritaskan sumber ${new Date().getFullYear()-5}-${new Date().getFullYear()}.
-WAJIB: Akhiri dengan bagian DAFTAR PUSTAKA (huruf kapital) berisi semua sumber, format APA edisi ke-7, urut abjad.
+WAJIB: Akhiri dengan bagian DAFTAR PUSTAKA (huruf kapital) berisi semua sumber, format APA edisi ke-7, urut abjad, dan pastikan ini adalah bagian TERAKHIR yang selesai ditulis secara utuh sebelum jawabanmu berakhir.
 Tulis dalam Bahasa Indonesia formal dan akademis. Jangan gunakan format markdown atau tanda pagar.`;
   }
 
@@ -1019,7 +1103,7 @@ ATURAN PENULISAN PENTING:
       hasilEl.innerHTML = renderHasilHTML(result); // render rapi bergaya akademik
       document.getElementById('hasilContent').style.display = 'block';
       setStep(3);
-      highlightFormatButton();
+      await renderDownloadCard();
 
       // Simpan untuk keperluan lanjut
       localStorage.setItem('skripsi_hasil', result);
@@ -1308,9 +1392,10 @@ function pilihFormatHasil(btn, format){
   btn.classList.add('active');
   formatHasilTerpilih = format;
   const note = document.getElementById('formatHasilNote');
-  if(format==='word') note.textContent = 'File Word akan dibuat rapi lengkap dengan bab bold-tengah, sampul, dan spasi sesuai pengaturan.';
-  else if(format==='pdf') note.textContent = 'File PDF dibuat lewat print browser — pastikan pilih "Save as PDF" saat muncul dialog cetak.';
-  else note.textContent = 'Excel paling cocok untuk BAB 4 (ada tabel data). Untuk BAB berisi teks/narasi, isi akan diekspor per-paragraf ke satu kolom.';
+  if(format==='word') note.textContent = 'Setelah AI selesai, langsung muncul link file Word siap-unduh — rapi lengkap dengan bab bold-tengah, sampul, dan spasi sesuai pengaturan.';
+  else if(format==='pdf') note.textContent = 'Setelah AI selesai, tombol "Cetak PDF" langsung tampil — pastikan pilih "Save as PDF" saat muncul dialog cetak.';
+  else if(format==='excel') note.textContent = 'Setelah AI selesai, langsung muncul link file Excel siap-unduh — paling cocok untuk BAB 4 (ada tabel data). Untuk BAB narasi, isi diekspor per-paragraf ke satu kolom.';
+  else note.textContent = 'Hasil ditampilkan sebagai teks yang bisa langsung dibaca di halaman ini — tidak ada file yang perlu diunduh.';
 }
 
 // Parse blok [TABEL]...[/TABEL] di dalam teks AI menjadi data tabel terstruktur,
@@ -1398,24 +1483,22 @@ function buildCoverHtmlSkripsi(judul, jenis, bidang, penulis){
   </div>`;
 }
 
-async function downloadHasil(type) {
+// Bangun blob file (word/excel/txt) TANPA trigger download — dipakai untuk kartu link siap-unduh
+async function buildFileBlob(type) {
   const hasilEl = document.getElementById('hasilText');
   const text = hasilEl.dataset.rawText || hasilEl.innerText;
-  if (!text) { showToast('Belum ada hasil untuk diunduh'); return; }
+  if (!text) throw new Error('Belum ada hasil untuk diunduh');
   const judul = document.getElementById('judulSkripsi').value.trim() || 'Skripsi';
   const jenis = document.querySelector('#jenisPenelitianPills .type-pill.active')?.textContent.trim() || '';
   const bidang = document.getElementById('bidang').value;
   const penulis = document.getElementById('namaPenulisSkripsi').value.trim();
   const spasi = document.getElementById('spasiBaris').value;
   const jenisDokumen = document.getElementById('jenisDokumen').value;
-  const filename = judul.substring(0, 40).replace(/[^a-z0-9]+/gi, '_');
+  const filenameBase = judul.substring(0, 40).replace(/[^a-z0-9]+/gi, '_');
   const includeCover = ['BAB 1','BAB 2','BAB 3','BAB 4','BAB 5','outline'].includes(jenisDokumen);
 
   if (type === 'excel') {
-    if (typeof XLSX === 'undefined') {
-      showToast('Modul Excel belum siap, coba lagi sebentar.');
-      return;
-    }
+    if (typeof XLSX === 'undefined') throw new Error('Modul Excel belum siap');
     const { tables } = extractTabelBlocks(text);
     const wb = XLSX.utils.book_new();
     if (tables.length) {
@@ -1423,35 +1506,23 @@ async function downloadHasil(type) {
         const ws = XLSX.utils.aoa_to_sheet(t.rows);
         XLSX.utils.book_append_sheet(wb, ws, (t.judul || `Tabel ${i+1}`).substring(0,28).replace(/[\\\/\?\*\[\]:]/g,''));
       });
-      showToast('File Excel (tabel data) berhasil diunduh!');
     } else {
-      // Tidak ada tabel di konten ini (mis. BAB narasi) — fallback: 1 paragraf per baris, beri catatan jujur
       const rows = text.split(/\n{2,}/).filter(Boolean).map(p => [p]);
       const ws = XLSX.utils.aoa_to_sheet([['Catatan: dokumen ini berupa narasi, bukan data tabel — setiap baris = 1 paragraf'], [''], ...rows]);
       XLSX.utils.book_append_sheet(wb, ws, 'Isi');
-      showToast('Konten ini teks narasi, bukan tabel — diekspor per-paragraf.');
     }
-    XLSX.writeFile(wb, filename + '.xlsx');
-    return;
+    const wbBlob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    return { blob: wbBlob, filename: filenameBase + '.xlsx' };
   }
 
   if (type === 'word') {
     if (typeof docx !== 'undefined') {
       try {
         const blob = await buildSkripsiDocxBlob(text, judul, jenis, bidang, penulis, spasi, includeCover);
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = filename + '.docx';
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        showToast('File Word (.docx) berhasil diunduh!');
-        return;
+        return { blob, filename: filenameBase + '.docx' };
       } catch (e) {
         console.error('docx build error, falling back to HTML export:', e);
-        showToast('Format lengkap gagal, mengunduh versi sederhana...');
       }
-    } else {
-      showToast('Modul Word belum siap, mengunduh versi sederhana...');
     }
     // Fallback: HTML-trick .doc (styling lebih terbatas, tapi tetap bisa dibuka di Word)
     const bodyHtml = (includeCover ? buildCoverHtmlSkripsi(judul, jenis, bidang, penulis) + '<hr style="margin:22px 0;border:none;border-top:1px dashed #ccc;">' : '') + formatSkripsiBody(text);
@@ -1459,17 +1530,31 @@ async function downloadHasil(type) {
     <head><meta charset='utf-8'><title>${judul}</title></head>
     <body style="font-family:'Times New Roman';font-size:12pt;line-height:1.8;">${bodyHtml}</body></html>`;
     const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename + '.doc';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    return;
+    return { blob, filename: filenameBase + '.doc' };
   }
 
-  const bodyHtml = (includeCover ? buildCoverHtmlSkripsi(judul, jenis, bidang, penulis) + '<div style="page-break-after:always;"></div>' : '') + formatSkripsiBody(text);
+  if (type === 'txt') {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    return { blob, filename: filenameBase + '.txt' };
+  }
+
+  throw new Error('Tipe file tidak dikenal: ' + type);
+}
+
+async function downloadHasil(type) {
+  const hasilEl = document.getElementById('hasilText');
+  const text = hasilEl.dataset.rawText || hasilEl.innerText;
+  if (!text) { showToast('Belum ada hasil untuk diunduh'); return; }
 
   if (type === 'pdf') {
+    const judul = document.getElementById('judulSkripsi').value.trim() || 'Skripsi';
+    const spasi = document.getElementById('spasiBaris').value;
+    const jenisDokumen = document.getElementById('jenisDokumen').value;
+    const jenis = document.querySelector('#jenisPenelitianPills .type-pill.active')?.textContent.trim() || '';
+    const bidang = document.getElementById('bidang').value;
+    const penulis = document.getElementById('namaPenulisSkripsi').value.trim();
+    const includeCover = ['BAB 1','BAB 2','BAB 3','BAB 4','BAB 5','outline'].includes(jenisDokumen);
+    const bodyHtml = (includeCover ? buildCoverHtmlSkripsi(judul, jenis, bidang, penulis) + '<div style="page-break-after:always;"></div>' : '') + formatSkripsiBody(text);
     const lineHeightCss = {'1':'1.0','1.15':'1.15','1.5':'1.5','2':'2.0'}[spasi] || '1.5';
     const win = window.open('', '_blank');
     win.document.write(`<html><head><title>${judul}</title><meta charset="utf-8"><style>
@@ -1478,14 +1563,20 @@ async function downloadHasil(type) {
     win.document.close();
     win.focus();
     setTimeout(() => win.print(), 400);
-  } else {
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    return;
+  }
+
+  try {
+    const { blob, filename } = await buildFileBlob(type);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = filename + '.txt';
+    a.href = url; a.download = filename;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast('File TXT berhasil diunduh!');
+    showToast(`File ${filename} berhasil diunduh!`);
+  } catch (e) {
+    console.error('Gagal membangun file:', e);
+    showToast('Gagal menyiapkan file: ' + e.message);
   }
 }
 
