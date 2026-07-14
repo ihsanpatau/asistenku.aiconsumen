@@ -3,269 +3,350 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#1A3DC2">
+<meta name="theme-color" content="#0a1128">
 <title>Beranda – asistenku.pro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
-/* Hero banner home */
-.home-hero {
-margin: 16px 16px 0;
-background: linear-gradient(135deg,#EEF2FF 0%,#C7D5FF 100%);
-border-radius: 22px;
-padding: 20px 20px 0;
-position: relative;
-overflow: hidden;
-min-height: 175px;
+/* ── Global dark background ── */
+body, .app {
+  background: linear-gradient(160deg, #0a1128 0%, #0f1d4a 40%, #1a2d6e 70%, #1e3a8a 100%) !important;
+  min-height: 100vh;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
-.home-hero-text {}
-.home-hero-label { font-size: 12px; font-weight: 700; color: #3B5BFF; margin-bottom: 4px; }
+.page-body { background: transparent !important; }
+
+/* ── Top Nav ── */
+.topnav {
+  background: rgba(10,17,40,0.85) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+  backdrop-filter: blur(12px);
+}
+.logo { color: #fff !important; }
+.logo-pro {
+  background: #3B5BFF;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 5px;
+  margin-left: 1px;
+}
+.icon-btn { color: rgba(255,255,255,0.7) !important; background: rgba(255,255,255,0.08) !important; }
+.user-chip {
+  background: rgba(255,255,255,0.08) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  color: #fff !important;
+}
+.user-chip-name { color: #fff !important; }
+.chevron { stroke: rgba(255,255,255,0.5) !important; }
+
+/* ── Hero Banner ── */
+.home-hero {
+  margin: 16px 16px 0;
+  background: linear-gradient(135deg, #0f1f5c 0%, #1a3dc2 60%, #3b5bff 100%);
+  border-radius: 22px;
+  padding: 20px 16px 0;
+  position: relative;
+  overflow: hidden;
+  min-height: 175px;
+  box-shadow: 0 8px 32px rgba(59,91,255,0.30);
+}
+.home-hero::before {
+  content: '';
+  position: absolute;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(255,183,3,.22), transparent 70%);
+  top: -50px; right: 60px;
+  border-radius: 50%;
+}
+.home-hero::after {
+  content: '';
+  position: absolute;
+  width: 90px; height: 90px;
+  background: radial-gradient(circle, rgba(91,127,255,.45), transparent 70%);
+  bottom: -20px; left: 20px;
+  border-radius: 50%;
+}
+.home-hero-label { font-size: 12px; font-weight: 700; color: #93c5fd; margin-bottom: 4px; }
 .home-hero-title {
-font-size: 24px; font-weight: 800; color: #1A3DC2; line-height: 1.1;
-display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+  font-size: 24px; font-weight: 800; color: #fff; line-height: 1.1;
+  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
 }
 .home-hero-title .pro-pill {
-background: #3B5BFF; color: #fff;
-font-size: 14px; font-weight: 700;
-padding: 2px 8px; border-radius: 6px;
+  background: rgba(255,255,255,0.20);
+  color: #fff;
+  font-size: 14px; font-weight: 700;
+  padding: 2px 8px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.25);
 }
-.home-hero-sub { font-size: 12px; color: #6B7280; margin-top: 6px; line-height: 1.4; }
+.home-hero-sub { font-size: 12px; color: rgba(255,255,255,.72); margin-top: 6px; line-height: 1.4; }
 .home-hero-quote {
-background: rgba(255,255,255,.75);
-border-left: 3px solid #3B5BFF;
-border-radius: 8px; padding: 8px 12px;
-font-size: 12px; font-style: italic; font-weight: 500;
-color: #1A3DC2; margin-top: 10px;
+  background: rgba(255,255,255,.10);
+  border-left: 3px solid rgba(255,255,255,0.5);
+  border-radius: 8px; padding: 8px 12px;
+  font-size: 12px; font-style: italic; font-weight: 500;
+  color: rgba(255,255,255,.88); margin-top: 10px;
+  backdrop-filter: blur(4px);
 }
-.home-hero-mascot {
-position: absolute; right: -14px; bottom: 0; width: 215px;
-}
+.home-hero-mascot { position: absolute; right: -14px; bottom: 0; width: 215px; z-index: 2; }
 
-/* Menu 3 cards */
+/* ── Stats Row ── */
+.stats-row {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(6px);
+}
+.stat-val { color: #fff !important; }
+.stat-lbl { color: rgba(255,255,255,0.5) !important; }
+.stat-icon { color: #60a5fa !important; }
+
+/* ── Section Headers ── */
+.sec-title { color: rgba(255,255,255,0.90) !important; }
+.sec-link { color: #60a5fa !important; }
+
+/* ── Menu 3 Cards ── */
 .menu3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; padding: 0 16px; }
 .menu3-card {
-background: #fff;
-border: 1px solid #E5E7EB;
-border-radius: 16px;
-overflow: hidden;
-cursor: pointer; text-decoration: none;
-display: flex; flex-direction: column;
-transition: box-shadow .2s, transform .1s;
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer; text-decoration: none;
+  display: flex; flex-direction: column;
+  transition: background .2s, transform .15s;
+  backdrop-filter: blur(6px);
 }
-.menu3-card:hover { box-shadow: 0 8px 24px rgba(27,61,194,.1); transform: translateY(-2px); }
-.menu3-card:active { transform: scale(.98); }
+.menu3-card:hover { background: rgba(255,255,255,0.10) !important; transform: translateY(-2px); }
+.menu3-card:active { transform: scale(.97); }
 .menu3-img { height: 86px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .menu3-body { padding: 9px; }
-.menu3-title { font-size: 11px; font-weight: 700; color: #111827; line-height: 1.2; }
-.menu3-desc { font-size: 9px; color: #6B7280; margin-top: 2px; line-height: 1.3; }
+.menu3-title { font-size: 11px; font-weight: 700; color: #fff !important; line-height: 1.2; }
+.menu3-desc { font-size: 9px; color: rgba(255,255,255,0.5) !important; margin-top: 2px; line-height: 1.3; }
 .menu3-cta { font-size: 10px; font-weight: 600; display: flex; align-items: center; gap: 2px; margin-top: 5px; }
 
-/* Upgrade banner */
-.upgrade-cta {
-margin: 12px 16px 0;
-background: linear-gradient(135deg,#EEF2FF,#C7D5FF);
-border: 1px solid #C7D5FF;
-border-radius: 14px;
-padding: 13px 15px;
-display: flex; align-items: center; gap: 10px;
+/* ── Quota Box ── */
+.quota-box {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  backdrop-filter: blur(6px);
 }
-.upgrade-cta-text { flex: 1; font-size: 12px; color: #1A3DC2; line-height: 1.4; }
-.upgrade-cta-text strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 1px; }
+.quota-heading { color: #fff !important; }
+.quota-label { color: rgba(255,255,255,0.6) !important; }
+.quota-val { color: rgba(255,255,255,0.8) !important; }
+.progress-track { background: rgba(255,255,255,0.10) !important; }
+#expiry { color: rgba(255,255,255,0.4) !important; }
+
+/* Plan badge */
+.plan-pill { background: rgba(59,91,255,0.30) !important; color: #93c5fd !important; border: 1px solid rgba(59,91,255,0.4) !important; }
+
+/* ── Upgrade Banner ── */
+.upgrade-cta {
+  margin: 12px 16px 0;
+  background: rgba(59,91,255,0.15) !important;
+  border: 1px solid rgba(59,91,255,0.35) !important;
+  border-radius: 14px;
+  padding: 13px 15px;
+  display: flex; align-items: center; gap: 10px;
+  backdrop-filter: blur(6px);
+}
+.upgrade-cta-text { flex: 1; font-size: 12px; color: #93c5fd !important; line-height: 1.4; }
+.upgrade-cta-text strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 1px; color: #bfdbfe !important; }
+
+/* ── Bottom Nav ── */
+.bottom-nav {
+  background: rgba(10,17,40,0.92) !important;
+  border-top: 1px solid rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(12px);
+}
+.nav-item { color: rgba(255,255,255,0.40) !important; }
+.nav-item.active { color: #60a5fa !important; }
+.nav-label { color: inherit !important; }
+.notif-dot { background: #f87171 !important; }
 </style>
 </head>
 <body>
 <div class="app">
+
 <!-- Top Nav -->
 <header class="topnav">
-<a href="beranda.html" class="logo">asistenku<span class="logo-pro">.pro</span></a>
-<div class="topnav-right">
-<button class="icon-btn" onclick="toast('Tidak ada notifikasi baru')" aria-label="Notifikasi">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-<span class="notif-dot"></span>
-</button>
-<div class="user-chip" onclick="location.href='profil.html'">
-<div class="user-chip-avatar" id="ua">A</div>
-<span class="user-chip-name" id="un">Halo, Andi</span>
-<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-</div>
-</div>
+  <a href="beranda.html" class="logo">asistenku<span class="logo-pro">.pro</span></a>
+  <div class="topnav-right">
+    <button class="icon-btn" onclick="toast('Tidak ada notifikasi baru')" aria-label="Notifikasi">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-dot"></span>
+    </button>
+    <div class="user-chip" onclick="location.href='profil.html'">
+      <div class="user-chip-avatar" id="ua">A</div>
+      <span class="user-chip-name" id="un">Halo, Andi</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+  </div>
 </header>
 
 <div class="page-body">
 
 <!-- Hero Banner -->
 <div class="home-hero">
-<div class="home-hero-text" style="max-width:195px;">
-<div class="home-hero-label">Selamat datang di</div>
-<div class="home-hero-title">
-asistenku<span class="pro-pill">.pro</span>
-</div>
-<p class="home-hero-sub">Asisten AI pintar untuk membantu tugas akademik dan profesionalmu.</p>
-<div class="home-hero-quote">"Kerjakan lebih cepat, lebih mudah, dan hasil lebih berkualitas."</div>
-</div>
-
-<!-- Mascot -->
-<div class="home-hero-mascot">
-<img src="mascot-logo.png" alt="Maskot asistenku.pro" style="width:100%;max-width:215px;display:block;margin:0 auto;">
-</div>
+  <div class="home-hero-text" style="max-width:195px;position:relative;z-index:2;">
+    <div class="home-hero-label">Selamat datang di</div>
+    <div class="home-hero-title">asistenku<span class="pro-pill">.pro</span></div>
+    <p class="home-hero-sub">Asisten AI pintar untuk membantu tugas akademik dan profesionalmu.</p>
+    <div class="home-hero-quote">"Kerjakan lebih cepat, lebih mudah, dan hasil lebih berkualitas."</div>
+  </div>
+  <div class="home-hero-mascot">
+    <img src="mascot-logo.png" alt="Maskot asistenku.pro" style="width:100%;max-width:215px;display:block;margin:0 auto;">
+  </div>
 </div>
 
 <!-- Stats Row -->
 <div class="stats-row">
-<div class="stat-item">
-<div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-<div class="stat-val">12.450+</div>
-<div class="stat-lbl">Pengguna Aktif</div>
-</div>
-<div class="stat-item">
-<div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-<div class="stat-val">245.800+</div>
-<div class="stat-lbl">Dokumen Dibuat</div>
-</div>
-<div class="stat-item">
-<div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-<div class="stat-val">99.9%</div>
-<div class="stat-lbl">Aman &amp; Terpercaya</div>
-</div>
-<div class="stat-item">
-<div class="stat-icon" style="color:#F59E0B;"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-<div class="stat-val">4.9/5</div>
-<div class="stat-lbl">Rating Pengguna</div>
-</div>
+  <div class="stat-item">
+    <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+    <div class="stat-val">12.450+</div>
+    <div class="stat-lbl">Pengguna Aktif</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+    <div class="stat-val">245.800+</div>
+    <div class="stat-lbl">Dokumen Dibuat</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <div class="stat-val">99.9%</div>
+    <div class="stat-lbl">Aman &amp; Terpercaya</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-icon" style="color:#F59E0B;"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+    <div class="stat-val">4.9/5</div>
+    <div class="stat-lbl">Rating Pengguna</div>
+  </div>
 </div>
 
 <!-- 3 Menu Utama -->
 <div class="sec-header">
-<span class="sec-title">3 Menu Utama</span>
-<a href="mahasiswa.html" class="sec-link">Lihat Semua</a>
+  <span class="sec-title">3 Menu Utama</span>
+  <a href="mahasiswa.html" class="sec-link">Lihat Semua</a>
 </div>
 <div class="menu3">
-<!-- Mahasiswa -->
-<a href="mahasiswa.html" class="menu3-card">
-<div class="menu3-img" style="background:linear-gradient(135deg,#1A2B6D 0%,#3B5BFF 55%,#5B7FFF 100%);position:relative;overflow:hidden;">
-<div style="position:absolute;width:70px;height:70px;background:radial-gradient(circle,rgba(255,183,3,.35),transparent 70%);top:-16px;right:-16px;border-radius:50%;"></div>
-<div style="position:absolute;width:50px;height:50px;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%);bottom:-10px;left:-10px;border-radius:50%;"></div>
-<img src="cat-main.png" alt="Mahasiswa & Siswa" style="width:74px;height:74px;object-fit:contain;position:relative;z-index:1;">
-</div>
-<div class="menu3-body">
-<div class="menu3-title">Mahasiswa &amp; Siswa</div>
-<div class="menu3-desc">Fitur akademik terstruktur untuk skripsi, jurnal, makalah.</div>
-<div class="menu3-cta" style="color:#3B5BFF;">Buka Menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><path d="m9 18 6-6-6-6"/></svg></div>
-</div>
-</a>
+  <!-- Mahasiswa -->
+  <a href="mahasiswa.html" class="menu3-card">
+    <div class="menu3-img" style="background:linear-gradient(135deg,#1A2B6D 0%,#3B5BFF 55%,#5B7FFF 100%);position:relative;overflow:hidden;">
+      <div style="position:absolute;width:70px;height:70px;background:radial-gradient(circle,rgba(255,183,3,.35),transparent 70%);top:-16px;right:-16px;border-radius:50%;"></div>
+      <img src="cat-main.png" alt="Mahasiswa & Siswa" style="width:74px;height:74px;object-fit:contain;position:relative;z-index:1;">
+    </div>
+    <div class="menu3-body">
+      <div class="menu3-title">Mahasiswa &amp; Siswa</div>
+      <div class="menu3-desc">Fitur akademik terstruktur untuk skripsi, jurnal, makalah.</div>
+      <div class="menu3-cta" style="color:#60a5fa;">Buka Menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><path d="m9 18 6-6-6-6"/></svg></div>
+    </div>
+  </a>
 
-<!-- Tugas -->
-<a href="tugas.html" class="menu3-card">
-<div class="menu3-img" style="background:linear-gradient(135deg,#ECFDF5,#A7F3D0);">
-<svg viewBox="0 0 120 120" width="80" height="80" fill="none">
-<ellipse cx="60" cy="102" rx="34" ry="18" fill="#16A34A" opacity=".4"/>
-<!-- Laptop -->
-<rect x="20" y="60" width="80" height="52" rx="5" fill="#374151"/>
-<rect x="24" y="64" width="72" height="42" rx="3" fill="#10B981" opacity=".85"/>
-<rect x="28" y="68" width="30" height="5" rx="2" fill="rgba(255,255,255,.25)"/>
-<rect x="28" y="76" width="24" height="3" rx="1.5" fill="rgba(255,255,255,.15)"/>
-<rect x="8" y="112" width="104" height="8" rx="4" fill="#374151"/>
-<!-- Cat head -->
-<ellipse cx="60" cy="47" rx="24" ry="22" fill="#F5F5F5"/>
-<polygon points="43,30 34,14 50,26" fill="#F5F5F5"/>
-<polygon points="77,30 86,14 70,26" fill="#F5F5F5"/>
-<ellipse cx="52" cy="47" rx="6" ry="7" fill="#1A90FF"/>
-<ellipse cx="68" cy="47" rx="6" ry="7" fill="#1A90FF"/>
-<ellipse cx="52" cy="48" rx="3.5" ry="4.5" fill="#0A2060"/>
-<ellipse cx="68" cy="48" rx="3.5" ry="4.5" fill="#0A2060"/>
-<ellipse cx="50.5" cy="45.5" rx="1.5" ry="1.5" fill="white"/>
-<ellipse cx="66.5" cy="45.5" rx="1.5" ry="1.5" fill="white"/>
-<text x="60" y="68" text-anchor="middle" fill="#10B981" font-family="sans-serif" font-size="8" font-weight="800">a</text>
-<!-- Briefcase -->
-<rect x="80" y="75" width="26" height="20" rx="4" fill="#92400E"/>
-<rect x="86" y="70" width="14" height="8" rx="3" fill="#B45309"/>
-<circle cx="93" cy="85" r="3.5" fill="#D97706"/>
-</svg>
-</div>
-<div class="menu3-body">
-<div class="menu3-title">Tugas &amp; Project</div>
-<div class="menu3-desc">Satu halaman serba-bisa untuk tugas apapun.</div>
-<div class="menu3-cta" style="color:#16A34A;">Buka Menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><path d="m9 18 6-6-6-6"/></svg></div>
-</div>
-</a>
+  <!-- Tugas -->
+  <a href="tugas.html" class="menu3-card">
+    <div class="menu3-img" style="background:linear-gradient(135deg,#052e16,#14532d);">
+      <svg viewBox="0 0 120 120" width="80" height="80" fill="none">
+        <ellipse cx="60" cy="102" rx="34" ry="18" fill="#16A34A" opacity=".4"/>
+        <rect x="20" y="60" width="80" height="52" rx="5" fill="#374151"/>
+        <rect x="24" y="64" width="72" height="42" rx="3" fill="#10B981" opacity=".85"/>
+        <rect x="28" y="68" width="30" height="5" rx="2" fill="rgba(255,255,255,.25)"/>
+        <rect x="28" y="76" width="24" height="3" rx="1.5" fill="rgba(255,255,255,.15)"/>
+        <rect x="8" y="112" width="104" height="8" rx="4" fill="#374151"/>
+        <ellipse cx="60" cy="47" rx="24" ry="22" fill="#F5F5F5"/>
+        <polygon points="43,30 34,14 50,26" fill="#F5F5F5"/>
+        <polygon points="77,30 86,14 70,26" fill="#F5F5F5"/>
+        <ellipse cx="52" cy="47" rx="6" ry="7" fill="#1A90FF"/>
+        <ellipse cx="68" cy="47" rx="6" ry="7" fill="#1A90FF"/>
+        <ellipse cx="52" cy="48" rx="3.5" ry="4.5" fill="#0A2060"/>
+        <ellipse cx="68" cy="48" rx="3.5" ry="4.5" fill="#0A2060"/>
+        <ellipse cx="50.5" cy="45.5" rx="1.5" ry="1.5" fill="white"/>
+        <ellipse cx="66.5" cy="45.5" rx="1.5" ry="1.5" fill="white"/>
+        <text x="60" y="68" text-anchor="middle" fill="#10B981" font-family="sans-serif" font-size="8" font-weight="800">a</text>
+        <rect x="80" y="75" width="26" height="20" rx="4" fill="#92400E"/>
+        <rect x="86" y="70" width="14" height="8" rx="3" fill="#B45309"/>
+        <circle cx="93" cy="85" r="3.5" fill="#D97706"/>
+      </svg>
+    </div>
+    <div class="menu3-body">
+      <div class="menu3-title">Tugas &amp; Project</div>
+      <div class="menu3-desc">Satu halaman serba-bisa untuk tugas apapun.</div>
+      <div class="menu3-cta" style="color:#34d399;">Buka Menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><path d="m9 18 6-6-6-6"/></svg></div>
+    </div>
+  </a>
 
-<!-- DoktrAI -->
-<a href="doktrai.html" class="menu3-card">
-<div class="menu3-img" style="background:linear-gradient(135deg,#F5F3FF,#DDD6FE);">
-<svg viewBox="0 0 120 120" width="80" height="80" fill="none">
-<ellipse cx="60" cy="104" rx="34" ry="18" fill="#7C3AED" opacity=".35"/>
-<!-- Coat -->
-<path d="M36 68 L28 104 L60 96 L92 104 L84 68" fill="white" stroke="#E5E7EB" stroke-width="1.2"/>
-<circle cx="60" cy="86" r="9" fill="#7C3AED"/>
-<text x="60" y="90" text-anchor="middle" fill="white" font-family="sans-serif" font-size="7" font-weight="800">AI</text>
-<!-- Cat head -->
-<ellipse cx="60" cy="48" rx="26" ry="25" fill="#F5F5F5"/>
-<polygon points="40,30 28,10 52,24" fill="#F5F5F5"/>
-<polygon points="80,30 92,10 68,24" fill="#F5F5F5"/>
-<ellipse cx="50" cy="48" rx="7" ry="7.5" fill="#1A90FF"/>
-<ellipse cx="70" cy="48" rx="7" ry="7.5" fill="#1A90FF"/>
-<ellipse cx="50" cy="49" rx="4" ry="4.5" fill="#0A2060"/>
-<ellipse cx="70" cy="49" rx="4" ry="4.5" fill="#0A2060"/>
-<ellipse cx="48" cy="46" rx="1.7" ry="1.7" fill="white"/>
-<ellipse cx="68" cy="46" rx="1.7" ry="1.7" fill="white"/>
-<!-- Stethoscope -->
-<path d="M70 30 Q80 22 86 30" stroke="#7C3AED" stroke-width="2" fill="none" stroke-linecap="round"/>
-<circle cx="86" cy="33" r="3.5" fill="#7C3AED"/>
-<path d="M86 36 Q86 50 74 50" stroke="#7C3AED" stroke-width="2" fill="none" stroke-linecap="round"/>
-<!-- Headset -->
-<rect x="22" y="60" width="8" height="12" rx="3" fill="#7C3AED"/>
-<rect x="90" y="60" width="8" height="12" rx="3" fill="#7C3AED"/>
-<path d="M22 62 Q60 44 98 62" stroke="#7C3AED" stroke-width="2" fill="none"/>
-</svg>
-</div>
-<div class="menu3-body">
-<div class="menu3-title">Konsultasi AI (DoktrAI)</div>
-<div class="menu3-desc">Chat AI bebas untuk semua topik.</div>
-<div class="menu3-cta" style="color:#7C3AED;">Buka Menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><path d="m9 18 6-6-6-6"/></svg></div>
-</div>
-</a>
+  <!-- DoktrAI -->
+  <a href="doktrai.html" class="menu3-card">
+    <div class="menu3-img" style="background:linear-gradient(135deg,#2e1065,#4c1d95);">
+      <svg viewBox="0 0 120 120" width="80" height="80" fill="none">
+        <ellipse cx="60" cy="104" rx="34" ry="18" fill="#7C3AED" opacity=".35"/>
+        <path d="M36 68 L28 104 L60 96 L92 104 L84 68" fill="white" stroke="#E5E7EB" stroke-width="1.2"/>
+        <circle cx="60" cy="86" r="9" fill="#7C3AED"/>
+        <text x="60" y="90" text-anchor="middle" fill="white" font-family="sans-serif" font-size="7" font-weight="800">AI</text>
+        <ellipse cx="60" cy="48" rx="26" ry="25" fill="#F5F5F5"/>
+        <polygon points="40,30 28,10 52,24" fill="#F5F5F5"/>
+        <polygon points="80,30 92,10 68,24" fill="#F5F5F5"/>
+        <ellipse cx="50" cy="48" rx="7" ry="7.5" fill="#1A90FF"/>
+        <ellipse cx="70" cy="48" rx="7" ry="7.5" fill="#1A90FF"/>
+        <ellipse cx="50" cy="49" rx="4" ry="4.5" fill="#0A2060"/>
+        <ellipse cx="70" cy="49" rx="4" ry="4.5" fill="#0A2060"/>
+        <ellipse cx="48" cy="46" rx="1.7" ry="1.7" fill="white"/>
+        <ellipse cx="68" cy="46" rx="1.7" ry="1.7" fill="white"/>
+        <path d="M70 30 Q80 22 86 30" stroke="#7C3AED" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <circle cx="86" cy="33" r="3.5" fill="#7C3AED"/>
+        <path d="M86 36 Q86 50 74 50" stroke="#7C3AED" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <rect x="22" y="60" width="8" height="12" rx="3" fill="#7C3AED"/>
+        <rect x="90" y="60" width="8" height="12" rx="3" fill="#7C3AED"/>
+        <path d="M22 62 Q60 44 98 62" stroke="#7C3AED" stroke-width="2" fill="none"/>
+      </svg>
+    </div>
+    <div class="menu3-body">
+      <div class="menu3-title">Konsultasi AI (DoktrAI)</div>
+      <div class="menu3-desc">Chat AI bebas untuk semua topik.</div>
+      <div class="menu3-cta" style="color:#a78bfa;">Buka Menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><path d="m9 18 6-6-6-6"/></svg></div>
+    </div>
+  </a>
 </div>
 
 <!-- Kuota Hari Ini -->
 <div class="sec-header">
-<span class="sec-title">Sisa Kuota Hari Ini</span>
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+  <span class="sec-title">Sisa Kuota Hari Ini</span>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
 </div>
 <div class="quota-box">
-<div class="quota-header">
-<div>
-<div class="quota-heading">Paket Anda</div>
-<div style="font-size:11px;color:#9CA3AF;margin-top:2px;" id="expiry">Berlaku hingga 20 Jul 2026</div>
-</div>
-<span class="plan-pill standar" id="planBadge">GRATIS</span>
-</div>
-<div class="quota-item">
-<div class="quota-label-row">
-<div class="quota-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Halaman Dokumen</div>
-<div class="quota-val" id="qDoc">0 / 5 halaman</div>
-</div>
-<div class="progress-track"><div class="progress-fill" id="pDoc" style="width:0%"></div></div>
-</div>
-<div class="quota-item">
-<div class="quota-label-row">
-<div class="quota-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat DoktrAI</div>
-<div class="quota-val" id="qChat">0 / 5 pesan</div>
-</div>
-<div class="progress-track"><div class="progress-fill" id="pChat" style="width:0%"></div></div>
-</div>
+  <div class="quota-header">
+    <div>
+      <div class="quota-heading">Paket Anda</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;" id="expiry">Berlaku hingga 20 Jul 2026</div>
+    </div>
+    <span class="plan-pill standar" id="planBadge">GRATIS</span>
+  </div>
+  <div class="quota-item">
+    <div class="quota-label-row">
+      <div class="quota-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Halaman Dokumen</div>
+      <div class="quota-val" id="qDoc">0 / 5 halaman</div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="pDoc" style="width:0%"></div></div>
+  </div>
+  <div class="quota-item">
+    <div class="quota-label-row">
+      <div class="quota-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat DoktrAI</div>
+      <div class="quota-val" id="qChat">0 / 5 pesan</div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="pChat" style="width:0%"></div></div>
+  </div>
 </div>
 
 <!-- Upgrade Banner -->
 <div class="upgrade-cta">
-<div style="font-size:22px;">🎁</div>
-<div class="upgrade-cta-text">
-<strong>Upgrade paket</strong>
-untuk mendapatkan lebih banyak halaman dan fitur premium lainnya!
-</div>
-<a href="upgrade.html" class="btn btn-primary btn-sm" style="white-space:nowrap;">
-Lihat Paket <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><path d="m9 18 6-6-6-6"/></svg>
-</a>
+  <div style="font-size:22px;">🎁</div>
+  <div class="upgrade-cta-text">
+    <strong>Upgrade paket</strong>
+    untuk mendapatkan lebih banyak halaman dan fitur premium lainnya!
+  </div>
+  <a href="upgrade.html" class="btn btn-primary btn-sm" style="white-space:nowrap;background:#3B5BFF;color:#fff;">
+    Lihat Paket <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><path d="m9 18 6-6-6-6"/></svg>
+  </a>
 </div>
 
 <div class="spacer-20"></div>
@@ -273,33 +354,32 @@ Lihat Paket <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-wi
 
 <!-- Bottom Nav -->
 <nav class="bottom-nav">
-<a href="beranda.html" class="nav-item active">
-<svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-<span class="nav-label">Beranda</span>
-</a>
-<a href="mahasiswa.html" class="nav-item">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6L23 9zm6.82 6L12 12.72 5.18 9 12 5.28zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>
-<span class="nav-label">Mahasiswa</span>
-</a>
-<a href="tugas.html" class="nav-item">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-<span class="nav-label">Tugas &amp; Project</span>
-</a>
-<a href="doktrai.html" class="nav-item">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-<span class="nav-label">DoktrAI</span>
-</a>
-<a href="profil.html" class="nav-item">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-<span class="nav-label">Profil</span>
-</a>
+  <a href="beranda.html" class="nav-item active">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    <span class="nav-label">Beranda</span>
+  </a>
+  <a href="mahasiswa.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6L23 9zm6.82 6L12 12.72 5.18 9 12 5.28zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>
+    <span class="nav-label">Mahasiswa</span>
+  </a>
+  <a href="tugas.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+    <span class="nav-label">Tugas &amp; Project</span>
+  </a>
+  <a href="doktrai.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span class="nav-label">DoktrAI</span>
+  </a>
+  <a href="profil.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span class="nav-label">Profil</span>
+  </a>
 </nav>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// === FIX: proses access_token asli dari Supabase setelah login ===
 (function(){
   if (location.hash && location.hash.includes('access_token')) {
     const params = new URLSearchParams(location.hash.substring(1));
@@ -319,10 +399,8 @@ Lihat Paket <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-wi
 
 function toast(msg,d=2500){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),d);}
 
-// Auth check
 if(!localStorage.getItem('ak_token')){location.href='login.html';}
 
-// Load user
 const user = JSON.parse(localStorage.getItem('ak_user')||'{}');
 const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Pengguna';
 const firstName = name.split(' ')[0];
