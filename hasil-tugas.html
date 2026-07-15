@@ -199,11 +199,25 @@ function buildChartSVG(spec){
         legend+=`<div style="display:flex;align-items:center;gap:4px;font-size:10px;"><span style="width:9px;height:9px;background:${colors[i%colors.length]};display:inline-block;border-radius:2px;"></span>${escSvgText(labels[i]||('Data '+(i+1)))} (${(frac*100).toFixed(1)}%)</div>`;
         angleStart=angleEnd;
       });
+      if(type==='donut'){
+        paths+=`<circle cx="${cx}" cy="${cy}" r="${(r*0.55).toFixed(1)}" fill="#fff"/>`;
+      }
       return `<div style="margin:14px 0;">${titleHtml}<svg viewBox="0 0 ${w} ${h}" style="width:100%;max-width:320px;display:block;margin:0 auto;">${paths}</svg><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:4px;">${legend}</div></div>`;
     }
 
     const allVals=datasets.flatMap(d=>(d.data||[]).map(Number).filter(v=>isFinite(v)));
-    const maxV=Math.max(1,...(allVals.length?allVals:[1]));
+    const rawMax=Math.max(1,...(allVals.length?allVals:[1]));
+    // Bulatkan ke angka "rapi" (mis. 90, 100, 50) seperti yang otomatis dilakukan Chart.js di Word,
+    // supaya skala sumbu-Y preview dan file Word terlihat konsisten (sebelumnya preview pakai
+    // angka mentah dari data seperti 89/66/44/22 yang terkesan beda dari 0/10/20/.../90 di Word).
+    function niceCeil(v){
+      const exp=Math.floor(Math.log10(v));
+      const base=Math.pow(10,exp);
+      const frac=v/base;
+      const niceFrac = frac<=1?1 : frac<=2?2 : frac<=5?5 : 10;
+      return niceFrac*base;
+    }
+    const maxV=niceCeil(rawMax);
     const plotW=w-pad.l-pad.r, plotH=h-pad.t-pad.b;
     const n=Math.max(labels.length, ...datasets.map(d=>(d.data||[]).length), 1);
     const groupW=plotW/n;
@@ -242,9 +256,10 @@ function buildChartSVG(spec){
     let xlabels='';
     labels.forEach((l,i)=>{
       const x=pad.l+groupW*(i+0.5);
-      xlabels+=`<text x="${x.toFixed(1)}" y="${h-pad.b+12}" font-size="8" fill="#374151" text-anchor="middle">${escSvgText(String(l).substring(0,10))}</text>`;
+      const labelText=String(l).length>16 ? String(l).substring(0,15)+'…' : String(l);
+      xlabels+=`<text x="${x.toFixed(1)}" y="${(h-pad.b+14).toFixed(1)}" font-size="8" fill="#374151" text-anchor="end" transform="rotate(-30 ${x.toFixed(1)} ${(h-pad.b+14).toFixed(1)})">${escSvgText(labelText)}</text>`;
     });
-    return `<div style="margin:14px 0;">${titleHtml}<svg viewBox="0 0 ${w} ${h}" style="width:100%;max-width:360px;display:block;margin:0 auto;background:#fff;">${grid}${shapes}${xlabels}</svg>${legend?`<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:2px;">${legend}</div>`:''}</div>`;
+    return `<div style="margin:14px 0;">${titleHtml}<svg viewBox="0 0 ${w} ${h+14}" style="width:100%;max-width:360px;display:block;margin:0 auto;background:#fff;">${grid}${shapes}${xlabels}</svg>${legend?`<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:2px;">${legend}</div>`:''}</div>`;
   }catch(e){
     return '<div style="font-size:11px;color:#B91C1C;">[Gagal menampilkan grafik: data tidak valid]</div>';
   }
@@ -283,6 +298,7 @@ function renderHasilHTML(rawText) {
   lines.forEach(raw=>{
     const trimmed=raw.trim();
     if(/^\|.+\|/.test(trimmed)){flushPara();flushBullets();flushNumbered();if(/^\|[\s\-:]+\|/.test(trimmed))return;inTable=true;tableRows.push(trimmed.replace(/^\||\|$/g,''));return;}
+    if(inTable&&!trimmed)return;
     if(inTable)flushTable();
     if(!trimmed){flushPara();flushBullets();flushNumbered();return;}
     const vblockM=trimmed.match(/^@@VBLOCK_(\d+)@@$/);
@@ -660,7 +676,7 @@ async function buildGenericDocxBlob(rawText, judulDok){
         return new TableRow({ children: cells.map(c=> new TableCell({
           width:{size:Math.floor(9000/Math.max(1,cells.length)), type:WidthType.DXA},
           shading: ri===0 ? {type:ShadingType.SOLID, color:'E5E7EB', fill:'E5E7EB'} : undefined,
-          children:[ new Paragraph({ alignment:AlignmentType.CENTER, children:[new TextRun({text:c, bold:ri===0})] }) ]
+          children:[ new Paragraph({ alignment:AlignmentType.CENTER, children: applyInlineRuns(c, ri===0?{bold:true}:{}) }) ]
         })) });
       });
       children.push(new Table({ width:{size:9000,type:WidthType.DXA}, rows }));
@@ -695,6 +711,9 @@ async function buildGenericDocxBlob(rawText, judulDok){
       inTable=true; tableRows.push(trimmed.replace(/^\||\|$/g,''));
       continue;
     }
+    // Baris kosong di tengah tabel (misal sebelum baris "Rata-rata" yang ditulis AI dengan
+    // spasi ekstra) JANGAN memutus tabel jadi dua — cukup dilewati saja.
+    if(inTable && !trimmed) continue;
     if(inTable) flushTable();
     if(!trimmed){ flushPara(); flushBullets(); flushNumbered(); continue; }
 
