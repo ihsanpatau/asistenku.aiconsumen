@@ -275,6 +275,14 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
   font-size: 11px; font-style: italic; text-align: left;
   color: var(--gray-400); margin: 4px 0 16px;
 }
+.hasil-content .ai-figure-title {
+  font-size: 12px; font-weight: 700; text-align: center;
+  color: var(--dark); margin: 6px 0 2px;
+}
+.hasil-content .ai-figure-source {
+  font-size: 11px; font-style: italic; text-align: center;
+  color: var(--gray-400); margin: 0 0 18px;
+}
 .hasil-content strong, .hasil-content b {
   font-weight: 700; color: var(--dark);
 }
@@ -1295,6 +1303,18 @@ function renderHasilHTML(text) {
   let inTable = false;
   let tableRows = [];
   let tableTitle = '';
+  let gambarCounter = 0;
+  // Ambil "Tabel 4.1" dari judul tabel (hasil renumberTables) supaya nomor Gambar ikut BAB yang sama
+  function buatCaptionGambar(t) {
+    gambarCounter++;
+    const babMatch = /^Tabel\s+(\d+)\./i.exec(t.judul || '');
+    const babNum = babMatch ? babMatch[1] : '1';
+    const namaSingkat = (t.judul || '').replace(/^Tabel\s+[\d.]+\.\s*/i, '');
+    return {
+      judul: `Gambar ${babNum}.${gambarCounter}. Grafik ${namaSingkat}`,
+      sumber: t.sumber ? `Diolah dari ${t.judul}` : `Diolah oleh peneliti, ${new Date().getFullYear()}`
+    };
+  }
 
   function esc(s) {
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1343,7 +1363,10 @@ function renderHasilHTML(text) {
       html += out;
       const chartUrl = buildChartDataUrlFromTable({ judul: tableTitle, rows: tableRows.map(r => r.split('|').map(c => c.trim())) });
       if (chartUrl) {
-        html += `<div style="text-align:center;margin:10px 0 18px;"><img src="${chartUrl}" alt="Grafik ${esc(tableTitle || '')}" style="max-width:100%;height:auto;border:1px solid #E5E7EB;border-radius:8px;"></div>`;
+        const cap = buatCaptionGambar({ judul: tableTitle, sumber: '' });
+        html += `<div style="text-align:center;margin:10px 0 4px;"><img src="${chartUrl}" alt="${esc(cap.judul)}" style="max-width:100%;height:auto;border:1px solid #E5E7EB;border-radius:8px;"></div>`;
+        html += `<div class="ai-figure-title">${esc(cap.judul)}</div>`;
+        html += `<div class="ai-figure-source">Sumber: ${esc(cap.sumber)}</div>`;
       }
       tableRows = []; tableTitle = '';
     }
@@ -1369,7 +1392,10 @@ function renderHasilHTML(text) {
         if (t.sumber) html += `<div class="ai-table-source">Sumber: ${esc(t.sumber)}</div>`;
         const chartUrl = buildChartDataUrlFromTable(t);
         if (chartUrl) {
-          html += `<div style="text-align:center;margin:10px 0 18px;"><img src="${chartUrl}" alt="Grafik ${esc(t.judul || '')}" style="max-width:100%;height:auto;border:1px solid #E5E7EB;border-radius:8px;"></div>`;
+          const cap = buatCaptionGambar(t);
+          html += `<div style="text-align:center;margin:10px 0 4px;"><img src="${chartUrl}" alt="${esc(cap.judul)}" style="max-width:100%;height:auto;border:1px solid #E5E7EB;border-radius:8px;"></div>`;
+          html += `<div class="ai-figure-title">${esc(cap.judul)}</div>`;
+          html += `<div class="ai-figure-source">Sumber: ${esc(cap.sumber)}</div>`;
         }
       }
       return;
@@ -1487,6 +1513,7 @@ async function buildSkripsiDocxBlob(text, judul, jenis, bidang, penulis, spasi, 
   const lineSpacingMap = { '1':240, '1.15':276, '1.5':360, '2':480 };
   const lineVal = lineSpacingMap[spasi] || 360;
   const children = [];
+  let gambarCounterDocx = 0;
 
   function dataUrlToUint8Array(dataUrl){
     const base64 = dataUrl.split(',')[1];
@@ -1509,15 +1536,24 @@ async function buildSkripsiDocxBlob(text, judul, jenis, bidang, penulis, spasi, 
     out.push(new Table({ width:{size:9000, type:WidthType.DXA}, rows }));
     if(t.sumber) out.push(new Paragraph({ children:[new TextRun({text:'Sumber: '+t.sumber, italics:true, size:18})], alignment: AlignmentType.LEFT, spacing:{before:80,after:150} }));
     else out.push(new Paragraph({ text:'', spacing:{after:200} }));
-    // Sisipkan chart otomatis (jika kolom tabel ada angkanya) tepat di bawah tabel
+    // Sisipkan chart otomatis (jika kolom tabel ada angkanya) tepat di bawah tabel, lengkap
+    // dengan keterangan "Gambar X.Y" dan sumbernya — sama seperti tabel.
     const chartUrl = buildChartDataUrlFromTable(t);
     if(chartUrl){
       try{
+        gambarCounterDocx++;
+        const babMatch = /^Tabel\s+(\d+)\./i.exec(t.judul || '');
+        const babNum = babMatch ? babMatch[1] : '1';
+        const namaSingkat = (t.judul || '').replace(/^Tabel\s+[\d.]+\.\s*/i, '');
+        const capJudul = `Gambar ${babNum}.${gambarCounterDocx}. Grafik ${namaSingkat}`;
+        const capSumber = t.sumber ? `Diolah dari ${t.judul}` : `Diolah oleh peneliti, ${new Date().getFullYear()}`;
         out.push(new Paragraph({
           alignment: AlignmentType.CENTER,
-          spacing: { after: 300 },
+          spacing: { before: 100 },
           children: [ new ImageRun({ data: dataUrlToUint8Array(chartUrl), transformation: { width: 420, height: 240 } }) ]
         }));
+        out.push(new Paragraph({ children:[new TextRun({text:capJudul, bold:true, size:18})], alignment: AlignmentType.CENTER, spacing:{before:60,after:20} }));
+        out.push(new Paragraph({ children:[new TextRun({text:'Sumber: '+capSumber, italics:true, size:18})], alignment: AlignmentType.CENTER, spacing:{after:300} }));
       }catch(e){ console.error('Gagal menyisipkan chart ke Word:', e); }
     }
     return out;
