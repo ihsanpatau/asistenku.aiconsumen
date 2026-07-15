@@ -87,6 +87,16 @@
         </div>
       </div>
 
+      <div class="form-group" style="margin-top:4px;">
+        <label class="form-label">Format Hasil Akhir</label>
+        <div class="type-pills" id="formatJurnalPills">
+          <button class="type-pill active" onclick="pilihFormatJurnal(this,'word')" data-format="word">📄 Word</button>
+          <button class="type-pill" onclick="pilihFormatJurnal(this,'pdf')" data-format="pdf">📕 PDF</button>
+          <button class="type-pill" onclick="pilihFormatJurnal(this,'teks')" data-format="teks">📝 Teks</button>
+        </div>
+        <div style="font-size:11px;color:var(--gray-400);margin-top:4px;">Setelah AI selesai, file dalam format ini langsung siap diunduh (rapi, heading & tabel sudah diformat).</div>
+      </div>
+
       <button class="btn btn-green" id="btnGenerate" onclick="generate()" style="margin-top:4px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         <span id="btnGenerateLabel">Generate Jurnal dengan AI</span>
@@ -108,6 +118,12 @@ if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudf
 
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function selectPill(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active');}
+let formatJurnalTerpilih='word';
+function pilihFormatJurnal(btn,format){
+  document.querySelectorAll('#formatJurnalPills .type-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  formatJurnalTerpilih=format;
+}
 function switchMode(btn,mode){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('mode-baru').style.display=mode==='baru'?'block':'none';document.getElementById('mode-konversi').style.display=mode==='konversi'?'block':'none';}
 
 // ===== File handling (skripsi & template) =====
@@ -210,6 +226,7 @@ ${CHART_TABLE_INSTRUCTION}`;
     localStorage.removeItem('task_result');
     localStorage.removeItem('task_result_structured');
     localStorage.setItem('task_type','jurnal');
+    localStorage.setItem('task_output_format', formatJurnalTerpilih);
     localStorage.setItem('task_prompt', catatanTambahan || 'Jurnal dari Skripsi');
     localStorage.setItem('task_full_prompt', prompt);
     btnLabel.textContent='Memproses dengan AI...';
@@ -230,6 +247,7 @@ ${CHART_TABLE_INSTRUCTION}`;
     localStorage.removeItem('task_result');
     localStorage.removeItem('task_result_structured');
     localStorage.setItem('task_type','jurnal');
+    localStorage.setItem('task_output_format', formatJurnalTerpilih);
     localStorage.setItem('task_prompt', judul);
     localStorage.setItem('task_full_prompt', prompt);
     btn.disabled=true; btnLabel.textContent='Memproses dengan AI...';

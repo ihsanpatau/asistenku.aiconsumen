@@ -129,9 +129,17 @@
       </div>
     </div>
 
+    <!-- Tombol unduh utama sesuai format yang dipilih di halaman sebelumnya -->
+    <div id="downloadUtamaWrap" style="padding:0 16px 10px;display:none;">
+      <button id="btnDownloadUtama" class="btn btn-green" style="width:100%;" onclick="downloadHasilTugas(window.__formatUtama==='teks'?'txt':window.__formatUtama)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span id="btnDownloadUtamaLabel">File Anda siap — Unduh</span>
+      </button>
+    </div>
+
     <!-- Download -->
     <div style="padding:0 16px 14px;">
-      <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:8px;">Download Dokumen</div>
+      <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:8px;" id="downloadLainLabel">Download Dokumen</div>
       <div style="display:flex;gap:8px;overflow-x:auto;">
         <div onclick="downloadHasilTugas('word')" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
           <div style="width:48px;height:44px;background:#2B579A;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;">W</div>
@@ -332,6 +340,16 @@ if(prompt){
 
 let hasilTugasFull = '';
 let makalahParts = null;
+const formatLabelMap = { word:{label:'Word (.docx)', icon:'📄'}, pdf:{label:'PDF', icon:'📕'}, teks:{label:'Teks (.txt)', icon:'📝'} };
+window.__formatUtama = localStorage.getItem('task_output_format') || 'word';
+(function setupFormatUtama(){
+  const f = window.__formatUtama;
+  const info = formatLabelMap[f] || formatLabelMap.word;
+  const btn = document.getElementById('btnDownloadUtamaLabel');
+  if(btn) btn.textContent = `File Anda siap — Unduh sebagai ${info.icon} ${info.label}`;
+  const lain = document.getElementById('downloadLainLabel');
+  if(lain) lain.textContent = 'Format lain (opsional)';
+})();
 
 function setBanner(state, msg){
   // state: 'loading' | 'done' | 'error'
@@ -355,6 +373,8 @@ function setBanner(state, msg){
     title.textContent='Tugas selesai!'; title.style.color='var(--green)';
     sub.textContent='AI telah memproses tugasmu dengan sukses.';
     backnavSub.textContent='Tugas sudah selesai diproses oleh AI';
+    const wrap = document.getElementById('downloadUtamaWrap');
+    if(wrap) wrap.style.display = 'block';
   } else {
     banner.style.background='linear-gradient(135deg,#FEF2F2,#FECACA)';
     iconWrap.style.background='#DC2626';
@@ -580,11 +600,14 @@ function downloadHasilTugas(type){
   // Generic (tugas/jurnal) flow
   const text = hasilTugasFull || localStorage.getItem('task_result') || '';
   if(!text){ showToast('Konten masih diproses, tunggu sebentar lagi'); return; }
-  const bodyHtml = text.split(/\n{2,}/).map(p=>`<p>${p.replace(/\n/g,'<br>').replace(/</g,'&lt;')}</p>`).join('');
+  // Pakai parser yang sama dengan Preview Dokumen (heading, bold, tabel, chart) —
+  // sebelumnya file unduhan pakai pemecah paragraf polos sehingga tanda markdown (#, **, dst)
+  // ikut terbawa mentah dan tabel/chart tidak ikut ke file.
+  const bodyHtml = renderHasilHTML(text);
 
   if(type==='pdf'){
     const win=window.open('','_blank');
-    win.document.write(`<html><head><title>${judul}</title><meta charset="utf-8"><style>body{font-family:'Times New Roman',serif;font-size:12pt;line-height:1.8;padding:40px;text-align:justify;}p{margin:0 0 14px;}</style></head><body>${bodyHtml}</body></html>`);
+    win.document.write(`<html><head><title>${judul}</title><meta charset="utf-8"><style>body{font-family:'Times New Roman',serif;font-size:12pt;line-height:1.8;padding:40px;text-align:justify;}p{margin:0 0 14px;}table{page-break-inside:avoid;}</style></head><body>${bodyHtml}</body></html>`);
     win.document.close(); win.focus();
     setTimeout(()=>win.print(),400);
   } else if(type==='word'){

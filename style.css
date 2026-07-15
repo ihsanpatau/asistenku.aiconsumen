@@ -89,6 +89,8 @@ body {
 .app {
   width: 100%;
   max-width: 430px;
+  height: 100vh;
+  height: 100dvh;
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--white);
@@ -96,6 +98,8 @@ body {
   flex-direction: column;
   position: relative;
   overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 @media (min-width: 430px) {
@@ -114,6 +118,7 @@ body {
   body { background: var(--gray-100); }
   .app {
     max-width: 480px;
+    height: 96vh;
     min-height: 96vh;
     margin: 2vh 0;
     border-radius: var(--r-2xl);
