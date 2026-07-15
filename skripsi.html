@@ -8,6 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.2/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
 :root {
   --blue: #1A3DC2;
@@ -1031,7 +1032,7 @@ Jenis penelitian: ${jenis}
 Bidang studi: ${bidang || 'umum'}
 ${deskripsi ? 'Deskripsi: ' + deskripsi : ''}
 
-Buat 12-15 entri referensi yang relevan dengan topik di atas (kombinasi buku, jurnal, dan sumber resmi/pemerintah). Prioritaskan tahun terbit ${tahunSekarang - 5}-${tahunSekarang} (5 tahun terakhir), boleh menyertakan beberapa sumber teori klasik yang lebih lama bila memang relevan. Urutkan berdasarkan abjad nama penulis. Tulis dalam format APA yang benar (Nama Penulis. (Tahun). Judul karya. Nama Penerbit/Jurnal.). Tulis judul karya apa adanya tanpa tanda bintang atau markdown apapun. Satu referensi per baris.`;
+Buat 12-15 entri referensi yang relevan dengan topik di atas (kombinasi buku, jurnal, dan sumber resmi/pemerintah). Prioritaskan tahun terbit ${tahunSekarang - 5}-${tahunSekarang} (5 tahun terakhir), boleh menyertakan beberapa sumber teori klasik yang lebih lama bila memang relevan. Utamakan artikel JURNAL yang memang lazim punya DOI. Urutkan berdasarkan abjad nama penulis. Tulis dalam format APA yang benar (Nama Penulis. (Tahun). Judul karya. Nama Penerbit/Jurnal.). WAJIB tambahkan DOI di akhir tiap entri jurnal dengan format "https://doi.org/xxxxx" jika sumber tersebut secara wajar memang punya DOI (kebanyakan artikel jurnal terindeks punya DOI); untuk buku cetak, situs resmi pemerintah, atau sumber yang memang tidak punya DOI, boleh dilewati tanpa DOI — JANGAN mengarang DOI yang tidak masuk akal. Tulis judul karya apa adanya tanpa tanda bintang atau markdown apapun. Satu referensi per baris.`;
   } else {
     // BAB 1-5 — sistem PRIORITAS (bukan persentase tetap): poin utama boleh
     // "makan" kata sesuai kebutuhan (mis. makin banyak kutipan di Latar Belakang),
@@ -1100,7 +1101,15 @@ Buat 12-15 entri referensi yang relevan dengan topik di atas (kombinasi buku, ju
         ]
       }
     };
-    const tabelInstruksi = jenisDokumen==='BAB 4' ? `\nWAJIB sertakan minimal 2-3 tabel data pendukung (misalnya distribusi responden, statistik deskriptif, atau ringkasan hasil uji) menggunakan format PERSIS berikut (jangan pakai format tabel lain):\n[TABEL]\nJudul Tabel\nKolom1 | Kolom2 | Kolom3\nBaris1 | Data | Data\nBaris2 | Data | Data\n[/TABEL]\nIsi data dengan angka/perkiraan yang masuk akal dan konsisten dengan narasi (bukan data kosong), agar tabel benar-benar terisi.\n` : '';
+    // Tabel & chart kini disediakan untuk SEMUA BAB (dulu cuma BAB 4), supaya deskripsi/topik
+    // seperti "masukan data dalam bentuk tabel dan chart di latar belakang" benar-benar dituruti AI.
+    const permintaanEksplisitTabel = /tabel|chart|grafik|diagram/i.test(deskripsi || '') || (outlineCustom && /tabel|chart|grafik|diagram/i.test(outlineCustom));
+    const tabelWajibBab4 = jenisDokumen === 'BAB 4';
+    let tabelInstruksi = '';
+    if (tabelWajibBab4 || permintaanEksplisitTabel) {
+      const jumlahTabel = tabelWajibBab4 ? 'minimal 2-3 tabel data pendukung (misalnya distribusi responden, statistik deskriptif, atau ringkasan hasil uji)' : 'minimal 1 tabel data pendukung yang relevan dengan isi bagian ini';
+      tabelInstruksi = `\nWAJIB sertakan ${jumlahTabel}, menggunakan format PERSIS berikut (jangan pakai format tabel lain, jangan pakai markdown pipe biasa):\n[TABEL]\nJudul Tabel\nKolom1 | Kolom2 | Kolom3\nBaris1 | Angka | Angka\nBaris2 | Angka | Angka\n[/TABEL]\nIsi data dengan angka/perkiraan yang masuk akal dan konsisten dengan narasi (bukan data kosong), agar tabel benar-benar terisi DAN bisa otomatis digambarkan sebagai chart (kolom pertama = label kategori, kolom berikutnya = nilai numerik).\n`;
+    }
     const kataPerHalaman = 300;
     const targetKata = parseInt(halaman, 10) * kataPerHalaman;
     const plan = getUserPlan();
@@ -1156,7 +1165,8 @@ ATURAN PENULISAN PENTING:
 - Pisahkan paragraf dengan baris kosong
 - Untuk sub-bab, tulis dengan format: "1.1 Latar Belakang" (bukan "## 1.1 Latar Belakang")
 - Konten harus substantif, informatif, dan sesuai standar akademik Indonesia
-- WAJIB menyertakan kutipan (Nama, Tahun) untuk klaim, data, teori, atau pernyataan yang membutuhkan sumber. Utamakan sumber 5 tahun terakhir, boleh gunakan teori klasik yang lebih lama bila relevan.`,
+- WAJIB menyertakan kutipan (Nama, Tahun) untuk klaim, data, teori, atau pernyataan yang membutuhkan sumber. Utamakan sumber 5 tahun terakhir, boleh gunakan teori klasik yang lebih lama bila relevan.
+- Pada bagian DAFTAR PUSTAKA di akhir, WAJIB tambahkan DOI (format "https://doi.org/xxxxx") di akhir entri untuk sumber yang secara wajar punya DOI (terutama artikel jurnal). Untuk sumber yang memang tidak punya DOI (buku cetak, situs resmi pemerintah, dsb), boleh dilewati tanpa DOI — JANGAN pernah mengarang/menebak DOI palsu.`,
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -1198,8 +1208,67 @@ ATURAN PENULISAN PENTING:
 // =====================================================================
 // RENDER HASIL AI — Konversi teks plain jadi HTML rapi bergaya akademik
 // =====================================================================
+// Bikin gambar chart (PNG dataURL) otomatis dari tabel [TABEL] yang punya kolom angka.
+// Kolom pertama dipakai sebagai label kategori, kolom-kolom sisanya (yang isinya angka semua)
+// dipakai sebagai dataset batang. Dipakai baik di preview browser maupun di file Word.
+function buildChartDataUrlFromTable(t) {
+  try {
+    if (typeof Chart === 'undefined' || !t || !t.rows || t.rows.length < 2) return null;
+    const header = t.rows[0];
+    const dataRows = t.rows.slice(1).filter(r => r.length === header.length);
+    if (!dataRows.length || header.length < 2) return null;
+
+    const toNum = (v) => {
+      const n = Number(String(v || '').replace(/[^0-9.\-]/g, ''));
+      return isNaN(n) ? null : n;
+    };
+    const numericCols = [];
+    for (let c = 1; c < header.length; c++) {
+      if (dataRows.every(r => toNum(r[c]) !== null)) numericCols.push(c);
+    }
+    if (!numericCols.length) return null;
+
+    const labels = dataRows.map(r => r[0]);
+    const palette = ['#1A3DC2', '#3B5BFF', '#7C9BFF', '#B3C4FF'];
+    const datasets = numericCols.map((c, i) => ({
+      label: header[c] || `Data ${i + 1}`,
+      data: dataRows.map(r => toNum(r[c]) || 0),
+      backgroundColor: palette[i % palette.length]
+    }));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 560; canvas.height = 320;
+    canvas.style.position = 'fixed'; canvas.style.left = '-9999px';
+    document.body.appendChild(canvas);
+    const chart = new Chart(canvas.getContext('2d'), {
+      type: 'bar',
+      data: { labels, datasets },
+      options: {
+        responsive: false,
+        animation: false,
+        plugins: {
+          title: { display: !!t.judul, text: t.judul || '' },
+          legend: { display: datasets.length > 1 }
+        },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+    const url = canvas.toDataURL('image/png');
+    chart.destroy();
+    canvas.remove();
+    return url;
+  } catch (e) {
+    console.error('Gagal membuat chart otomatis:', e);
+    return null;
+  }
+}
+
 function renderHasilHTML(text) {
-  const lines = text.split('\n');
+  // Ambil dulu semua blok [TABEL]...[/TABEL] sesuai format yang diminta ke AI —
+  // sebelumnya fungsi ini pakai parser tabel markdown pipe yang TIDAK cocok dengan
+  // format [TABEL] yang sebenarnya dikirim AI, sehingga tabel gagal tampil di preview.
+  const { cleaned, tables } = extractTabelBlocks(text);
+  const lines = cleaned.split('\n');
   let html = '';
   let paraBuffer = [];
   let bulletBuffer = [];
@@ -1253,6 +1322,10 @@ function renderHasilHTML(text) {
       });
       out += '</table></div>';
       html += out;
+      const chartUrl = buildChartDataUrlFromTable({ judul: tableTitle, rows: tableRows.map(r => r.split('|').map(c => c.trim())) });
+      if (chartUrl) {
+        html += `<div style="text-align:center;margin:10px 0 18px;"><img src="${chartUrl}" alt="Grafik ${esc(tableTitle || '')}" style="max-width:100%;height:auto;border:1px solid #E5E7EB;border-radius:8px;"></div>`;
+      }
       tableRows = []; tableTitle = '';
     }
     inTable = false;
@@ -1262,7 +1335,27 @@ function renderHasilHTML(text) {
     const line = raw.trimEnd();
     const trimmed = line.trim();
 
-    // Tabel markdown: baris dengan pipe
+    // Placeholder tabel [[TABEL_N]] hasil extractTabelBlocks (format resmi yang diminta ke AI)
+    const tabelPlaceholder = trimmed.match(/^\[\[TABEL_(\d+)\]\]$/);
+    if (tabelPlaceholder) {
+      flushPara(); flushBullets(); flushNumbered();
+      const t = tables[parseInt(tabelPlaceholder[1], 10)];
+      if (t) {
+        if (t.judul) html += `<div class="ai-table-title">${esc(t.judul)}</div>`;
+        html += '<div class="ai-table-wrap"><table class="ai-table">';
+        t.rows.forEach((row, ri) => {
+          html += '<tr>' + row.map(c => ri === 0 ? `<th>${esc(c)}</th>` : `<td>${applyInline(esc(c))}</td>`).join('') + '</tr>';
+        });
+        html += '</table></div>';
+        const chartUrl = buildChartDataUrlFromTable(t);
+        if (chartUrl) {
+          html += `<div style="text-align:center;margin:10px 0 18px;"><img src="${chartUrl}" alt="Grafik ${esc(t.judul || '')}" style="max-width:100%;height:auto;border:1px solid #E5E7EB;border-radius:8px;"></div>`;
+        }
+      }
+      return;
+    }
+
+    // Tabel markdown: baris dengan pipe (fallback bila AI tetap menulis tabel gaya markdown biasa)
     if (/^\|.+\|/.test(trimmed)) {
       flushPara(); flushBullets(); flushNumbered();
       // Skip separator rows: |---|---|
@@ -1370,10 +1463,18 @@ function copyHasil() {
 // Bangun file .docx ASLI (bukan trik HTML) memakai library docx.js — supaya bold/center/spasi
 // konsisten di semua aplikasi (Word, WPS, Google Docs), tidak cuma di browser.
 async function buildSkripsiDocxBlob(text, judul, jenis, bidang, penulis, spasi, includeCover){
-  const { Document, Packer, Paragraph, TextRun, AlignmentType, PageBreak, Table, TableRow, TableCell, WidthType, ShadingType } = docx;
+  const { Document, Packer, Paragraph, TextRun, AlignmentType, PageBreak, Table, TableRow, TableCell, WidthType, ShadingType, ImageRun } = docx;
   const lineSpacingMap = { '1':240, '1.15':276, '1.5':360, '2':480 };
   const lineVal = lineSpacingMap[spasi] || 360;
   const children = [];
+
+  function dataUrlToUint8Array(dataUrl){
+    const base64 = dataUrl.split(',')[1];
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
 
   function buildDocxTable(t){
     const rows = t.rows.map((row, ri) => new TableRow({
@@ -1387,6 +1488,17 @@ async function buildSkripsiDocxBlob(text, judul, jenis, bidang, penulis, spasi, 
     if(t.judul) out.push(new Paragraph({ children:[new TextRun({text:t.judul, bold:true})], alignment: AlignmentType.CENTER, spacing:{before:300,after:100} }));
     out.push(new Table({ width:{size:9000, type:WidthType.DXA}, rows }));
     out.push(new Paragraph({ text:'', spacing:{after:200} }));
+    // Sisipkan chart otomatis (jika kolom tabel ada angkanya) tepat di bawah tabel
+    const chartUrl = buildChartDataUrlFromTable(t);
+    if(chartUrl){
+      try{
+        out.push(new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 300 },
+          children: [ new ImageRun({ data: dataUrlToUint8Array(chartUrl), transformation: { width: 420, height: 240 } }) ]
+        }));
+      }catch(e){ console.error('Gagal menyisipkan chart ke Word:', e); }
+    }
     return out;
   }
 
