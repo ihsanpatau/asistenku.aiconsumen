@@ -674,11 +674,11 @@ body {
 .history-icon svg { width: 18px; height: 18px; color: #fff; }
 .history-body { flex: 1; min-width: 0; }
 .history-title { font-size: 13px; font-weight: 600; color: var(--gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.history-meta  { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
-.status-pill { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: var(--r-full); white-space: nowrap; }
-.status-pill.done   { background: var(--green-100); color: #166534; }
-.status-pill.proc   { background: #FEF3C7; color: #92400E; }
-.status-pill.fail   { background: var(--red-50); color: var(--red); }
+.history-meta, .history-time  { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+.status-pill, .status-badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: var(--r-full); white-space: nowrap; }
+.status-pill.done, .status-badge.done   { background: var(--green-100); color: #166534; }
+.status-pill.proc, .status-badge.pending   { background: #FEF3C7; color: #92400E; }
+.status-pill.fail, .status-badge.error   { background: var(--red-50); color: var(--red); }
 
 /* ── Score Cards ── */
 .score-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; padding: 0 16px; }

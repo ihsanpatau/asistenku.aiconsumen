@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="riwayat-store.js"></script>
 </head>
 <body>
 <div class="app">
@@ -329,6 +330,30 @@ if(prompt){
   document.getElementById('namaFileTugas').textContent=prompt.substring(0,30).replace(/\s/g,'_')+'.docx';
 }
 
+// task_id dipakai agar satu hasil generate hanya tercatat sekali di riwayat, walau halaman
+// ini dibuka ulang/refresh. Kalau belum ada hasil tersimpan sama sekali, ini berarti tugas baru
+// (bukan cuma refresh halaman lama), jadi task_id dibuat ulang.
+(function ensureTaskId(){
+  const adaHasilTersimpan = !!(localStorage.getItem('task_result') || localStorage.getItem('task_result_structured'));
+  if(!localStorage.getItem('task_id') || !adaHasilTersimpan){
+    localStorage.setItem('task_id', 'r_'+Date.now()+'_'+Math.random().toString(36).slice(2,7));
+  }
+})();
+function simpanRiwayatHasil(judulOverride, kataTerhitung){
+  const kategoriAsli = taskType==='umum' ? 'tugas' : taskType;
+  const kategoriLabelMap = { tugas:'Tugas & Project', makalah:'Makalah', jurnal:'Jurnal' };
+  RiwayatStore.tambah({
+    id: localStorage.getItem('task_id'),
+    judul: (judulOverride || prompt || 'Tugas').substring(0,80),
+    kategori: kategoriAsli,
+    kategoriLabel: kategoriLabelMap[kategoriAsli] || 'Tugas & Project',
+    format: window.__formatUtama,
+    kataTerhitung: kataTerhitung || 0,
+    status: 'done',
+    link: 'hasil-tugas.html'
+  });
+}
+
 let hasilTugasFull = '';
 let makalahParts = null;
 const formatLabelMap = { word:{label:'Word (.docx)', icon:'📄'}, pdf:{label:'PDF', icon:'📕'}, teks:{label:'Teks (.txt)', icon:'📝'} };
@@ -482,6 +507,7 @@ function renderMakalah(doc, meta){
   document.getElementById('jumlahKataCard').textContent = wc.toLocaleString('id-ID')+' kata';
   document.getElementById('deskripsiPreviewTugas').textContent = (doc.kata_pengantar||'').substring(0,150)+((doc.kata_pengantar||'').length>150?'...':'');
   document.getElementById('namaFileTugas').textContent = (makalahParts.judul||prompt||'Makalah').substring(0,40).replace(/\s/g,'_')+'.docx';
+  simpanRiwayatHasil(makalahParts.judul, wc);
 }
 
 function renderGeneric(fullText, ringkasanText){
@@ -495,6 +521,7 @@ function renderGeneric(fullText, ringkasanText){
   document.getElementById('jumlahKataTugas').textContent = wc.toLocaleString('id-ID')+' kata';
   document.getElementById('jumlahKataCard').textContent = wc.toLocaleString('id-ID')+' kata';
   document.getElementById('deskripsiPreviewTugas').textContent = fullText.substring(0,150)+(fullText.length>150?'...':'');
+  simpanRiwayatHasil(null, wc);
 }
 
 async function generateContent(){
