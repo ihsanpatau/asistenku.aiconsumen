@@ -36,6 +36,20 @@ const RiwayatStore = (function () {
     simpan(semua().filter(x => x.id !== id));
   }
 
+  // upsert: tambah item baru, atau perbarui item yang sudah ada (dicocokkan lewat id).
+  // Dipakai oleh halaman chat (mis. DoktrAI, Tanya Jawab) yang perlu memperbarui
+  // judul/waktu percakapan yang sama setiap kali ada pesan baru, bukan membuat entri baru terus-menerus.
+  function upsert(item) {
+    const list = semua();
+    const idx = item.id ? list.findIndex(x => x.id === item.id) : -1;
+    if (idx === -1) {
+      tambah(item);
+      return;
+    }
+    list[idx] = Object.assign({}, list[idx], item, { waktu: new Date().toISOString() });
+    simpan(list);
+  }
+
   function byKategori(kategori, limit) {
     const list = semua().filter(x => kategori === 'semua' ? true : x.kategori === kategori);
     return limit ? list.slice(0, limit) : list;
@@ -56,5 +70,5 @@ const RiwayatStore = (function () {
     return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
   }
 
-  return { semua, tambah, hapus, byKategori, waktuRelatif };
+  return { semua, tambah, upsert, hapus, byKategori, waktuRelatif };
 })();

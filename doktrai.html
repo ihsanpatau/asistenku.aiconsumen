@@ -133,23 +133,13 @@ function showToast(msg,d=2500){const t=document.getElementById('toast');t.textCo
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
 
 let chatHistory=[];
-let chatSessionId=localStorage.getItem('doktrai_chat_id')||null;
+let chatSessionId=null;
 
-// Muat ulang sesi chat asli (kalau ada) dari localStorage, bukan percakapan contoh.
-// Ini memastikan histori yang tampil benar-benar pesan yang pernah dikirim pengguna.
-(function muatSesiChat(){
-  const saved=localStorage.getItem('doktrai_current_chat');
-  if(!saved) return;
-  try{
-    const arr=JSON.parse(saved);
-    if(Array.isArray(arr) && arr.length){
-      arr.forEach(m=>renderMsg(m.role, formatKontenChat(m.content), false));
-      chatHistory=arr;
-      document.getElementById('introBanner').style.display='none';
-      document.getElementById('quickReplies').style.display='none';
-    }
-  }catch(e){}
-})();
+// Setiap kali halaman DoktrAI dibuka, mulai percakapan baru yang bersih.
+// Percakapan sebelumnya (jika ada) sudah otomatis tersimpan ke Riwayat Chat,
+// jadi tidak perlu ditampilkan lagi menempel di kolom chat.
+localStorage.removeItem('doktrai_current_chat');
+localStorage.removeItem('doktrai_chat_id');
 
 function formatKontenChat(text){
   return String(text).replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
