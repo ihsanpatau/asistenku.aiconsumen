@@ -184,6 +184,9 @@ async function handleQAFile(inp){
   chip.innerHTML=`<div class="file-chip">📎 <span class="fname">Membaca ${file.name}...</span></div>`;
   try{
     const text=await readFileAsText(file);
+    if(!text||!text.trim()){
+      throw new Error('Teks tidak ditemukan di file ini. Kemungkinan file berupa hasil scan/gambar sehingga tidak bisa dibaca. Gunakan file PDF/DOCX yang berisi teks asli.');
+    }
     qaFileText=truncateText(text);
     qaFileName=file.name;
     chip.innerHTML=`<div class="file-chip">📎 <span class="fname">${file.name}</span><span class="fremove" onclick="removeQAFile()">✕</span></div>`;
@@ -191,7 +194,7 @@ async function handleQAFile(inp){
   }catch(e){
     chip.innerHTML='';
     qaFileText='';qaFileName='';
-    showToast(e.message||'Gagal membaca file');
+    showToast(e.message||'Gagal membaca file', 4500);
   }
   inp.value='';
 }
@@ -258,6 +261,9 @@ async function handleBelajarFile(inp){
   chip.innerHTML=`<div class="file-chip">📎 <span class="fname">Membaca ${file.name}...</span></div>`;
   try{
     const text=await readFileAsText(file);
+    if(!text||!text.trim()){
+      throw new Error('Teks tidak ditemukan di file ini. Kemungkinan file berupa hasil scan/gambar sehingga tidak bisa dibaca. Gunakan file PDF/DOCX yang berisi teks asli.');
+    }
     belajarFileText=truncateText(text);
     belajarFileName=file.name;
     chip.innerHTML=`<div class="file-chip">📎 <span class="fname">${file.name}</span><span class="fremove" onclick="removeBelajarFile()">✕</span></div>`;
@@ -266,7 +272,8 @@ async function handleBelajarFile(inp){
   }catch(e){
     chip.innerHTML='';
     belajarFileText='';belajarFileName='';
-    showToast(e.message||'Gagal membaca file');
+    box.style.display='block';
+    showToast(e.message||'Gagal membaca file', 4500);
   }
   inp.value='';
 }
@@ -279,24 +286,38 @@ async function doBelajar(instruction, btn){
   if(!belajarFileText){showToast('Unggah file terlebih dahulu');return;}
   document.querySelectorAll('#genreGrid .genre-chip').forEach(c=>c.disabled=true);
   if(btn)btn.classList.add('active');
-  showToast('Sedang memproses file...');
+
+  const wrap=document.getElementById('belajarResultWrap');
+  const box=document.getElementById('belajarResult');
+  wrap.style.display='block';
+  box.innerHTML='<div style="display:flex;align-items:center;gap:8px;color:var(--gray-500);"><div style="width:14px;height:14px;border:2px solid var(--gray-200);border-top-color:var(--blue-light);border-radius:50%;animation:spin .8s linear infinite;"></div>Sedang memproses file, mohon tunggu...</div>';
+  wrap.scrollIntoView({behavior:'smooth'});
+
   const system=`Kamu adalah asisten belajar AI dari asistenku.pro. Pengguna mengunggah file bernama "${belajarFileName}" untuk dipelajari. Berikut isi filenya:\n\n${belajarFileText}\n\nGunakan isi file di atas sebagai satu-satunya sumber utama untuk menjawab permintaan pengguna, jawab dalam Bahasa Indonesia yang jelas dan mudah dipahami.`;
   try{
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:instruction}]})});
-    const data=await res.json();
+    const data=await res.json().catch(()=>({}));
     document.querySelectorAll('#genreGrid .genre-chip').forEach(c=>c.disabled=false);
-    if(!res.ok){ showToast(data.error||'Gagal terhubung ke server'); return; }
+    if(!res.ok){
+      box.innerHTML=`<div style="color:var(--red,#DC2626);">⚠️ Gagal memproses: ${data.error||('Server merespons dengan status '+res.status)}</div>`;
+      showToast(data.error||'Gagal terhubung ke server');
+      return;
+    }
     const result=data.text||'';
-    document.getElementById('belajarResult').innerHTML=result.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
-    document.getElementById('belajarResultWrap').style.display='block';
-    document.getElementById('belajarResultWrap').scrollIntoView({behavior:'smooth'});
+    if(!result){
+      box.innerHTML='<div style="color:var(--red,#DC2626);">⚠️ AI tidak memberikan jawaban. Coba pilih genre lain atau unggah ulang file.</div>';
+      return;
+    }
+    box.innerHTML=result.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
     showToast('Selesai! ✓');
   }catch(e){
     document.querySelectorAll('#genreGrid .genre-chip').forEach(c=>c.disabled=false);
+    box.innerHTML='<div style="color:var(--red,#DC2626);">⚠️ Gagal terhubung ke server. Periksa koneksi internet Anda lalu coba lagi.</div>';
     showToast('Gagal. Coba lagi.');
   }
 }
 function copyBelajar(){navigator.clipboard.writeText(document.getElementById('belajarResult').innerText).then(()=>showToast('Disalin!'));}
 </script>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </body>
 </html>
