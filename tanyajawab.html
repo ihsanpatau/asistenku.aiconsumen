@@ -79,7 +79,7 @@
   </div>
 
   <!-- Belajar Mode -->
-  <div id="belajarMode" style="display:none;flex:1;overflow:hidden;display:flex;flex-direction:column;">
+  <div id="belajarMode" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
     <div class="belajar-area" id="belajarContent">
 
       <div id="belajarFileChip"></div>
@@ -136,6 +136,7 @@ function switchMode(mode){
   document.getElementById('tabQA').classList.toggle('active',mode==='qa');
   document.getElementById('tabBelajar').classList.toggle('active',mode==='belajar');
 }
+switchMode('qa');
 
 /* ---------- File reading helper (shared) ---------- */
 const MAX_FILE_CHARS = 15000;
