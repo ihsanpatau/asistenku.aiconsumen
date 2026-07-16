@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Abstrak – asistenku.pro</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -17,56 +20,40 @@
   <div class="page-content">
     <div style="margin:16px 16px 0;background:linear-gradient(135deg,#FFFBEB,#FDE68A);border-radius:20px;padding:16px;">
       <h2 style="font-size:18px;font-weight:800;color:#92400E;">Abstrak Bilingual Otomatis</h2>
-      <p style="font-size:12px;color:var(--gray-500);margin-top:4px;">Buat abstrak Indonesia dan Inggris secara otomatis dari naskah penelitian Anda.</p>
+      <p style="font-size:12px;color:var(--gray-500);margin-top:4px;">Upload naskah penelitian Anda, AI baca isinya dan buatkan abstrak Indonesia &amp; Inggris lengkap dengan kata kunci.</p>
     </div>
     <div style="padding:16px;">
       <div class="form-group">
-        <label class="form-label">Judul Penelitian <span style="color:var(--red)">*</span></label>
-        <input type="text" class="form-input" id="judulPenelitian" placeholder="Masukkan judul penelitian...">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Teks / Isi Penelitian <span style="color:var(--red)">*</span></label>
-        <textarea class="form-textarea" id="inputText" placeholder="Tempel teks skripsi atau penelitian Anda di sini (minimal BAB I – BAB V)..." rows="6"></textarea>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Atau Upload File</label>
-        <div class="upload-area" onclick="document.getElementById('abstrakFile').click()">
+        <label class="form-label">Upload Naskah <span style="color:var(--red)">*</span></label>
+        <div class="upload-area" id="uploadAreaAbstrak" onclick="document.getElementById('abstrakFile').click()">
           <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-          <div class="upload-label">PDF, Word, atau TXT</div>
-          <div class="upload-sub">Maks. 10MB</div>
-          <input type="file" id="abstrakFile" accept=".pdf,.doc,.docx,.txt" style="display:none" onchange="showToast('File: '+this.files[0].name)">
+          <div class="upload-label" id="uploadLabelAbstrak">PDF, Word, atau TXT</div>
+          <div class="upload-sub" id="uploadSubAbstrak">Maks. 10MB — skripsi, jurnal, laporan penelitian, dll.</div>
+          <input type="file" id="abstrakFile" accept=".pdf,.docx,.txt" style="display:none" onchange="onPickAbstrakFile(this)">
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Kata Kunci (Opsional)</label>
-        <input type="text" class="form-input" id="keywords" placeholder="Contoh: digital marketing, keputusan pembelian, Shopee">
+        <label class="form-label">Instruksi Tambahan (Opsional)</label>
+        <textarea class="form-textarea" id="instruksiAbstrak" rows="4" placeholder="Isi sesuai kemauan Anda, misalnya: &quot;buat jadi 2 paragraf&quot;, &quot;kata kunci minimal 5&quot;, &quot;ikuti pedoman berikut: ...&quot;, &quot;fokus ke hasil penelitian saja&quot;, dsb. Kosongkan kalau tidak ada permintaan khusus."></textarea>
       </div>
-      <div class="form-group">
-        <label class="form-label">Panjang Abstrak</label>
-        <div class="type-pills">
-          <button class="type-pill active" onclick="selectPill(this)">Pendek (100-150 kata)</button>
-          <button class="type-pill" onclick="selectPill(this)">Standar (150-250 kata)</button>
-          <button class="type-pill" onclick="selectPill(this)">Panjang (250+ kata)</button>
-        </div>
-      </div>
-      <button class="btn btn-primary" style="background:#D97706;" onclick="generateAbstrak()">
+      <button class="btn btn-primary" id="btnGenerateAbstrak" style="background:#D97706;" onclick="generateAbstrak()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        Generate Abstrak Bilingual
+        <span id="btnGenerateAbstrakLabel">Generate Abstrak Bilingual</span>
       </button>
     </div>
     <div id="resultArea" style="display:none;padding:0 16px 16px;">
       <div style="font-size:14px;font-weight:700;color:var(--dark);margin-bottom:10px;">Hasil Abstrak:</div>
-      <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:16px;margin-bottom:10px;">
+      <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:16px;margin-bottom:10px;white-space:pre-wrap;">
         <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:8px;border-bottom:1px solid var(--gray-100);padding-bottom:6px;">ABSTRAK (Indonesia)</div>
         <div id="abstrakIndo" style="font-size:13px;line-height:1.7;color:var(--dark);"></div>
       </div>
-      <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:16px;">
+      <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:16px;white-space:pre-wrap;">
         <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:8px;border-bottom:1px solid var(--gray-100);padding-bottom:6px;">ABSTRACT (English)</div>
         <div id="abstrakEng" style="font-size:13px;line-height:1.7;color:var(--dark);"></div>
       </div>
       <div style="display:flex;gap:8px;margin-top:12px;">
         <button class="btn btn-secondary btn-sm" onclick="copyAll()">Salin Semua</button>
-        <button class="btn btn-primary btn-sm" onclick="showToast('Download segera hadir')">Download Word</button>
+        <button class="btn btn-primary btn-sm" onclick="downloadAbstrakWord()">Download Word</button>
       </div>
     </div>
   </div>
@@ -81,45 +68,146 @@
 <div class="toast" id="toast"></div>
 <script>
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
-function selectPill(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active');}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
-async function generateAbstrak(){
-  const text=document.getElementById('inputText').value.trim();
-  const judul=document.getElementById('judulPenelitian').value.trim();
-  const keywords=document.getElementById('keywords').value.trim();
-  if(!text&&!judul){showToast('Isi judul atau teks penelitian');return;}
-  showToast('Membuat abstrak bilingual...');
-  const prompt=`Buatkan abstrak penelitian bilingual (Indonesia dan Inggris) untuk:
-Judul: "${judul||'Penelitian'}"
-${keywords?'Kata kunci: '+keywords:''}
-${text?'Isi/Konteks: '+text.substring(0,1000):''}
+if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}
 
-Format respons:
+// ===== Upload naskah (PDF/DOCX/TXT) — beneran dibaca di browser, isinya dikirim ke AI =====
+let abstrakFileState = null;
+function onPickAbstrakFile(input){
+  const file = input.files && input.files[0];
+  if(!file) return; // batal pilih, jangan tampilkan apa-apa
+  if(file.size > 10*1024*1024){ showToast('Ukuran file maksimal 10MB'); input.value=''; return; }
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(!['pdf','docx','txt'].includes(ext)){ showToast('Format harus PDF, DOCX, atau TXT'); input.value=''; return; }
+  abstrakFileState = file;
+  const area=document.getElementById('uploadAreaAbstrak');
+  area.classList.add('filled');
+  document.getElementById('uploadLabelAbstrak').textContent = file.name;
+  document.getElementById('uploadSubAbstrak').textContent = (file.size/1024/1024).toFixed(2)+' MB • siap dibaca AI (klik lagi untuk ganti)';
+  showToast('Naskah dipilih: '+file.name);
+}
+
+async function extractFileTextAbstrak(file){
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='txt') return await file.text();
+  if(ext==='docx'){
+    if(!window.mammoth) throw new Error('Modul pembaca DOCX gagal dimuat, cek koneksi internet.');
+    const arrayBuffer=await file.arrayBuffer();
+    const result=await window.mammoth.extractRawText({arrayBuffer});
+    return result.value || '';
+  }
+  if(ext==='pdf'){
+    if(!window.pdfjsLib) throw new Error('Modul pembaca PDF gagal dimuat, cek koneksi internet.');
+    const arrayBuffer=await file.arrayBuffer();
+    const pdf=await window.pdfjsLib.getDocument({data:arrayBuffer}).promise;
+    let text='';
+    const maxPages=Math.min(pdf.numPages,60);
+    for(let i=1;i<=maxPages;i++){
+      const page=await pdf.getPage(i);
+      const content=await page.getTextContent();
+      text += content.items.map(it=>it.str).join(' ') + '\n';
+    }
+    return text;
+  }
+  throw new Error('Format file tidak didukung.');
+}
+
+let lastAbstrakResult = {indo:'', eng:''};
+
+async function generateAbstrak(){
+  if(!abstrakFileState){ showToast('Upload naskah penelitian dulu (PDF/Word/TXT)'); return; }
+  const instruksi = document.getElementById('instruksiAbstrak').value.trim();
+  const btn=document.getElementById('btnGenerateAbstrak');
+  const btnLabel=document.getElementById('btnGenerateAbstrakLabel');
+  btn.disabled=true; btnLabel.textContent='Membaca naskah...';
+
+  let naskahText;
+  try{
+    naskahText = (await extractFileTextAbstrak(abstrakFileState)).trim();
+    if(!naskahText){ throw new Error('Isi file kosong atau tidak bisa dibaca.'); }
+  }catch(e){
+    showToast('Gagal membaca file: '+e.message);
+    btn.disabled=false; btnLabel.textContent='Generate Abstrak Bilingual';
+    return;
+  }
+
+  btnLabel.textContent='AI sedang membuat abstrak...';
+  const prompt=`Kamu adalah asisten akademik. Berikut naskah penelitian (skripsi/jurnal/laporan) yang diupload penulis:
+
+=== ISI NASKAH ===
+${naskahText.substring(0,14000)}
+
+TUGAS: Buatkan SATU abstrak penelitian bilingual (Bahasa Indonesia dan Inggris) berdasarkan isi naskah di atas — ambil dari isi aslinya, jangan mengarang di luar itu.
+${instruksi ? `\nINSTRUKSI KHUSUS DARI PENULIS (WAJIB diikuti selama masuk akal): ${instruksi}\n` : ''}
+ATURAN DEFAULT (kecuali instruksi khusus di atas bilang lain):
+- Panjang abstrak 150-250 kata per bahasa, ditulis dalam 1 paragraf utuh (kecuali diminta lain).
+- Wajib sertakan kata kunci (minimal 3-5) di baris terakhir tiap versi bahasa.
+- Bahasa akademik formal, tanpa markdown/simbol bintang/tanda pagar.
+
+WAJIB balas PERSIS dengan format berikut, tanpa teks/komentar lain di luar format ini:
 ABSTRAK_INDO:
-[Abstrak dalam Bahasa Indonesia 150-250 kata]
-Kata kunci: [5 kata kunci]
+[isi abstrak dalam Bahasa Indonesia]
+Kata kunci: [kata kunci dipisah koma]
 
 ABSTRACT_ENG:
-[Abstract in English 150-250 words]
-Keywords: [5 keywords]`;
+[isi abstrak dalam Bahasa Inggris]
+Keywords: [keywords separated by commas]`;
+
   try{
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
-    if(!res.ok){ throw new Error(data.error||'Gagal terhubung ke server'); }
-    const result=data.text||'';
-    const indoMatch=result.match(/ABSTRAK_INDO:\n([\s\S]*?)(?=ABSTRACT_ENG:|$)/);
-    const engMatch=result.match(/ABSTRACT_ENG:\n([\s\S]*?)$/);
-    document.getElementById('abstrakIndo').innerHTML=(indoMatch?.[1]||result.split('\n\n')[0]||result).trim().replace(/\n/g,'<br>');
-    document.getElementById('abstrakEng').innerHTML=(engMatch?.[1]||result.split('\n\n')[1]||'').trim().replace(/\n/g,'<br>');
+    if(!res.ok){ throw new Error(data.error || `Server error (${res.status})`); }
+    const result=(data.text||'').trim();
+    if(!result){ throw new Error('AI mengembalikan hasil kosong.'); }
+
+    // Parsing lebih toleran: cari header ABSTRAK_INDO / ABSTRACT_ENG tanpa peduli spasi/simbol di sekitarnya
+    const indoMatch=result.match(/ABSTRAK[_\s]*INDO\s*:?\s*\n([\s\S]*?)(?=ABSTRACT[_\s]*ENG\s*:|$)/i);
+    const engMatch=result.match(/ABSTRACT[_\s]*ENG\s*:?\s*\n([\s\S]*)$/i);
+    let indoText = (indoMatch?.[1]||'').trim();
+    let engText = (engMatch?.[1]||'').trim();
+    if(!indoText && !engText){
+      // Fallback kalau AI tidak ikuti format persis: tampilkan apa adanya supaya tidak kosong
+      indoText = result;
+    }
+    lastAbstrakResult = {indo:indoText, eng:engText};
+    document.getElementById('abstrakIndo').textContent = indoText || '(tidak tersedia)';
+    document.getElementById('abstrakEng').textContent = engText || '(tidak tersedia)';
     document.getElementById('resultArea').style.display='block';
     document.getElementById('resultArea').scrollIntoView({behavior:'smooth'});
     showToast('Abstrak berhasil dibuat! ✓');
-  }catch(e){showToast('Gagal. Coba lagi.');}
+  }catch(e){
+    showToast('Gagal membuat abstrak: '+e.message);
+  }finally{
+    btn.disabled=false; btnLabel.textContent='Generate Abstrak Bilingual';
+  }
 }
+
 function copyAll(){
   const indo=document.getElementById('abstrakIndo').innerText;
   const eng=document.getElementById('abstrakEng').innerText;
   navigator.clipboard.writeText('ABSTRAK\n'+indo+'\n\nABSTRACT\n'+eng).then(()=>showToast('Disalin!'));
+}
+
+async function downloadAbstrakWord(){
+  showToast('Menyiapkan file Word...');
+  try{
+    if(typeof docx==='undefined'){ showToast('Modul Word belum dimuat, muat ulang halaman.'); return; }
+    const { Document, Packer, Paragraph, TextRun, AlignmentType } = docx;
+    const mk=(label,txt)=>[
+      new Paragraph({ children:[new TextRun({text:label,bold:true,size:24})], spacing:{before:300,after:150} }),
+      new Paragraph({ children:[new TextRun({text:txt||'-'})], alignment:AlignmentType.JUSTIFIED, spacing:{after:200,line:360} })
+    ];
+    const doc=new Document({
+      styles:{ default:{ document:{ run:{ font:'Times New Roman', size:24 } } } },
+      sections:[{ properties:{}, children:[ ...mk('ABSTRAK (Indonesia)', lastAbstrakResult.indo), ...mk('ABSTRACT (English)', lastAbstrakResult.eng) ] }]
+    });
+    const blob=await Packer.toBlob(doc);
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='Abstrak.docx';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('File Word berhasil diunduh!');
+  }catch(e){ showToast('Gagal membuat file Word: '+e.message); }
 }
 </script>
 </body>
