@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Presentasi (PPT) – asistenku.pro</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 <style>
 .slide-preview{background:#1E293B;border-radius:12px;padding:16px 20px;margin-bottom:8px;cursor:pointer;transition:background 0.15s;}
 .slide-preview:hover{background:#334155;}
@@ -26,7 +29,7 @@
   <div class="page-content">
     <div style="margin:16px 16px 0;background:linear-gradient(135deg,#FDF2F8,#FBCFE8);border-radius:20px;padding:16px;">
       <h2 style="font-size:18px;font-weight:800;color:#9D174D;">Presentasi AI dalam Menit</h2>
-      <p style="font-size:12px;color:var(--gray-500);margin-top:4px;">Buat outline slide presentasi profesional dari topik, skripsi, atau dokumen Anda.</p>
+      <p style="font-size:12px;color:var(--gray-500);margin-top:4px;">Buat file PPT bertemplate & sudah didesain langsung dari topik, skripsi, atau dokumen Anda — bukan cuma outline teks.</p>
     </div>
     <div id="inputSection" style="padding:16px;">
       <div class="form-group">
@@ -35,7 +38,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">Tujuan Presentasi</label>
-        <div class="type-pills">
+        <div class="type-pills" id="pillsTujuan">
           <button class="type-pill active" onclick="selectPill(this)">Sidang Skripsi</button>
           <button class="type-pill" onclick="selectPill(this)">Seminar</button>
           <button class="type-pill" onclick="selectPill(this)">Bisnis / Kantor</button>
@@ -44,8 +47,17 @@
         </div>
       </div>
       <div class="form-group">
+        <label class="form-label">Tema Desain Slide</label>
+        <div class="type-pills" id="pillsTema">
+          <button class="type-pill active" onclick="selectPill(this)" data-tema="navy">🔵 Navy Akademik</button>
+          <button class="type-pill" onclick="selectPill(this)" data-tema="teal">🟢 Teal Modern</button>
+          <button class="type-pill" onclick="selectPill(this)" data-tema="gold">🟡 Gold Korporat</button>
+          <button class="type-pill" onclick="selectPill(this)" data-tema="magenta">🟣 Magenta Kreatif</button>
+        </div>
+      </div>
+      <div class="form-group">
         <label class="form-label">Jumlah Slide</label>
-        <div class="type-pills">
+        <div class="type-pills" id="pillsJumlah">
           <button class="type-pill" onclick="selectPill(this)">10 slide</button>
           <button class="type-pill active" onclick="selectPill(this)">15 slide</button>
           <button class="type-pill" onclick="selectPill(this)">20 slide</button>
@@ -53,20 +65,25 @@
         </div>
       </div>
       <div class="form-group">
+        <label class="form-label">Instruksi / Perintah Tambahan (Opsional)</label>
+        <textarea class="form-textarea" id="instruksiPPT" rows="3" placeholder="Isi sesuai kemauan Anda, misalnya: &quot;fokus ke bagian hasil dan pembahasan&quot;, &quot;bahasa Inggris&quot;, &quot;tambahkan slide metodologi lebih detail&quot;, &quot;nada santai untuk presentasi bisnis&quot;, dsb."></textarea>
+      </div>
+      <div class="form-group">
         <label class="form-label">Konten / Ringkasan (Opsional)</label>
         <textarea class="form-textarea" id="kontenPPT" placeholder="Tempel ringkasan atau poin penting yang harus ada dalam presentasi..." rows="4"></textarea>
       </div>
       <div class="form-group">
         <label class="form-label">Upload Dokumen Referensi (Opsional)</label>
-        <div class="upload-area" onclick="document.getElementById('pptFile').click()">
+        <div class="upload-area" id="uploadAreaPPT" onclick="document.getElementById('pptFile').click()">
           <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-          <div class="upload-label">PDF, Word, atau TXT</div>
-          <input type="file" id="pptFile" accept=".pdf,.doc,.docx,.txt" style="display:none" onchange="showToast('File: '+this.files[0].name)">
+          <div class="upload-label" id="uploadLabelPPT">PDF, Word, atau TXT</div>
+          <div class="upload-sub" id="uploadSubPPT">Opsional – jadi acuan isi slide</div>
+          <input type="file" id="pptFile" accept=".pdf,.docx,.txt" style="display:none" onchange="onPickPPTFile(this)">
         </div>
       </div>
-      <button class="btn btn-primary" style="background:#DB2777;" onclick="generatePPT()">
+      <button class="btn btn-primary" id="btnGeneratePPT" style="background:#DB2777;" onclick="generatePPT()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        Generate Outline Presentasi
+        <span id="btnGeneratePPTLabel">Generate Presentasi</span>
       </button>
     </div>
 
@@ -77,11 +94,11 @@
         <button onclick="generatePPT()" style="background:none;border:none;font-size:12px;font-weight:600;color:#DB2777;cursor:pointer;">Regenerate</button>
       </div>
       <div id="slideList"></div>
-      <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 12px;margin-top:10px;font-size:12px;color:#92400E;">
-        💡 Outline ini akan digunakan sebagai panduan. Download file PPT untuk mendapatkan file presentasi lengkap.
-      </div>
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <button class="btn btn-primary btn-sm" style="background:#DB2777;" onclick="showToast('Download PPT segera hadir – gunakan outline sebagai panduan')">Download PPT</button>
+      <button class="btn btn-primary" style="background:#DB2777;width:100%;margin-top:14px;" onclick="downloadPPTX()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span id="btnDownloadPPTXLabel">Download File PPT (.pptx)</span>
+      </button>
+      <div style="display:flex;gap:8px;margin-top:10px;">
         <button class="btn btn-secondary btn-sm" onclick="copyOutline()">Salin Outline</button>
       </div>
     </div>
@@ -99,45 +116,198 @@
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function selectPill(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active');}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
+if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}
+
+// ===== Upload dokumen referensi (PDF/DOCX/TXT) — beneran dibaca, dikirim ke AI =====
+let pptFileState = null;
+function onPickPPTFile(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  if(file.size > 10*1024*1024){ showToast('Ukuran file maksimal 10MB'); input.value=''; return; }
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(!['pdf','docx','txt'].includes(ext)){ showToast('Format harus PDF, DOCX, atau TXT'); input.value=''; return; }
+  pptFileState = file;
+  document.getElementById('uploadAreaPPT').classList.add('filled');
+  document.getElementById('uploadLabelPPT').textContent = file.name;
+  document.getElementById('uploadSubPPT').textContent = (file.size/1024/1024).toFixed(2)+' MB • siap dibaca AI (klik lagi untuk ganti)';
+  showToast('File referensi dipilih: '+file.name);
+}
+async function extractFileTextPPT(file){
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='txt') return await file.text();
+  if(ext==='docx'){
+    if(!window.mammoth) throw new Error('Modul pembaca DOCX gagal dimuat, cek koneksi internet.');
+    const arrayBuffer=await file.arrayBuffer();
+    const result=await window.mammoth.extractRawText({arrayBuffer});
+    return result.value || '';
+  }
+  if(ext==='pdf'){
+    if(!window.pdfjsLib) throw new Error('Modul pembaca PDF gagal dimuat, cek koneksi internet.');
+    const arrayBuffer=await file.arrayBuffer();
+    const pdf=await window.pdfjsLib.getDocument({data:arrayBuffer}).promise;
+    let text='';
+    const maxPages=Math.min(pdf.numPages,60);
+    for(let i=1;i<=maxPages;i++){
+      const page=await pdf.getPage(i);
+      const content=await page.getTextContent();
+      text += content.items.map(it=>it.str).join(' ') + '\n';
+    }
+    return text;
+  }
+  throw new Error('Format file tidak didukung.');
+}
+
+// ===== Tema desain (dipakai baik untuk preview warna maupun file .pptx asli) =====
+const TEMA_WARNA = {
+  navy:    { bg:'0F1E3D', accent:'3B82F6', accent2:'93C5FD', text:'0F172A', light:'F0F5FF' },
+  teal:    { bg:'0F3D3A', accent:'14B8A6', accent2:'5EEAD4', text:'0F172A', light:'EFFEFB' },
+  gold:    { bg:'1F1B12', accent:'D97706', accent2:'FCD34D', text:'1F2937', light:'FFFBEB' },
+  magenta: { bg:'3D0F2E', accent:'DB2777', accent2:'F9A8D4', text:'1F2937', light:'FDF2F8' },
+};
+function getTema(){
+  const key = document.querySelector('#pillsTema .type-pill.active')?.dataset.tema || 'navy';
+  return TEMA_WARNA[key];
+}
+
 let slides=[];
+
 async function generatePPT(){
   const topik=document.getElementById('topikPPT').value.trim();
   if(!topik){showToast('Isi judul/topik presentasi');return;}
-  const tujuan=document.querySelector('.type-pills .type-pill.active')?.textContent||'Sidang Skripsi';
-  const jumlah=document.querySelectorAll('.type-pills')[1]?.querySelector('.type-pill.active')?.textContent||'15 slide';
+  const tujuan=document.querySelector('#pillsTujuan .type-pill.active')?.textContent||'Sidang Skripsi';
+  const jumlah=document.querySelector('#pillsJumlah .type-pill.active')?.textContent||'15 slide';
   const konten=document.getElementById('kontenPPT').value.trim();
-  showToast('Membuat outline presentasi...');
+  const instruksi=document.getElementById('instruksiPPT').value.trim();
+
+  const btn=document.getElementById('btnGeneratePPT');
+  const btnLabel=document.getElementById('btnGeneratePPTLabel');
+  btn.disabled=true;
+
+  let referensiText='';
+  if(pptFileState){
+    try{
+      btnLabel.textContent='Membaca dokumen referensi...';
+      referensiText=(await extractFileTextPPT(pptFileState)).trim();
+    }catch(e){
+      showToast('Gagal membaca file: '+e.message);
+      btn.disabled=false; btnLabel.textContent='Generate Presentasi';
+      return;
+    }
+  }
+
+  btnLabel.textContent='AI sedang menyusun slide...';
+  const prompt=`Buatkan outline presentasi PPT untuk acara: ${tujuan}, jumlah ${jumlah}, dengan topik: "${topik}".
+${konten?'\nRingkasan/poin penting dari penulis: '+konten.substring(0,1500):''}
+${instruksi?'\nINSTRUKSI KHUSUS DARI PENULIS (WAJIB diikuti selama masuk akal): '+instruksi:''}
+${referensiText?'\n=== ISI DOKUMEN REFERENSI (gunakan sebagai sumber utama isi slide) ===\n'+referensiText.substring(0,10000):''}
+
+ATURAN:
+- Slide pertama WAJIB "type":"title" (judul presentasi + subjudul singkat, misal nama institusi/tanggal).
+- Selipkan beberapa "type":"section" sebagai pembatas bagian besar (misal sebelum masuk ke Metode, Hasil, dst) — cukup title singkat, tanpa points.
+- Slide isi pakai "type":"content" dengan title dan 3-5 points singkat (maksimal ±12 kata per point, bukan kalimat panjang, ini SLIDE bukan naskah).
+- Slide terakhir WAJIB "type":"closing" (misal "Terima Kasih" / "Pertanyaan?").
+- Total slide sesuai jumlah yang diminta.
+
+WAJIB balas HANYA dengan JSON array valid, tanpa teks/komentar/blok kode markdown di luar JSON, format persis:
+[{"type":"title","title":"...","subtitle":"..."},{"type":"section","title":"..."},{"type":"content","title":"...","points":["...","..."]},{"type":"closing","title":"Terima Kasih","subtitle":"..."}]`;
+
   try{
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:`Buatkan outline ${jumlah} slide presentasi untuk ${tujuan} dengan topik: "${topik}".${konten?' Konten: '+konten.substring(0,500):''}\n\nFormat JSON array: [{"num":1,"title":"Judul Slide","points":["Poin 1","Poin 2","Poin 3"]}]\nHanya JSON, tidak ada teks lain.`}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
-    if(!res.ok){ throw new Error(data.error||'Gagal terhubung ke server'); }
+    if(!res.ok){ throw new Error(data.error || `Server error (${res.status})`); }
     const text=data.text||'[]';
-    const clean=text.replace(/\`\`\`json|\`\`\`/g,'').trim();
-    slides=JSON.parse(clean);
+    const clean=text.replace(/```json|```/g,'').trim();
+    const start=clean.indexOf('['), end=clean.lastIndexOf(']');
+    if(start===-1||end===-1) throw new Error('AI tidak mengembalikan format outline yang valid.');
+    slides=JSON.parse(clean.substring(start,end+1));
+    if(!Array.isArray(slides)||!slides.length) throw new Error('Outline kosong.');
     renderSlides(slides);
-    showToast('Outline berhasil dibuat! ✓');
+    showToast('Outline berhasil dibuat! Klik "Download File PPT" untuk file lengkapnya. ✓');
   }catch(e){
-    slides=[{num:1,title:'Halaman Judul',points:[topik,'Nama Penulis','Institusi','Tahun']},{num:2,title:'Latar Belakang',points:['Permasalahan yang diangkat','Urgensi penelitian','Kontribusi']},{num:3,title:'Rumusan Masalah',points:['Pertanyaan penelitian 1','Pertanyaan penelitian 2']},{num:4,title:'Tujuan Penelitian',points:['Tujuan umum','Tujuan khusus']},{num:5,title:'Tinjauan Pustaka',points:['Landasan teori','Penelitian terdahulu']},{num:6,title:'Metode Penelitian',points:['Pendekatan','Populasi & sampel','Instrumen']},{num:7,title:'Hasil Penelitian',points:['Temuan utama','Data statistik']},{num:8,title:'Pembahasan',points:['Analisis temuan','Kaitannya dengan teori']},{num:9,title:'Simpulan',points:['Jawaban rumusan masalah','Implikasi']},{num:10,title:'Penutup & Terima Kasih',points:['Saran','Pertanyaan?']}];
-    renderSlides(slides);
-    showToast('Menggunakan template standar');
+    showToast('Gagal membuat outline: '+e.message);
+  }finally{
+    btn.disabled=false; btnLabel.textContent='Generate Presentasi';
   }
 }
+
 function renderSlides(slides){
   const list=document.getElementById('slideList');
   document.getElementById('slideCount').textContent=slides.length;
-  list.innerHTML=slides.map(s=>`
+  list.innerHTML=slides.map((s,i)=>`
     <div class="slide-preview">
-      <div class="slide-num">SLIDE ${s.num}</div>
-      <div class="slide-title-preview">${s.title}</div>
-      <div class="slide-points">${(s.points||[]).map(p=>`<div class="slide-point">${p}</div>`).join('')}</div>
+      <div class="slide-num">SLIDE ${i+1}${s.type?' • '+s.type.toUpperCase():''}</div>
+      <div class="slide-title-preview">${(s.title||'').replace(/</g,'&lt;')}</div>
+      ${s.subtitle?`<div class="slide-point" style="margin-top:2px;">${s.subtitle.replace(/</g,'&lt;')}</div>`:''}
+      <div class="slide-points">${(s.points||[]).map(p=>`<div class="slide-point">${String(p).replace(/</g,'&lt;')}</div>`).join('')}</div>
     </div>
   `).join('');
   document.getElementById('resultArea').style.display='block';
   document.getElementById('resultArea').scrollIntoView({behavior:'smooth'});
 }
+
 function copyOutline(){
-  const text=slides.map(s=>`Slide ${s.num}: ${s.title}\n${(s.points||[]).map(p=>'• '+p).join('\n')}`).join('\n\n');
+  const text=slides.map((s,i)=>`Slide ${i+1} (${s.type}): ${s.title}${s.subtitle?'\n'+s.subtitle:''}\n${(s.points||[]).map(p=>'• '+p).join('\n')}`).join('\n\n');
   navigator.clipboard.writeText(text).then(()=>showToast('Outline disalin!'));
+}
+
+// ===== Bangun file .pptx ASLI dan bertemplate (PptxGenJS) — bukan cuma outline teks =====
+async function downloadPPTX(){
+  if(!slides.length){ showToast('Belum ada outline untuk dibuat filenya'); return; }
+  if(typeof PptxGenJS==='undefined'){ showToast('Modul PPT belum dimuat, cek koneksi internet lalu coba lagi.'); return; }
+  const btnLabel=document.getElementById('btnDownloadPPTXLabel');
+  const prevLabel=btnLabel.textContent;
+  btnLabel.textContent='Menyiapkan file...';
+  try{
+    const tema=getTema();
+    const pptx=new PptxGenJS();
+    pptx.defineLayout({ name:'WIDE', width:13.33, height:7.5 });
+    pptx.layout='WIDE';
+    const W=13.33, H=7.5;
+
+    slides.forEach((s,i)=>{
+      const slide=pptx.addSlide();
+      const type=s.type||(i===0?'title':(i===slides.length-1?'closing':'content'));
+
+      if(type==='title'){
+        slide.background={ color:tema.bg };
+        slide.addShape('rect',{ x:0, y:0, w:0.28, h:H, fill:{color:tema.accent} });
+        slide.addShape('rect',{ x:0.9, y:H/2-0.05, w:1.6, h:0.06, fill:{color:tema.accent} });
+        slide.addText(s.title||'', { x:0.9, y:H/2-1.5, w:W-1.8, h:1.4, fontSize:36, bold:true, color:'FFFFFF', fontFace:'Calibri', align:'left', valign:'bottom' });
+        if(s.subtitle) slide.addText(s.subtitle, { x:0.9, y:H/2+0.15, w:W-1.8, h:0.6, fontSize:16, color:tema.accent2, fontFace:'Calibri', align:'left' });
+      } else if(type==='section'){
+        slide.background={ color:tema.accent };
+        slide.addText(s.title||'', { x:0.9, y:H/2-0.7, w:W-1.8, h:1.4, fontSize:30, bold:true, color:'FFFFFF', fontFace:'Calibri', align:'left', valign:'middle' });
+        slide.addShape('rect',{ x:0.95, y:H/2+0.55, w:1.2, h:0.05, fill:{color:'FFFFFF'} });
+      } else if(type==='closing'){
+        slide.background={ color:tema.bg };
+        slide.addText(s.title||'Terima Kasih', { x:0.9, y:H/2-0.9, w:W-1.8, h:1.1, fontSize:34, bold:true, color:'FFFFFF', fontFace:'Calibri', align:'center', valign:'middle' });
+        if(s.subtitle) slide.addText(s.subtitle, { x:0.9, y:H/2+0.25, w:W-1.8, h:0.6, fontSize:15, color:tema.accent2, fontFace:'Calibri', align:'center' });
+        slide.addShape('rect',{ x:W/2-0.6, y:H/2-1.15, w:1.2, h:0.05, fill:{color:tema.accent} });
+      } else {
+        // content
+        slide.background={ color:'FFFFFF' };
+        slide.addShape('rect',{ x:0, y:0, w:W, h:1.05, fill:{color:tema.bg} });
+        slide.addShape('rect',{ x:0, y:1.05, w:1.4, h:0.06, fill:{color:tema.accent} });
+        slide.addText(s.title||'', { x:0.6, y:0.15, w:W-1.2, h:0.75, fontSize:24, bold:true, color:'FFFFFF', fontFace:'Calibri', align:'left', valign:'middle' });
+        const points=(s.points||[]).map(p=>String(p));
+        if(points.length){
+          slide.addText(points.map(p=>({ text:p, options:{ bullet:{code:'2022', indent:18}, breakLine:true, paraSpaceAfter:14 } })), {
+            x:0.7, y:1.5, w:W-1.4, h:H-2.1, fontSize:18, color:tema.text, fontFace:'Calibri', valign:'top', lineSpacingMultiple:1.15
+          });
+        }
+        slide.addText(`${i+1}`, { x:W-0.7, y:H-0.5, w:0.5, h:0.35, fontSize:10, color:'9CA3AF', align:'right' });
+      }
+    });
+
+    const judulFile=(document.getElementById('topikPPT').value.trim()||'Presentasi').substring(0,50).replace(/[^a-z0-9]+/gi,'_');
+    await pptx.writeFile({ fileName: judulFile+'.pptx' });
+    showToast('File PPT berhasil diunduh!');
+  }catch(e){
+    console.error(e);
+    showToast('Gagal membuat file PPT: '+e.message);
+  }finally{
+    btnLabel.textContent=prevLabel;
+  }
 }
 </script>
 </body>
