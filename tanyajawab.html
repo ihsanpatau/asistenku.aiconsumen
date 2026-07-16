@@ -101,6 +101,11 @@
         </div>
       </div>
 
+      <button class="btn btn-primary" id="belajarGenerateBtn" onclick="triggerBelajar()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M4 19h4l10.5-10.5a2.121 2.121 0 0 0-3-3L5 16v3"/></svg>
+        Buat Sekarang
+      </button>
+
       <div id="belajarResultWrap" style="display:none;">
         <div style="font-size:14px;font-weight:700;color:var(--dark);margin:16px 0 8px;">Hasil:</div>
         <div class="belajar-result" id="belajarResult"></div>
@@ -248,10 +253,15 @@ let belajarFileName='';
 document.getElementById('genreGrid').addEventListener('click',function(e){
   const btn=e.target.closest('.genre-chip');
   if(!btn)return;
-  if(!belajarFileText){showToast('Unggah file terlebih dahulu');return;}
   this.querySelectorAll('.genre-chip').forEach(c=>c.classList.remove('active'));
-  doBelajar(btn.getAttribute('data-prompt'), btn);
+  btn.classList.add('active');
 });
+function triggerBelajar(){
+  if(!belajarFileText){showToast('Unggah file terlebih dahulu');return;}
+  const selected=document.querySelector('#genreGrid .genre-chip.active');
+  if(!selected){showToast('Pilih genre belajar terlebih dahulu');return;}
+  doBelajar(selected.getAttribute('data-prompt'), selected);
+}
 
 async function handleBelajarFile(inp){
   const file=inp.files[0];
@@ -285,6 +295,8 @@ function removeBelajarFile(){
 async function doBelajar(instruction, btn){
   if(!belajarFileText){showToast('Unggah file terlebih dahulu');return;}
   document.querySelectorAll('#genreGrid .genre-chip').forEach(c=>c.disabled=true);
+  const genBtn=document.getElementById('belajarGenerateBtn');
+  genBtn.disabled=true;
   if(btn)btn.classList.add('active');
 
   const wrap=document.getElementById('belajarResultWrap');
@@ -298,6 +310,7 @@ async function doBelajar(instruction, btn){
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:instruction}]})});
     const data=await res.json().catch(()=>({}));
     document.querySelectorAll('#genreGrid .genre-chip').forEach(c=>c.disabled=false);
+    genBtn.disabled=false;
     if(!res.ok){
       box.innerHTML=`<div style="color:var(--red,#DC2626);">⚠️ Gagal memproses: ${data.error||('Server merespons dengan status '+res.status)}</div>`;
       showToast(data.error||'Gagal terhubung ke server');
@@ -312,6 +325,7 @@ async function doBelajar(instruction, btn){
     showToast('Selesai! ✓');
   }catch(e){
     document.querySelectorAll('#genreGrid .genre-chip').forEach(c=>c.disabled=false);
+    genBtn.disabled=false;
     box.innerHTML='<div style="color:var(--red,#DC2626);">⚠️ Gagal terhubung ke server. Periksa koneksi internet Anda lalu coba lagi.</div>';
     showToast('Gagal. Coba lagi.');
   }
