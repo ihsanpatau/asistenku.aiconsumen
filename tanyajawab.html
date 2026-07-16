@@ -146,6 +146,17 @@ function switchMode(mode){
 }
 switchMode('qa');
 
+// Kalau pengguna tanya siapa pemilik/pencipta/pembuat aplikasi atau AI ini,
+// jawab langsung tanpa perlu ke server, supaya jawabannya selalu konsisten.
+const NAMA_PEMILIK = 'Muh. Ihsan Patau, S.E';
+const REGEX_IDENTITAS = /(siapa\s+(yang\s+)?(membuat|menciptakan|mengembangkan|punya|pemilik|pembuat|pencipta|developer|owner)|pemilik(mu| aplikasi| ai)?|pencipta(mu| aplikasi| ai)?|pembuat(mu| aplikasi| ai)?|siapa\s+(itu\s+)?(developer|owner)|dibuat\s+oleh\s+siapa|punya\s+siapa)/i;
+function jawabanIdentitas(msg){
+  if(REGEX_IDENTITAS.test(msg)){
+    return `Aplikasi dan AI ini dimiliki dan diciptakan oleh **${NAMA_PEMILIK}**. Ada lagi yang bisa saya bantu?`;
+  }
+  return null;
+}
+
 /* ---------- File reading helper (shared) ---------- */
 const MAX_FILE_CHARS = 15000;
 async function readFileAsText(file){
@@ -234,6 +245,17 @@ async function sendQA(){
   if(!msg)return;
   inp.value='';inp.style.height='auto';
   addMsg('user',msg);
+
+  const jawabLangsung=jawabanIdentitas(msg);
+  if(jawabLangsung){
+    showTypingQA();
+    setTimeout(()=>{
+      document.getElementById('typingQA')?.remove();
+      addMsg('bot',jawabLangsung);
+    },500);
+    return;
+  }
+
   showTypingQA();
   let system='Kamu adalah asisten akademik AI dari asistenku.pro. Jawab pertanyaan seputar skripsi, tesis, penelitian, metodologi, dan penulisan akademik dalam Bahasa Indonesia. Jawab dengan jelas, terstruktur, dan berikan contoh praktis jika perlu.';
   if(qaFileText){
