@@ -315,19 +315,19 @@ Pilih jenis yang PALING PAS untuk tiap bagian isi (bukan asal random):
 
 - "title": slide pembuka. field: title, subtitle
 - "section": pemisah bab/bagian besar. field: title
-- "content": poin-poin singkat. field: title, points (3-5 poin, maks 12 kata/poin)
+- "content": poin-poin dengan penjelasan, BUKAN cuma fragmen kata. field: title, points (3-4 poin). SETIAP poin WAJIB format "Sub-judul singkat: penjelasan 1 kalimat (10-16 kata)" — sub-judul maks 4 kata sebelum tanda titik dua, lalu penjelasan yang menjabarkan maksudnya. Contoh benar: "Asas Legalitas: hukuman hanya boleh dijatuhkan jika sudah diatur lebih dulu dalam undang-undang". Contoh SALAH (jangan begini): "Asas Legalitas" (tanpa penjelasan).
 - "table": kalau ada data terstruktur/perbandingan/rincian yang cocok disusun tabel. field: title, headers (array 2-4 kolom), rows (array of array, isi tiap sel singkat maks 6 kata, 3-6 baris)
 - "chart": kalau ada data numerik/statistik/tren yang bisa divisualisasi. field: title, chart_type ("bar"|"pie"|"line"), series_name (label singkat data), categories (array label, 3-6 item), values (array angka, JUMLAH SAMA dengan categories)
-- "comparison": kalau ada 2 sisi yang dibandingkan (sebelum/sesudah, pro/kontra, A vs B). field: title, left_title, left_points (2-4 poin), right_title, right_points (2-4 poin)
+- "comparison": kalau ada 2 sisi yang dibandingkan (sebelum/sesudah, pro/kontra, A vs B). field: title, left_title, left_points (2-4 poin, format sama "Sub-judul: penjelasan singkat"), right_title, right_points (2-4 poin, format sama)
 - "stat": kalau ingin menonjolkan 2-3 angka/statistik penting jadi besar. field: title, stats (array of {"number":"contoh 87%","label":"deskripsi singkat"}, 2-3 item)
 - "quote": kutipan/pernyataan penting untuk penekanan. field: quote, author (author boleh nama tokoh/sumber/kosong)
-- "image": slide dengan foto ilustratif relevan. field: title, points (1-3 poin caption singkat, opsional), image_query (kata kunci PENCARIAN FOTO dalam BAHASA INGGRIS, spesifik & visual, contoh: "university students studying library", "chicken farm poultry indonesia", "financial chart growth")
+- "image": slide dengan foto ilustratif relevan. field: title, points (1-3 poin caption, format sama "Sub-judul: penjelasan singkat" atau kalimat pendek biasa), image_query (kata kunci PENCARIAN FOTO dalam BAHASA INGGRIS, SPESIFIK & KONKRET secara visual — hindari istilah abstrak yang tidak bisa difoto seperti nama pasal/asas hukum; ganti dengan objek/adegan nyata yang mewakilinya, contoh: "courtroom judge gavel Indonesia", "old house window night burglary", "islamic law quran book scale of justice", "university law students discussion", "financial growth chart graph office")
 - "closing": slide penutup. field: title, subtitle
 
 ATURAN WAJIB:
 - Slide pertama HARUS "title", slide terakhir HARUS "closing"
 - Sebar minimal 1 slide "table" ATAU "chart" jika topik punya data/rincian yang relevan
-- Sebar 1-3 slide "image" di titik yang relevan (jangan di awal/akhir)
+- Sebar slide "image" secara merata, KIRA-KIRA 1 dari SETIAP 3-4 slide (jangan cuma 1-2 dari total, dan jangan di slide pertama/terakhir) — presentasi harus terasa kaya visual, bukan didominasi teks
 - Jangan taruh 2 slide bertipe sama berturut-turut kecuali "content"
 - Total slide sesuai jumlah diminta, isi konten akurat & sesuai instruksi/dokumen
 
@@ -443,6 +443,13 @@ function renderDesignPreview(d){
 // ============================================================
 const TYPE_ICON = {title:'🏁',section:'📌',content:'📝',table:'📊',chart:'📈',comparison:'⚖️',stat:'🔢',quote:'❝',image:'🖼️',closing:'🎉'};
 function esc(v){ return String(v==null?'':v).replace(/</g,'&lt;'); }
+// Bold-kan bagian "Sub-judul" sebelum ":" pada preview, biar kelihatan ada penjelasannya
+function escPoint(v){
+  const str = String(v==null?'':v);
+  const idx = str.indexOf(':');
+  if(idx>-1 && idx<=40) return `<b>${esc(str.slice(0,idx))}:</b>${esc(str.slice(idx+1))}`;
+  return esc(str);
+}
 
 function renderSlides(s){
   const list = document.getElementById('slideList');
@@ -460,18 +467,18 @@ function renderSlides(s){
       body = `<div class="slide-point">Grafik ${esc(sl.chart_type||'bar')}: ${sl.categories.map((c,ci)=>`${esc(c)}=${esc((sl.values||[])[ci])}`).join(', ')}</div>`;
     } else if(sl.type==='comparison'){
       body = `<div style="display:flex;gap:10px;margin-top:4px;">
-        <div style="flex:1;"><div style="font-size:10px;font-weight:700;color:#F8FAFC;">${esc(sl.left_title)}</div>${(sl.left_points||[]).map(p=>`<div class="slide-point">${esc(p)}</div>`).join('')}</div>
-        <div style="flex:1;"><div style="font-size:10px;font-weight:700;color:#F8FAFC;">${esc(sl.right_title)}</div>${(sl.right_points||[]).map(p=>`<div class="slide-point">${esc(p)}</div>`).join('')}</div>
+        <div style="flex:1;"><div style="font-size:10px;font-weight:700;color:#F8FAFC;">${esc(sl.left_title)}</div>${(sl.left_points||[]).map(p=>`<div class="slide-point">${escPoint(p)}</div>`).join('')}</div>
+        <div style="flex:1;"><div style="font-size:10px;font-weight:700;color:#F8FAFC;">${esc(sl.right_title)}</div>${(sl.right_points||[]).map(p=>`<div class="slide-point">${escPoint(p)}</div>`).join('')}</div>
       </div>`;
     } else if(sl.type==='stat'){
       body = `<div style="display:flex;gap:14px;margin-top:4px;">${(sl.stats||[]).map(st=>`<div><div style="font-size:16px;font-weight:800;color:#F8FAFC;">${esc(st.number)}</div><div style="font-size:9px;color:#94A3B8;">${esc(st.label)}</div></div>`).join('')}</div>`;
     } else if(sl.type==='quote'){
       body = `<div class="slide-point" style="font-style:italic;">"${esc(sl.quote)}"${sl.author?' — '+esc(sl.author):''}</div>`;
     } else if(sl.type==='image'){
-      body = `<div class="slide-point">🖼️ Foto: ${esc(sl.image_query)}</div>${(sl.points||[]).map(p=>`<div class="slide-point">${esc(p)}</div>`).join('')}`;
+      body = `<div class="slide-point">🖼️ Foto: ${esc(sl.image_query)}</div>${(sl.points||[]).map(p=>`<div class="slide-point">${escPoint(p)}</div>`).join('')}`;
     } else {
       body = `${sl.subtitle?`<div class="slide-point" style="margin-top:2px;">${esc(sl.subtitle)}</div>`:''}
-      <div class="slide-points">${(sl.points||[]).map(p=>`<div class="slide-point">${esc(p)}</div>`).join('')}</div>`;
+      <div class="slide-points">${(sl.points||[]).map(p=>`<div class="slide-point">${escPoint(p)}</div>`).join('')}</div>`;
     }
 
     return `<div class="slide-preview">
@@ -547,6 +554,24 @@ function AR(slide, x,y,w,h, hexColor, alphaOverride){
 function AE(slide, x,y,w,h, hexColor){
   const color6 = String(hexColor||'000000').replace(/[^0-9a-fA-F]/g,'').substring(0,6).padEnd(6,'0').toUpperCase();
   slide.addShape('ellipse', { x, y, w, h, fill:{ color: color6 } });
+}
+
+// Pecah poin format "Sub-judul: penjelasan" jadi rich-text runs (heading tebal + penjelasan biasa)
+// supaya tiap sub-poin tampil dengan judul singkat DAN kalimat penjelasan, bukan cuma fragmen.
+function richPoint(str, headSize, descSize, color, font){
+  const text = String(str||'');
+  const idx = text.indexOf(':');
+  if(idx > -1 && idx <= 40){
+    const heading = text.slice(0, idx).trim();
+    const desc = text.slice(idx+1).trim();
+    if(desc){
+      return [
+        { text: heading + ':  ', options:{ bold:true, fontSize:headSize, color, fontFace:font, breakLine:false } },
+        { text: desc, options:{ bold:false, fontSize:descSize, color, fontFace:font } }
+      ];
+    }
+  }
+  return [{ text, options:{ fontSize:headSize, color, fontFace:font } }];
 }
 
 // Ambil foto dari sumber publik berdasar kata kunci, convert ke base64.
@@ -839,8 +864,8 @@ async function downloadPPTX(){
         AR(slide, leftX, bodyY, colW, bodyH, C.acc, 93);
         AR(slide, rightX, bodyY, colW, bodyH, C.acc2, 80);
         const rowHL = bodyH/Math.max(lp.length,1), rowHR = bodyH/Math.max(rp.length,1);
-        lp.forEach((p,pi)=>slide.addText('•  '+p, { x:leftX+0.2, y:bodyY+pi*rowHL, w:colW-0.4, h:rowHL, fontSize:14, color:C.body, fontFace:FONT, valign:'middle', lineSpacingMultiple:1.1 }));
-        rp.forEach((p,pi)=>slide.addText('•  '+p, { x:rightX+0.2, y:bodyY+pi*rowHR, w:colW-0.4, h:rowHR, fontSize:14, color:C.body, fontFace:FONT, valign:'middle', lineSpacingMultiple:1.1 }));
+        lp.forEach((p,pi)=>slide.addText(richPoint(p, 13, 12, C.body, FONT), { x:leftX+0.2, y:bodyY+pi*rowHL, w:colW-0.4, h:rowHL, valign:'middle', lineSpacingMultiple:1.15, bullet:{code:'25CF'} }));
+        rp.forEach((p,pi)=>slide.addText(richPoint(p, 13, 12, C.body, FONT), { x:rightX+0.2, y:bodyY+pi*rowHR, w:colW-0.4, h:rowHR, valign:'middle', lineSpacingMultiple:1.15, bullet:{code:'25CF'} }));
       }
 
       // ══════════════════════════════════════════════
@@ -900,7 +925,7 @@ async function downloadPPTX(){
         cap.forEach((p,pi)=>{
           const y = AREA_Y + pi*rowH;
           AR(slide, 0.55, y+rowH*0.4, 0.22,0.22, C.acc);
-          slide.addText(p, { x:0.9, y, w:capW-0.35, h:rowH, fontSize:16, color:C.body, fontFace:FONT, valign:'middle', lineSpacingMultiple:1.2 });
+          slide.addText(richPoint(p, 15, 13, C.body, FONT), { x:0.9, y, w:capW-0.35, h:rowH, valign:'middle', lineSpacingMultiple:1.25 });
         });
       }
 
@@ -913,7 +938,7 @@ async function downloadPPTX(){
 
         // ── numbered_cards ──────────────────────────
         if(LAYOUT==='numbered_cards'){
-          const cardH = Math.min(0.92, AREA_H/nPts - 0.12);
+          const cardH = Math.min(1.35, AREA_H/nPts - 0.12);
           const totalCards = cardH*nPts + 0.12*(nPts-1);
           const startY = AREA_Y + (AREA_H-totalCards)/2;
           pts.forEach((pt,pi)=>{
@@ -925,10 +950,9 @@ async function downloadPPTX(){
               fontSize:17, bold:true, color:'FFFFFF', fontFace:FONT,
               align:'center', valign:'middle', margin:0
             });
-            slide.addText(pt, {
+            slide.addText(richPoint(pt, 15, 13, C.body, FONT), {
               x:1.25, y, w:W-1.88, h:cardH,
-              fontSize:16, color:C.body, fontFace:FONT,
-              valign:'middle', lineSpacingMultiple:1.15
+              valign:'middle', lineSpacingMultiple:1.2, margin:6
             });
           });
         }
@@ -945,10 +969,9 @@ async function downloadPPTX(){
             list.forEach((pt,pi)=>{
               const y = AREA_Y + pi*rH;
               AR(slide, xBase, y+rH*0.35, 0.22,0.22, C.acc);
-              slide.addText(pt, {
+              slide.addText(richPoint(pt, 14, 12, C.body, FONT), {
                 x:xBase+0.32, y, w:colW-0.32, h:rH,
-                fontSize:15, color:C.body, fontFace:FONT,
-                valign:'middle', lineSpacingMultiple:1.1
+                valign:'middle', lineSpacingMultiple:1.15, margin:2
               });
             });
           };
@@ -958,7 +981,7 @@ async function downloadPPTX(){
 
         // ── icon_rows ────────────────────────────────
         else if(LAYOUT==='icon_rows'){
-          const rowH = Math.min(1.05, AREA_H/nPts);
+          const rowH = Math.min(1.5, AREA_H/nPts);
           pts.forEach((pt,pi)=>{
             const y = AREA_Y + pi*rowH + (AREA_H - rowH*nPts)/2;
             AE(slide, 0.55, y+(rowH-0.6)/2, 0.6,0.6, pi%2===0?C.acc:C.acc2);
@@ -967,10 +990,9 @@ async function downloadPPTX(){
               fontSize:15, bold:true, color:'FFFFFF', fontFace:FONT,
               align:'center', valign:'middle', margin:0
             });
-            slide.addText(pt, {
+            slide.addText(richPoint(pt, 16, 13, C.body, FONT), {
               x:1.28, y, w:W-1.85, h:rowH,
-              fontSize:17, color:C.body, fontFace:FONT,
-              valign:'middle', lineSpacingMultiple:1.15
+              valign:'middle', lineSpacingMultiple:1.2, margin:4
             });
             if(pi<pts.length-1)
               AR(slide, 0.6,y+rowH-0.04, W-1.2,0.04, C.acc, 78);
@@ -979,7 +1001,7 @@ async function downloadPPTX(){
 
         // ── timeline ─────────────────────────────────
         else if(LAYOUT==='timeline'){
-          const rowH = Math.min(1.05, AREA_H/nPts);
+          const rowH = Math.min(1.5, AREA_H/nPts);
           // garis vertikal
           AR(slide, 1.35, AREA_Y, 0.07, AREA_H, C.acc, 60);
           pts.forEach((pt,pi)=>{
@@ -994,20 +1016,19 @@ async function downloadPPTX(){
             AR(slide, 1.68,y+(rowH-0.62)/2+0.24, 0.38,0.05, C.acc, 50);
             // kartu isi
             AR(slide, 2.15, y+0.05, W-2.7, rowH-0.1, C.acc, 92);
-            slide.addText(pt, {
+            slide.addText(richPoint(pt, 14, 12, C.body, FONT), {
               x:2.28, y:y+0.05, w:W-2.95, h:rowH-0.1,
-              fontSize:15, color:C.body, fontFace:FONT,
-              valign:'middle', lineSpacingMultiple:1.1
+              valign:'middle', lineSpacingMultiple:1.15, margin:4
             });
           });
         }
 
         // ── grid_boxes ───────────────────────────────
         else if(LAYOUT==='grid_boxes'){
-          const cols  = pts.length<=2 ? pts.length : pts.length<=4 ? 2 : Math.min(3,pts.length);
+          const cols  = pts.length<=1 ? 1 : 2;
           const rows  = Math.ceil(pts.length/cols);
           const bW    = (W-0.9-(cols-1)*0.18)/cols;
-          const bH    = Math.min(1.55, (AREA_H-(rows-1)*0.18)/rows);
+          const bH    = Math.min(2.0, (AREA_H-(rows-1)*0.18)/rows);
           pts.forEach((pt,pi)=>{
             const col  = pi%cols, row = Math.floor(pi/cols);
             const x    = 0.55 + col*(bW+0.18);
@@ -1019,10 +1040,9 @@ async function downloadPPTX(){
               fontSize:11, bold:true, color:'FFFFFF', fontFace:FONT,
               align:'center', valign:'middle', margin:0
             });
-            slide.addText(pt, {
-              x:x+0.1, y:y+0.36, w:bW-0.2, h:bH-0.46,
-              fontSize:13, color:C.body, fontFace:FONT,
-              valign:'top', lineSpacingMultiple:1.15
+            slide.addText(richPoint(pt, 14, 12, C.body, FONT), {
+              x:x+0.15, y:y+0.4, w:bW-0.3, h:bH-0.5,
+              valign:'top', lineSpacingMultiple:1.2
             });
           });
         }
@@ -1032,28 +1052,25 @@ async function downloadPPTX(){
           if(pts.length===1){
             AR(slide, 0.6,AREA_Y, W-1.2,AREA_H, C.acc, 90);
             AR(slide, 0.6,AREA_Y, 0.16,AREA_H, C.acc);
-            slide.addText(pts[0], {
+            slide.addText(richPoint(pts[0], 24, 18, C.body, FONT), {
               x:0.95, y:AREA_Y, w:W-1.75, h:AREA_H,
-              fontSize:22, color:C.body, fontFace:FONT,
               valign:'middle', lineSpacingMultiple:1.35
             });
           } else {
             // Poin pertama jadi callout besar, sisanya list kecil
             const bigH = Math.min(2.0, AREA_H*0.45);
             AR(slide, 0.55,AREA_Y, W-1.1,bigH, C.acc);
-            slide.addText(pts[0], {
+            slide.addText(richPoint(pts[0], 19, 15, 'FFFFFF', FONT), {
               x:0.85, y:AREA_Y, w:W-1.6, h:bigH,
-              fontSize:19, bold:true, color:'FFFFFF', fontFace:FONT,
               valign:'middle', lineSpacingMultiple:1.2
             });
             const restH = (AREA_H-bigH-0.15) / Math.max(pts.length-1,1);
             pts.slice(1).forEach((pt,pi)=>{
               const y = AREA_Y + bigH + 0.18 + pi*restH;
               AR(slide, 0.55,y+restH*0.22, 0.14,restH*0.55, C.acc);
-              slide.addText(pt, {
+              slide.addText(richPoint(pt, 15, 12, C.body, FONT), {
                 x:0.85, y, w:W-1.5, h:restH,
-                fontSize:15, color:C.body, fontFace:FONT,
-                valign:'middle', lineSpacingMultiple:1.1
+                valign:'middle', lineSpacingMultiple:1.15
               });
             });
           }
@@ -1061,7 +1078,7 @@ async function downloadPPTX(){
 
         // ── fallback numbered_cards ───────────────────
         else {
-          const cardH2 = Math.min(0.92, AREA_H/nPts - 0.1);
+          const cardH2 = Math.min(1.35, AREA_H/nPts - 0.1);
           pts.forEach((pt,pi)=>{
             const y = AREA_Y + pi*(cardH2+0.12);
             AR(slide, 0.55,y, 0.58,cardH2, C.acc);
@@ -1070,10 +1087,9 @@ async function downloadPPTX(){
               fontSize:17, bold:true, color:'FFFFFF', fontFace:FONT,
               align:'center', valign:'middle', margin:0
             });
-            slide.addText(pt, {
+            slide.addText(richPoint(pt, 15, 13, C.body, FONT), {
               x:1.28, y, w:W-1.88, h:cardH2,
-              fontSize:16, color:C.body, fontFace:FONT,
-              valign:'middle', lineSpacingMultiple:1.1
+              valign:'middle', lineSpacingMultiple:1.2, margin:6
             });
           });
         }
