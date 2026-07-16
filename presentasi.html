@@ -304,20 +304,35 @@ async function generateAll(){
   }
 
   // Prompt konten
-  const promptKonten = `Buatkan outline presentasi PPT untuk acara: ${tujuan}, jumlah ${jumlah}.
+  const promptKonten = `Kamu adalah konsultan presentasi profesional (setara McKinsey/BCG) yang merancang deck untuk acara: ${tujuan}, jumlah ${jumlah}.
 ${instruksi?'\nINSTRUKSI PENULIS: '+instruksi:''}
 ${referensiText?'\n=== DOKUMEN REFERENSI ===\n'+referensiText.substring(0,9000):''}
 ${!referensiText?'\n(Tidak ada dokumen — gunakan instruksi penulis sebagai topik.)':''}
 
-ATURAN:
-- Slide pertama: "type":"title" (judul + subjudul singkat)
-- Slide section sebagai pemisah bagian besar (tanpa points)
-- Slide isi "type":"content": 3-5 points, maks 12 kata/point, BUKAN kalimat panjang
-- Slide terakhir: "type":"closing"
-- Total slide sesuai jumlah diminta
+JANGAN buat slide yang isinya cuma daftar sub-poin datar terus-menerus — itu membosankan.
+Variasikan JENIS SLIDE agar deck terasa seperti buatan desainer profesional, bukan template.
+Pilih jenis yang PALING PAS untuk tiap bagian isi (bukan asal random):
 
-BALAS HANYA JSON array valid:
-[{"type":"title","title":"...","subtitle":"..."},{"type":"section","title":"..."},{"type":"content","title":"...","points":["...","..."]},{"type":"closing","title":"Terima Kasih","subtitle":"..."}]`;
+- "title": slide pembuka. field: title, subtitle
+- "section": pemisah bab/bagian besar. field: title
+- "content": poin-poin singkat. field: title, points (3-5 poin, maks 12 kata/poin)
+- "table": kalau ada data terstruktur/perbandingan/rincian yang cocok disusun tabel. field: title, headers (array 2-4 kolom), rows (array of array, isi tiap sel singkat maks 6 kata, 3-6 baris)
+- "chart": kalau ada data numerik/statistik/tren yang bisa divisualisasi. field: title, chart_type ("bar"|"pie"|"line"), series_name (label singkat data), categories (array label, 3-6 item), values (array angka, JUMLAH SAMA dengan categories)
+- "comparison": kalau ada 2 sisi yang dibandingkan (sebelum/sesudah, pro/kontra, A vs B). field: title, left_title, left_points (2-4 poin), right_title, right_points (2-4 poin)
+- "stat": kalau ingin menonjolkan 2-3 angka/statistik penting jadi besar. field: title, stats (array of {"number":"contoh 87%","label":"deskripsi singkat"}, 2-3 item)
+- "quote": kutipan/pernyataan penting untuk penekanan. field: quote, author (author boleh nama tokoh/sumber/kosong)
+- "image": slide dengan foto ilustratif relevan. field: title, points (1-3 poin caption singkat, opsional), image_query (kata kunci PENCARIAN FOTO dalam BAHASA INGGRIS, spesifik & visual, contoh: "university students studying library", "chicken farm poultry indonesia", "financial chart growth")
+- "closing": slide penutup. field: title, subtitle
+
+ATURAN WAJIB:
+- Slide pertama HARUS "title", slide terakhir HARUS "closing"
+- Sebar minimal 1 slide "table" ATAU "chart" jika topik punya data/rincian yang relevan
+- Sebar 1-3 slide "image" di titik yang relevan (jangan di awal/akhir)
+- Jangan taruh 2 slide bertipe sama berturut-turut kecuali "content"
+- Total slide sesuai jumlah diminta, isi konten akurat & sesuai instruksi/dokumen
+
+BALAS HANYA JSON array valid, tanpa teks lain, tanpa markdown fence:
+[{"type":"title","title":"...","subtitle":"..."},{"type":"section","title":"..."},{"type":"content","title":"...","points":["...","..."]},{"type":"table","title":"...","headers":["...","..."],"rows":[["...","..."]]},{"type":"chart","title":"...","chart_type":"bar","series_name":"...","categories":["...","..."],"values":[10,20]},{"type":"comparison","title":"...","left_title":"...","left_points":["..."],"right_title":"...","right_points":["..."]},{"type":"stat","title":"...","stats":[{"number":"...","label":"..."}]},{"type":"quote","quote":"...","author":"..."},{"type":"image","title":"...","points":["..."],"image_query":"..."},{"type":"closing","title":"Terima Kasih","subtitle":"..."}]`;
 
   // Prompt desain — ini yang menghasilkan "template tak terbatas"
   const topikKonteks = instruksi || (referensiText ? referensiText.substring(0,500) : tujuan);
@@ -426,23 +441,61 @@ function renderDesignPreview(d){
 // ============================================================
 // RENDER SLIDE LIST (outline preview)
 // ============================================================
+const TYPE_ICON = {title:'🏁',section:'📌',content:'📝',table:'📊',chart:'📈',comparison:'⚖️',stat:'🔢',quote:'❝',image:'🖼️',closing:'🎉'};
+function esc(v){ return String(v==null?'':v).replace(/</g,'&lt;'); }
+
 function renderSlides(s){
   const list = document.getElementById('slideList');
   document.getElementById('slideCount').textContent = s.length;
-  list.innerHTML = s.map((sl,i)=>`
-    <div class="slide-preview">
-      <div class="slide-num">SLIDE ${i+1}${sl.type?' • '+sl.type.toUpperCase():''}</div>
-      <div class="slide-title-preview">${(sl.title||'').replace(/</g,'&lt;')}</div>
-      ${sl.subtitle?`<div class="slide-point" style="margin-top:2px;">${sl.subtitle.replace(/</g,'&lt;')}</div>`:''}
-      <div class="slide-points">${(sl.points||[]).map(p=>`<div class="slide-point">${String(p).replace(/</g,'&lt;')}</div>`).join('')}</div>
-    </div>
-  `).join('');
+  list.innerHTML = s.map((sl,i)=>{
+    const icon = TYPE_ICON[sl.type] || '📝';
+    let body = '';
+
+    if(sl.type==='table' && sl.headers){
+      body = `<div style="overflow-x:auto;margin-top:4px;"><table style="border-collapse:collapse;width:100%;font-size:10px;">
+        <tr>${sl.headers.map(h=>`<th style="border:1px solid #334155;padding:3px 6px;background:#334155;color:#F8FAFC;text-align:left;">${esc(h)}</th>`).join('')}</tr>
+        ${(sl.rows||[]).map(r=>`<tr>${r.map(c=>`<td style="border:1px solid #334155;padding:3px 6px;color:#CBD5E1;">${esc(c)}</td>`).join('')}</tr>`).join('')}
+      </table></div>`;
+    } else if(sl.type==='chart' && sl.categories){
+      body = `<div class="slide-point">Grafik ${esc(sl.chart_type||'bar')}: ${sl.categories.map((c,ci)=>`${esc(c)}=${esc((sl.values||[])[ci])}`).join(', ')}</div>`;
+    } else if(sl.type==='comparison'){
+      body = `<div style="display:flex;gap:10px;margin-top:4px;">
+        <div style="flex:1;"><div style="font-size:10px;font-weight:700;color:#F8FAFC;">${esc(sl.left_title)}</div>${(sl.left_points||[]).map(p=>`<div class="slide-point">${esc(p)}</div>`).join('')}</div>
+        <div style="flex:1;"><div style="font-size:10px;font-weight:700;color:#F8FAFC;">${esc(sl.right_title)}</div>${(sl.right_points||[]).map(p=>`<div class="slide-point">${esc(p)}</div>`).join('')}</div>
+      </div>`;
+    } else if(sl.type==='stat'){
+      body = `<div style="display:flex;gap:14px;margin-top:4px;">${(sl.stats||[]).map(st=>`<div><div style="font-size:16px;font-weight:800;color:#F8FAFC;">${esc(st.number)}</div><div style="font-size:9px;color:#94A3B8;">${esc(st.label)}</div></div>`).join('')}</div>`;
+    } else if(sl.type==='quote'){
+      body = `<div class="slide-point" style="font-style:italic;">"${esc(sl.quote)}"${sl.author?' — '+esc(sl.author):''}</div>`;
+    } else if(sl.type==='image'){
+      body = `<div class="slide-point">🖼️ Foto: ${esc(sl.image_query)}</div>${(sl.points||[]).map(p=>`<div class="slide-point">${esc(p)}</div>`).join('')}`;
+    } else {
+      body = `${sl.subtitle?`<div class="slide-point" style="margin-top:2px;">${esc(sl.subtitle)}</div>`:''}
+      <div class="slide-points">${(sl.points||[]).map(p=>`<div class="slide-point">${esc(p)}</div>`).join('')}</div>`;
+    }
+
+    return `<div class="slide-preview">
+      <div class="slide-num">${icon} SLIDE ${i+1}${sl.type?' • '+sl.type.toUpperCase():''}</div>
+      <div class="slide-title-preview">${esc(sl.title||(sl.type==='quote'?'Kutipan':''))}</div>
+      ${body}
+    </div>`;
+  }).join('');
   document.getElementById('resultArea').style.display='block';
   document.getElementById('resultArea').scrollIntoView({behavior:'smooth'});
 }
 
 function copyOutline(){
-  const text = slides.map((s,i)=>`Slide ${i+1} (${s.type}): ${s.title}${s.subtitle?'\n'+s.subtitle:''}\n${(s.points||[]).map(p=>'• '+p).join('\n')}`).join('\n\n');
+  const text = slides.map((s,i)=>{
+    let body = '';
+    if(s.type==='table' && s.headers) body = [s.headers.join(' | '), ...(s.rows||[]).map(r=>r.join(' | '))].join('\n');
+    else if(s.type==='chart' && s.categories) body = s.categories.map((c,ci)=>`${c}: ${(s.values||[])[ci]}`).join('\n');
+    else if(s.type==='comparison') body = `${s.left_title}:\n${(s.left_points||[]).map(p=>'• '+p).join('\n')}\n${s.right_title}:\n${(s.right_points||[]).map(p=>'• '+p).join('\n')}`;
+    else if(s.type==='stat') body = (s.stats||[]).map(st=>`${st.number} — ${st.label}`).join('\n');
+    else if(s.type==='quote') body = `"${s.quote}"${s.author?' — '+s.author:''}`;
+    else if(s.type==='image') body = `[Foto: ${s.image_query}]\n${(s.points||[]).map(p=>'• '+p).join('\n')}`;
+    else body = (s.points||[]).map(p=>'• '+p).join('\n');
+    return `Slide ${i+1} (${s.type}): ${s.title||''}${s.subtitle?'\n'+s.subtitle:''}\n${body}`;
+  }).join('\n\n');
   navigator.clipboard.writeText(text).then(()=>showToast('Outline disalin!'));
 }
 
@@ -496,6 +549,34 @@ function AE(slide, x,y,w,h, hexColor){
   slide.addShape('ellipse', { x, y, w, h, fill:{ color: color6 } });
 }
 
+// Ambil foto dari sumber publik berdasar kata kunci, convert ke base64.
+// Coba beberapa sumber; kalau semua gagal (mis. tidak ada internet ke domain itu), return null
+// dan slide akan pakai panel dekoratif sebagai gantinya (tetap terlihat rapi).
+async function fetchImageAsBase64(query){
+  const q = encodeURIComponent(query||'presentation');
+  const seed = String(query||'x').replace(/[^a-z0-9]/gi,'').substring(0,24) || 'x';
+  const candidates = [
+    `https://source.unsplash.com/1600x900/?${q}`,
+    `https://picsum.photos/seed/${seed}/1600/900`
+  ];
+  for(const url of candidates){
+    try{
+      const res = await fetch(url, { mode:'cors' });
+      if(!res.ok) continue;
+      const blob = await res.blob();
+      if(!blob || blob.size < 500) continue;
+      const base64 = await new Promise((resolve,reject)=>{
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = reject;
+        r.readAsDataURL(blob);
+      });
+      return base64;
+    }catch(e){ /* coba sumber berikutnya */ }
+  }
+  return null;
+}
+
 async function downloadPPTX(){
   if(!slides.length){ showToast('Belum ada outline untuk dibuat filenya'); return; }
   if(!currentDesign){ showToast('Generate dulu presentasinya'); return; }
@@ -537,11 +618,39 @@ async function downloadPPTX(){
     const CLOSE_STYLE  = D.closing_style   || 'split_h';
     const SEC_STYLE    = D.section_style   || 'solid';
 
+    // Pre-fetch semua foto untuk slide bertipe "image" secara paralel
+    setProgress('🖼️ Mengambil foto ilustrasi...');
+    const imageCache = {};
+    await Promise.all(slides.map(async (s,i)=>{
+      if(s.type==='image' && s.image_query){
+        imageCache[i] = await fetchImageAsBase64(s.image_query);
+      }
+    }));
+    setProgress('🛠️ Merakit file PPT...');
+
     slides.forEach((s, i) => {
       const slide = pptx.addSlide();
       const type   = s.type || (i===0?'title':(i===slides.length-1?'closing':'content'));
       const pts    = (s.points||[]).map(p=>String(p));
       const num    = String(i+1);
+
+      // Header bar dipakai bareng oleh table/chart/comparison/stat/image/content
+      function drawContentHeader(){
+        slide.background = { color: C.con_bg };
+        AR(slide, 0,0, W,1.38, C.hdr_bg);
+        AR(slide, 0,0, 0.48,1.38, C.acc);
+        slide.addText(s.title||'', {
+          x:0.68, y:0, w:W-1.65, h:1.38,
+          fontSize:22, bold:true, color:C.hdr_text, fontFace:FONT,
+          align:'left', valign:'middle', margin:0
+        });
+        slide.addText(num, {
+          x:W-1.18, y:0, w:0.88, h:1.38,
+          fontSize:30, bold:true, color:C.acc, fontFace:FONT,
+          align:'right', valign:'middle'
+        });
+        return { AREA_Y: 1.5, AREA_H: H - 1.5 - 0.25 };
+      }
 
       // ══════════════════════════════════════════════
       // TITLE SLIDE
@@ -676,27 +785,130 @@ async function downloadPPTX(){
       }
 
       // ══════════════════════════════════════════════
+      // TABLE SLIDE
+      // ══════════════════════════════════════════════
+      else if(type==='table' && Array.isArray(s.headers)){
+        const { AREA_Y, AREA_H } = drawContentHeader();
+        const headers = s.headers.map(String);
+        const rows = (s.rows||[]).map(r=>r.map(c=>String(c)));
+        const tableRows = [];
+        tableRows.push(headers.map(h=>({ text:h, options:{ bold:true, color:C.hdr_text, fill:{color:C.acc}, fontFace:FONT, fontSize:14, align:'left', valign:'middle' } })));
+        rows.forEach((r,ri)=>{
+          tableRows.push(r.map(c=>({ text:c, options:{ color:C.body, fill:{color: ri%2===0 ? C.con_bg : 'FFFFFF'}, fontFace:FONT, fontSize:13, align:'left', valign:'middle' } })));
+        });
+        slide.addTable(tableRows, {
+          x:0.6, y:AREA_Y+0.1, w:W-1.2, h:Math.min(AREA_H-0.2, 0.62*(tableRows.length)),
+          border:{ type:'solid', color:'E2E8F0', pt:0.75 },
+          autoPage:false, valign:'middle'
+        });
+      }
+
+      // ══════════════════════════════════════════════
+      // CHART SLIDE
+      // ══════════════════════════════════════════════
+      else if(type==='chart' && Array.isArray(s.categories)){
+        const { AREA_Y, AREA_H } = drawContentHeader();
+        const chartTypeMap = { bar: pptx.ChartType.bar, pie: pptx.ChartType.pie, line: pptx.ChartType.line };
+        const cType = chartTypeMap[s.chart_type] || pptx.ChartType.bar;
+        const labels = s.categories.map(String);
+        const values = (s.values||[]).map(v=>Number(v)||0);
+        const chartData = [{ name: s.series_name || 'Data', labels, values }];
+        slide.addChart(cType, chartData, {
+          x:0.8, y:AREA_Y+0.15, w:W-1.6, h:AREA_H-0.3,
+          chartColors:[C.acc, C.acc2, C.hdr_bg, C.sec_bg, C.clo_acc].filter((v,idx,a)=>v && a.indexOf(v)===idx),
+          showLegend: s.chart_type==='pie', legendPos:'r', legendColor:C.body,
+          showValue:true, dataLabelColor: s.chart_type==='pie' ? 'FFFFFF' : C.body, dataLabelFontSize:11,
+          catAxisLabelColor:C.body, valAxisLabelColor:C.body, catAxisLabelFontFace:FONT, valAxisLabelFontFace:FONT,
+          showTitle:false
+        });
+      }
+
+      // ══════════════════════════════════════════════
+      // COMPARISON SLIDE
+      // ══════════════════════════════════════════════
+      else if(type==='comparison'){
+        const { AREA_Y, AREA_H } = drawContentHeader();
+        const colW = (W-1.3)/2;
+        const leftX = 0.55, rightX = 0.55+colW+0.2;
+        AR(slide, leftX, AREA_Y, colW, 0.5, C.acc);
+        slide.addText(s.left_title||'', { x:leftX, y:AREA_Y, w:colW, h:0.5, fontSize:15, bold:true, color:'FFFFFF', fontFace:FONT, align:'center', valign:'middle' });
+        AR(slide, rightX, AREA_Y, colW, 0.5, C.acc2);
+        slide.addText(s.right_title||'', { x:rightX, y:AREA_Y, w:colW, h:0.5, fontSize:15, bold:true, color:C.hdr_bg, fontFace:FONT, align:'center', valign:'middle' });
+        const lp = (s.left_points||[]).map(String), rp = (s.right_points||[]).map(String);
+        const bodyY = AREA_Y+0.65, bodyH = AREA_H-0.65;
+        AR(slide, leftX, bodyY, colW, bodyH, C.acc, 93);
+        AR(slide, rightX, bodyY, colW, bodyH, C.acc2, 80);
+        const rowHL = bodyH/Math.max(lp.length,1), rowHR = bodyH/Math.max(rp.length,1);
+        lp.forEach((p,pi)=>slide.addText('•  '+p, { x:leftX+0.2, y:bodyY+pi*rowHL, w:colW-0.4, h:rowHL, fontSize:14, color:C.body, fontFace:FONT, valign:'middle', lineSpacingMultiple:1.1 }));
+        rp.forEach((p,pi)=>slide.addText('•  '+p, { x:rightX+0.2, y:bodyY+pi*rowHR, w:colW-0.4, h:rowHR, fontSize:14, color:C.body, fontFace:FONT, valign:'middle', lineSpacingMultiple:1.1 }));
+      }
+
+      // ══════════════════════════════════════════════
+      // STAT SLIDE
+      // ══════════════════════════════════════════════
+      else if(type==='stat' && Array.isArray(s.stats) && s.stats.length){
+        const { AREA_Y, AREA_H } = drawContentHeader();
+        const items = s.stats.slice(0,3);
+        const colW = (W-1.1-(items.length-1)*0.3)/items.length;
+        items.forEach((st,si)=>{
+          const x = 0.55 + si*(colW+0.3);
+          AR(slide, x, AREA_Y+0.1, colW, AREA_H-0.2, si%2===0?C.acc:C.acc2, 90);
+          AR(slide, x, AREA_Y+0.1, colW, 0.12, si%2===0?C.acc:C.acc2);
+          slide.addText(String(st.number||''), { x, y:AREA_Y+0.5, w:colW, h:1.5, fontSize:44, bold:true, color:C.hdr_bg, fontFace:FONT, align:'center', valign:'middle' });
+          slide.addText(String(st.label||''), { x:x+0.2, y:AREA_Y+2.1, w:colW-0.4, h:1.0, fontSize:14, color:C.body, fontFace:FONT, align:'center', valign:'top', lineSpacingMultiple:1.15 });
+        });
+      }
+
+      // ══════════════════════════════════════════════
+      // QUOTE SLIDE
+      // ══════════════════════════════════════════════
+      else if(type==='quote'){
+        slide.background = { color: C.hdr_bg };
+        AR(slide, 0.7, H/2-1.7, 0.12, 3.0, C.acc);
+        slide.addText('“', { x:0.9, y:0.5, w:2, h:1.5, fontSize:80, bold:true, color:C.acc, fontFace:FONT });
+        slide.addText(s.quote||'', {
+          x:1.1, y:H/2-1.5, w:W-2.4, h:2.6,
+          fontSize:26, italic:true, color:'FFFFFF', fontFace:FONT,
+          align:'left', valign:'middle', lineSpacingMultiple:1.25
+        });
+        if(s.author) slide.addText('— '+s.author, {
+          x:1.1, y:H/2+1.25, w:W-2.4, h:0.5,
+          fontSize:15, bold:true, color:C.acc, fontFace:FONT, align:'left'
+        });
+      }
+
+      // ══════════════════════════════════════════════
+      // IMAGE SLIDE
+      // ══════════════════════════════════════════════
+      else if(type==='image'){
+        const { AREA_Y, AREA_H } = drawContentHeader();
+        const imgData = imageCache[i];
+        const imgW = W*0.52;
+        const imgX = W - imgW - 0.55;
+        if(imgData){
+          slide.addImage({ data: imgData, x:imgX, y:AREA_Y, w:imgW, h:AREA_H, sizing:{ type:'cover', w:imgW, h:AREA_H } });
+          AR(slide, imgX, AREA_Y, 0.08, AREA_H, C.acc);
+        } else {
+          // Fallback dekoratif kalau foto gagal diambil (mis. tidak ada koneksi)
+          AR(slide, imgX, AREA_Y, imgW, AREA_H, C.acc, 25);
+          AE(slide, imgX+imgW/2-0.5, AREA_Y+AREA_H/2-0.5, 1,1, C.acc);
+          slide.addText('🖼', { x:imgX, y:AREA_Y+AREA_H/2-0.75, w:imgW, h:1.5, fontSize:36, align:'center', valign:'middle', color:'FFFFFF' });
+        }
+        const capW = imgX - 0.55 - 0.3;
+        const cap = pts.length ? pts : (s.image_query ? [s.image_query] : []);
+        const rowH = AREA_H/Math.max(cap.length,1);
+        cap.forEach((p,pi)=>{
+          const y = AREA_Y + pi*rowH;
+          AR(slide, 0.55, y+rowH*0.4, 0.22,0.22, C.acc);
+          slide.addText(p, { x:0.9, y, w:capW-0.35, h:rowH, fontSize:16, color:C.body, fontFace:FONT, valign:'middle', lineSpacingMultiple:1.2 });
+        });
+      }
+
+      // ══════════════════════════════════════════════
       // CONTENT SLIDE — 6 LAYOUT BERBEDA
       // ══════════════════════════════════════════════
       else {
-        slide.background = { color: C.con_bg };
-
-        // Header bar
-        AR(slide, 0,0, W,1.38, C.hdr_bg);
-        AR(slide, 0,0, 0.48,1.38, C.acc);
-        slide.addText(s.title||'', {
-          x:0.68, y:0, w:W-1.65, h:1.38,
-          fontSize:22, bold:true, color:C.hdr_text, fontFace:FONT,
-          align:'left', valign:'middle', margin:0
-        });
-        slide.addText(num, {
-          x:W-1.18, y:0, w:0.88, h:1.38,
-          fontSize:30, bold:true, color:C.acc, fontFace:FONT,
-          align:'right', valign:'middle'
-        });
-
-        const AREA_Y  = 1.5;
-        const AREA_H  = H - AREA_Y - 0.25;
+        const { AREA_Y, AREA_H } = drawContentHeader();
         const nPts    = Math.max(pts.length,1);
 
         // ── numbered_cards ──────────────────────────
