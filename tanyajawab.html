@@ -246,29 +246,33 @@ async function sendQA(){
   inp.value='';inp.style.height='auto';
   addMsg('user',msg);
 
-  const jawabLangsung=jawabanIdentitas(msg);
-  if(jawabLangsung){
-    showTypingQA();
-    setTimeout(()=>{
-      document.getElementById('typingQA')?.remove();
-      addMsg('bot',jawabLangsung);
-    },500);
-    return;
-  }
-
-  showTypingQA();
-  let system='Kamu adalah asisten akademik AI dari asistenku.pro. Jawab pertanyaan seputar skripsi, tesis, penelitian, metodologi, dan penulisan akademik dalam Bahasa Indonesia. Jawab dengan jelas, terstruktur, dan berikan contoh praktis jika perlu.';
-  if(qaFileText){
-    system+=`\n\nPengguna telah mengunggah file bernama "${qaFileName}". Berikut isi filenya, gunakan sebagai konteks utama untuk menjawab pertanyaan pengguna jika relevan:\n\n${qaFileText}`;
-  }
   try{
+    const jawabLangsung=jawabanIdentitas(msg);
+    if(jawabLangsung){
+      showTypingQA();
+      setTimeout(()=>{
+        document.getElementById('typingQA')?.remove();
+        addMsg('bot',jawabLangsung);
+      },500);
+      return;
+    }
+
+    showTypingQA();
+    let system='Kamu adalah asisten akademik AI dari asistenku.pro. Jawab pertanyaan seputar skripsi, tesis, penelitian, metodologi, dan penulisan akademik dalam Bahasa Indonesia. Jawab dengan jelas, terstruktur, dan berikan contoh praktis jika perlu.';
+    if(qaFileText){
+      system+=`\n\nPengguna telah mengunggah file bernama "${qaFileName}". Berikut isi filenya, gunakan sebagai konteks utama untuk menjawab pertanyaan pengguna jika relevan:\n\n${qaFileText}`;
+    }
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:system,messages:qaChatHistory})});
     const data=await res.json();
     document.getElementById('typingQA')?.remove();
     if(!res.ok){ addMsg('bot', data.error||'Gagal terhubung ke server.'); return; }
     const reply=data.text||'Maaf, terjadi kesalahan.';
     addMsg('bot',reply);
-  }catch(e){document.getElementById('typingQA')?.remove();addMsg('bot','Gagal terhubung ke AI. Periksa koneksi internet Anda.');}
+  }catch(e){
+    console.error('Tanya Jawab error:', e);
+    document.getElementById('typingQA')?.remove();
+    addMsg('bot','Gagal terhubung ke AI. Periksa koneksi internet Anda.');
+  }
 }
 
 /* ---------- Belajar Mode ---------- */

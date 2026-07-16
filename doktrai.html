@@ -250,43 +250,43 @@ inp.value='';inp.style.height='auto';
 document.getElementById('quickReplies').style.display='none';
 addMsg('user',msg.replace(/\n/g,'<br>'),msg);
 
-// Jawab langsung pertanyaan seputar identitas pemilik/pencipta,
-// tanpa perlu memanggil server sama sekali.
-const jawabLangsung=jawabanIdentitas(msg);
-if(jawabLangsung){
-  showTyping();
-  setTimeout(()=>{
-    document.getElementById('typingIndicator')?.remove();
-    addMsg('bot',formatKontenChat(jawabLangsung),jawabLangsung);
-  },500);
-  return;
-}
+try{
+  // Jawab langsung pertanyaan seputar identitas pemilik/pencipta,
+  // tanpa perlu memanggil server sama sekali.
+  const jawabLangsung=jawabanIdentitas(msg);
+  if(jawabLangsung){
+    showTyping();
+    setTimeout(()=>{
+      document.getElementById('typingIndicator')?.remove();
+      addMsg('bot',formatKontenChat(jawabLangsung),jawabLangsung);
+    },500);
+    return;
+  }
 
-showTyping();
-try{
-const res=await fetch('/api/generate',{
-method:'POST',headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-system:`Kamu adalah DoktrAI, asisten AI dari asistenku.pro. Kamu membantu menjawab pertanyaan seputar akademik, penelitian, penulisan, kesehatan, hukum, bisnis, dan karier dalam Bahasa Indonesia. Jawab dengan ramah, informatif, dan terstruktur. Aplikasi dan AI ini dimiliki serta diciptakan oleh ${NAMA_PEMILIK}; jika ditanya siapa pemilik, pencipta, pembuat, atau developer aplikasi/AI ini, jawab dengan nama tersebut.`,
-messages:chatHistory.filter(m=>m.role!=='system')
-})
-});
-let data;
-try{
-  data=await res.json();
-}catch(parseErr){
-  throw new Error('Server tidak mengembalikan jawaban yang valid (kemungkinan endpoint /api/generate belum aktif atau ANTHROPIC_API_KEY belum diatur di server).');
-}
-document.getElementById('typingIndicator')?.remove();
-if(!res.ok){ throw new Error(data.error||'Gagal terhubung ke server'); }
-const reply=data.text||'Maaf, terjadi kesalahan. Coba lagi.';
-const html=formatKontenChat(reply);
-addMsg('bot',html,reply);
+  showTyping();
+  const res=await fetch('/api/generate',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      system:`Kamu adalah DoktrAI, asisten AI dari asistenku.pro. Kamu membantu menjawab pertanyaan seputar akademik, penelitian, penulisan, kesehatan, hukum, bisnis, dan karier dalam Bahasa Indonesia. Jawab dengan ramah, informatif, dan terstruktur. Aplikasi dan AI ini dimiliki serta diciptakan oleh ${NAMA_PEMILIK}; jika ditanya siapa pemilik, pencipta, pembuat, atau developer aplikasi/AI ini, jawab dengan nama tersebut.`,
+      messages:chatHistory.filter(m=>m.role!=='system')
+    })
+  });
+  let data;
+  try{
+    data=await res.json();
+  }catch(parseErr){
+    throw new Error('Server tidak mengembalikan jawaban yang valid (kemungkinan endpoint /api/generate belum aktif atau ANTHROPIC_API_KEY belum diatur di server).');
+  }
+  document.getElementById('typingIndicator')?.remove();
+  if(!res.ok){ throw new Error(data.error||'Gagal terhubung ke server'); }
+  const reply=data.text||'Maaf, terjadi kesalahan. Coba lagi.';
+  const html=formatKontenChat(reply);
+  addMsg('bot',html,reply);
 }catch(e){
-document.getElementById('typingIndicator')?.remove();
-console.error('DoktrAI error:', e);
-const err='Maaf, gagal terhubung ke AI ('+(e.message||'kesalahan tidak diketahui')+'). Pastikan koneksi internet Anda aktif dan coba lagi.';
-addMsg('bot',err,err);
+  document.getElementById('typingIndicator')?.remove();
+  console.error('DoktrAI error:', e);
+  const err='Maaf, gagal terhubung ke AI ('+(e.message||'kesalahan tidak diketahui')+'). Pastikan koneksi internet Anda aktif dan coba lagi.';
+  addMsg('bot',err,err);
 }
 }
 
