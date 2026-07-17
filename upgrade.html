@@ -15,48 +15,92 @@
 .upgrade-hero h1 { font-size: 28px; font-weight: 800; color: var(--blue); line-height: 1.1; }
 .upgrade-hero p { font-size: 13px; color: var(--gray-500); margin-top: 6px; line-height: 1.5; max-width: 200px; }
 .hero-vip-mascot { position: absolute; right: 0; bottom: 0; width: 140px; }
-.pricing-cards-wrap { display: flex; gap: 10px; overflow-x: auto; padding: 0 16px 16px; scrollbar-width: none; }
+.pricing-cards-wrap { display: flex; gap: 14px; overflow-x: auto; padding: 6px 16px 20px; scroll-snap-type: x mandatory; scrollbar-width: none; }
 .pricing-cards-wrap::-webkit-scrollbar { display: none; }
 .plan-card {
-  min-width: 150px;
+  min-width: 208px;
+  max-width: 208px;
   flex-shrink: 0;
+  scroll-snap-align: center;
   background: var(--white);
-  border: 2px solid var(--gray-200);
-  border-radius: 20px;
-  padding: 16px 14px;
+  border: 1px solid var(--gray-200);
+  border-radius: 24px;
+  padding: 22px 18px 18px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
   position: relative;
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(20,30,60,.06);
+  transition: transform 0.25s cubic-bezier(.2,.8,.2,1), box-shadow 0.25s;
 }
-.plan-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.plan-card.current { border-color: var(--gray-300); }
-.plan-card.standar { border-color: var(--blue-light); }
-.plan-card.pro { border-color: var(--blue-light); background: linear-gradient(180deg, var(--blue-light) 0%, #2041E8 100%); color: #fff; }
-.plan-card.lanjutan { border-color: var(--blue-dark); background: linear-gradient(180deg, #111827 0%, #1A3DC2 100%); color: #fff; }
+.plan-card:hover { transform: translateY(-4px); }
+
+/* ── GRATIS — silver / matte ── */
+.plan-card.current {
+  background: linear-gradient(160deg,#F8F9FB 0%,#EDEFF3 100%);
+  border-color: #E2E5EB;
+}
+.plan-card.current .plan-mascot-ring { background: radial-gradient(circle,#E4E7EC,#CBD1DA); }
+
+/* ── STANDAR — sapphire blue ── */
+.plan-card.standar {
+  background: linear-gradient(160deg,#F2F6FF 0%,#DCE6FF 100%);
+  border: 1.5px solid #B7C9FF;
+  box-shadow: 0 8px 22px rgba(59,91,255,.14);
+}
+.plan-card.standar .plan-mascot-ring { background: radial-gradient(circle,#D6E1FF,#A9C0FF); }
+
+/* ── PRO — crimson, most premium visual weight ── */
+.plan-card.pro {
+  border: none;
+  background: linear-gradient(165deg,#FF5A5A 0%,#DC2626 55%,#8C0F0F 100%);
+  color: #fff;
+  box-shadow: 0 14px 32px rgba(220,38,38,.35);
+}
+.plan-card.pro .plan-mascot-ring { background: radial-gradient(circle,rgba(255,255,255,.35),rgba(255,255,255,.08)); }
+
+/* ── LANJUTAN — obsidian & gold, VIP tier ── */
+.plan-card.lanjutan {
+  border: 1.5px solid #B8860B;
+  background: linear-gradient(165deg,#1A1F2E 0%,#0B0E17 100%);
+  color: #fff;
+  box-shadow: 0 14px 32px rgba(0,0,0,.35);
+}
+.plan-card.lanjutan .plan-mascot-ring { background: radial-gradient(circle,rgba(245,166,35,.35),rgba(245,166,35,.05)); }
+.plan-card.lanjutan .plan-name { background: linear-gradient(90deg,#F5D061,#D4A017); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
 .best-badge {
   position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
-  background: var(--yellow); color: #fff; font-size: 10px; font-weight: 700;
-  padding: 3px 10px; border-radius: 99px; white-space: nowrap;
+  background: linear-gradient(90deg,#F5A623,#D97706); color: #fff; font-size: 10px; font-weight: 800;
+  padding: 4px 12px; border-radius: 99px; white-space: nowrap; box-shadow: 0 4px 10px rgba(217,119,6,.4);
   display: flex; align-items: center; gap: 4px;
 }
-.plan-mascot { width: 60px; height: 60px; margin: 0 auto 4px; display: flex; align-items: center; justify-content: center; }
-.plan-name { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
-.plan-price { font-size: 24px; font-weight: 800; text-align: center; }
+.plan-mascot-ring {
+  width: 74px; height: 74px; border-radius: 50%; margin: 0 auto 6px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 0 0 3px rgba(255,255,255,.5);
+}
+.plan-mascot { width: 58px; height: 58px; display: flex; align-items: center; justify-content: center; }
+.plan-name { font-size: 13.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; text-align: center; }
+.plan-price { font-size: 25px; font-weight: 800; text-align: center; }
 .plan-price span { font-size: 12px; font-weight: 500; opacity: 0.7; }
-.plan-features { list-style: none; display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
-.plan-features li { font-size: 11px; display: flex; align-items: flex-start; gap: 5px; line-height: 1.3; }
+.plan-features { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.plan-features li { font-size: 11.5px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.35; }
 .plan-features li svg { width: 12px; height: 12px; flex-shrink: 0; margin-top: 1px; }
 .plan-btn {
-  margin-top: auto; padding: 10px; border-radius: 10px; border: none;
+  margin-top: auto; padding: 11px; border-radius: 12px; border: none;
   font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, transform .15s;
 }
-.plan-btn.disabled { background: var(--gray-200); color: var(--gray-500); cursor: default; }
-.plan-btn.blue { background: var(--blue-light); color: #fff; }
-.plan-btn.gold { background: var(--yellow); color: #fff; }
-.plan-btn.white-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+.plan-btn:active { transform: scale(.97); }
+.plan-btn.disabled { background: rgba(120,130,150,.15); color: var(--gray-500); cursor: default; }
+.plan-card.lanjutan .plan-btn.disabled, .plan-card.pro .plan-btn.disabled { background: rgba(255,255,255,.15); color: rgba(255,255,255,.7); }
+.plan-btn.blue { background: linear-gradient(90deg,#3B5BFF,#2041E8); color: #fff; box-shadow: 0 6px 14px rgba(59,91,255,.35); }
+.plan-btn.gold { background: linear-gradient(90deg,#FFFFFF,#F3F4F6); color: #B91C1C; box-shadow: 0 6px 14px rgba(0,0,0,.2); }
+.plan-btn.white-outline { background: linear-gradient(90deg,#F5D061,#D4A017); color: #1A1F2E; border: none; box-shadow: 0 6px 14px rgba(212,160,23,.4); }
+.scroll-dots { display:flex; justify-content:center; gap:6px; margin-top:-8px; margin-bottom:14px; }
+.scroll-dots span { width:6px; height:6px; border-radius:50%; background:var(--gray-200); }
+
 
 /* Comparison Table */
 .compare-table { width: 100%; border-collapse: collapse; font-size: 12px; }
@@ -67,8 +111,8 @@
 .compare-table tr:last-child td { border-bottom: none; }
 .badge-col { display: inline-flex; align-items: center; justify-content: center; padding: 2px 8px; border-radius: 99px; font-weight: 700; font-size: 11px; }
 .badge-col.blue { background: var(--blue-pale); color: var(--blue); }
-.badge-col.pro { background: linear-gradient(90deg,var(--blue-light),#7C3AED); color: #fff; }
-.badge-col.lanjutan { background: var(--blue-dark); color: #fff; }
+.badge-col.pro { background: linear-gradient(90deg,#FF5A5A,#DC2626); color: #fff; }
+.badge-col.lanjutan { background: linear-gradient(90deg,#1A1F2E,#0B0E17); color: #F5D061; border: 1px solid #B8860B; }
 .badge-col.gray { background: var(--gray-100); color: var(--gray-500); }
 
 /* FAQ */
@@ -159,7 +203,7 @@
     <div class="pricing-cards-wrap">
       <!-- GRATIS -->
       <div class="plan-card current">
-        <div class="plan-mascot">
+        <div class="plan-mascot-ring"><div class="plan-mascot">
           <svg viewBox="0 0 80 80" fill="none">
             <circle cx="40" cy="40" r="38" fill="#EEF2FF"/>
             <ellipse cx="40" cy="42" rx="18" ry="19" fill="#F5F5F5"/>
@@ -171,7 +215,7 @@
             <ellipse cx="40" cy="35" rx="3" ry="2" fill="#FFB6C1"/>
             <text x="40" y="55" text-anchor="middle" fill="#3B5BFF" font-size="11" font-weight="800" font-family="sans-serif">a</text>
           </svg>
-        </div>
+        </div></div>
         <div class="plan-name" style="color:var(--gray-500);">GRATIS</div>
         <div class="plan-price" style="color:var(--dark);">Rp0</div>
         <ul class="plan-features" style="color:var(--gray-500);">
@@ -185,7 +229,7 @@
 
       <!-- STANDAR -->
       <div class="plan-card standar">
-        <div class="plan-mascot">
+        <div class="plan-mascot-ring"><div class="plan-mascot">
           <svg viewBox="0 0 80 80" fill="none">
             <circle cx="40" cy="40" r="38" fill="#EEF2FF"/>
             <ellipse cx="40" cy="42" rx="18" ry="19" fill="#1A2B6D"/>
@@ -200,7 +244,7 @@
             <text x="52" y="48" font-size="16">👍</text>
             <text x="40" y="58" text-anchor="middle" fill="#fff" font-size="9" font-weight="800" font-family="sans-serif">a</text>
           </svg>
-        </div>
+        </div></div>
         <div class="plan-name" style="color:var(--blue);">STANDAR</div>
         <div class="plan-price" style="color:var(--blue);">Rp20.000<span>/bulan</span></div>
         <ul class="plan-features" style="color:var(--gray-500);">
@@ -216,7 +260,7 @@
       <!-- PRO -->
       <div class="plan-card pro" style="position:relative;padding-top:26px;">
         <div class="best-badge">⭐ TERBAIK</div>
-        <div class="plan-mascot">
+        <div class="plan-mascot-ring"><div class="plan-mascot">
           <svg viewBox="0 0 80 80" fill="none">
             <circle cx="40" cy="40" r="38" fill="rgba(255,255,255,0.15)"/>
             <ellipse cx="40" cy="42" rx="18" ry="19" fill="rgba(255,255,255,0.3)"/>
@@ -232,7 +276,7 @@
             <rect x="21" y="50" width="38" height="22" rx="2" fill="#3B5BFF" opacity="0.8"/>
             <rect x="12" y="77" width="56" height="5" rx="2" fill="#1A2B6D"/>
           </svg>
-        </div>
+        </div></div>
         <div class="plan-name" style="color:#fff;">PRO</div>
         <div class="plan-price" style="color:#fff;">Rp59.000<span>/bulan</span></div>
         <ul class="plan-features" style="color:rgba(255,255,255,0.85);">
@@ -248,7 +292,7 @@
 
       <!-- LANJUTAN -->
       <div class="plan-card lanjutan">
-        <div class="plan-mascot">
+        <div class="plan-mascot-ring"><div class="plan-mascot">
           <svg viewBox="0 0 80 80" fill="none">
             <circle cx="40" cy="40" r="38" fill="rgba(255,255,255,0.1)"/>
             <ellipse cx="40" cy="42" rx="18" ry="19" fill="rgba(255,255,255,0.2)"/>
@@ -264,7 +308,7 @@
             <!-- Diamond -->
             <polygon points="58,30 50,40 58,50 66,40" fill="#93C5FD"/>
           </svg>
-        </div>
+        </div></div>
         <div class="plan-name" style="color:#fff;">LANJUTAN</div>
         <div class="plan-price" style="color:#fff;">Rp99.000<span>/bulan</span></div>
         <ul class="plan-features" style="color:rgba(255,255,255,0.85);">
@@ -277,6 +321,7 @@
         <button class="plan-btn white-outline" onclick="beliPaket('Lanjutan','99000')">Beli Sekarang</button>
       </div>
     </div>
+    <div class="scroll-dots"><span></span><span></span><span></span><span></span></div>
 
     <!-- Comparison Table -->
     <div style="padding:0 16px;margin-bottom:16px;">
