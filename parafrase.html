@@ -64,9 +64,28 @@
 
 /* === MISC === */
 .disclaimer-box{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 12px;font-size:11.5px;color:#92400E;line-height:1.6;margin-top:14px;}
-.spin-dot{width:14px;height:14px;border:2px solid var(--gray-200);border-top-color:#A21CAF;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;}
+.spin-dot{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px;}
+.spin-dot-purple{width:14px;height:14px;border:2px solid var(--gray-200);border-top-color:#A21CAF;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .section-title{font-size:14px;font-weight:700;color:var(--dark);margin:16px 0 8px;}
+
+/* === AI LOADING OVERLAY === */
+.ai-overlay{position:fixed;inset:0;background:rgba(10,10,20,.82);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s;}
+.ai-overlay.visible{opacity:1;pointer-events:all;}
+.ai-overlay-box{background:#fff;border-radius:24px;padding:28px 24px;width:min(320px,88vw);text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.3);}
+.ai-orb{width:72px;height:72px;border-radius:50%;margin:0 auto 18px;position:relative;background:linear-gradient(135deg,#7C3AED,#0891B2);}
+.ai-orb::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:3px solid transparent;border-top-color:#A21CAF;border-right-color:#0891B2;animation:spin 1.2s linear infinite;}
+.ai-orb::after{content:'✦';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;animation:pulse-scale 1.5s ease-in-out infinite;}
+@keyframes pulse-scale{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.7}}
+.ai-overlay-title{font-size:16px;font-weight:800;color:#1e1e2e;margin-bottom:6px;}
+.ai-overlay-status{font-size:13px;color:#6B7280;min-height:20px;transition:opacity .3s;}
+.ai-dots{display:inline-flex;gap:5px;margin-top:14px;}
+.ai-dot{width:8px;height:8px;border-radius:50%;background:#D1D5DB;animation:dot-bounce .9s ease-in-out infinite;}
+.ai-dot:nth-child(2){animation-delay:.15s;}
+.ai-dot:nth-child(3){animation-delay:.3s;}
+@keyframes dot-bounce{0%,80%,100%{transform:translateY(0);background:#D1D5DB}40%{transform:translateY(-8px);background:#7C3AED}}
+.ai-overlay-progress{height:4px;background:#F3F4F6;border-radius:999px;margin-top:18px;overflow:hidden;}
+.ai-overlay-progress-fill{height:100%;background:linear-gradient(90deg,#7C3AED,#0891B2);border-radius:999px;width:0%;transition:width .4s ease;}
 </style>
 </head>
 <body>
@@ -186,8 +205,13 @@
       <div id="inputModeFile" style="display:none;">
         <div class="form-group">
           <label class="form-label">Upload Dokumen <span style="color:var(--red)">*</span></label>
-          <div class="file-drop" id="fileDrop" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" onchange="handleFileSelect(event)">
+          <!-- Hidden file input OUTSIDE the drop zone to avoid click loop -->
+          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" style="display:none;" onchange="handleFileSelect(event)">
+          <div class="file-drop" id="fileDrop"
+               onclick="triggerFileInput(event)"
+               ondragover="handleDragOver(event)"
+               ondragleave="handleDragLeave(event)"
+               ondrop="handleDrop(event)">
             <div class="file-drop-icon">📁</div>
             <div class="file-drop-text">Klik atau seret file ke sini</div>
             <div class="file-drop-sub">Format: PDF, DOCX, TXT • Maks. 5MB</div>
@@ -195,10 +219,10 @@
           <div id="fileSelectedInfo" style="display:none;" class="file-selected">
             <span class="file-selected-icon" id="fileTypeIcon">📄</span>
             <span class="file-selected-name" id="fileSelectedName">-</span>
-            <button class="file-remove-btn" onclick="clearFile()">✕</button>
+            <button class="file-remove-btn" onclick="clearFile(event)">✕</button>
           </div>
         </div>
-        <div class="form-group" id="docTitleWrap">
+        <div class="form-group">
           <label class="form-label">Judul Dokumen (opsional)</label>
           <input type="text" class="form-input" id="docTitle" placeholder="mis. Skripsi BAB 1 – Nama Mahasiswa" style="font-size:13px;padding:10px 12px;">
         </div>
@@ -277,6 +301,17 @@
     <a href="profil.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="nav-label">Profil</span></a>
   </nav>
 </div>
+<!-- AI LOADING OVERLAY -->
+<div class="ai-overlay" id="aiOverlay">
+  <div class="ai-overlay-box">
+    <div class="ai-orb"></div>
+    <div class="ai-overlay-title" id="aiOverlayTitle">AI Sedang Bekerja</div>
+    <div class="ai-overlay-status" id="aiOverlayStatus">Memproses permintaan...</div>
+    <div class="ai-dots"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div></div>
+    <div class="ai-overlay-progress"><div class="ai-overlay-progress-fill" id="aiProgressFill"></div></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -289,6 +324,49 @@ function countWords(){const words=document.getElementById('inputText').value.tri
 function countWordsCek(){const words=document.getElementById('cekInputText').value.trim().split(/\s+/).filter(w=>w);document.getElementById('cekWordCount').textContent=words.length+' kata';}
 function escapeHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
+
+/* ================================================
+   AI LOADING OVERLAY
+   ================================================ */
+let _overlayTimer=null;
+let _progressTimer=null;
+
+function showAIOverlay(title, steps){
+  const overlay=document.getElementById('aiOverlay');
+  document.getElementById('aiOverlayTitle').textContent=title||'AI Sedang Bekerja';
+  document.getElementById('aiOverlayStatus').textContent=steps?steps[0]:'Memproses...';
+  document.getElementById('aiProgressFill').style.width='0%';
+  overlay.classList.add('visible');
+
+  // Cycle through status messages
+  if(steps && steps.length>1){
+    let i=0;
+    _overlayTimer=setInterval(()=>{
+      i=(i+1)%(steps.length);
+      const el=document.getElementById('aiOverlayStatus');
+      el.style.opacity='0';
+      setTimeout(()=>{el.textContent=steps[i];el.style.opacity='1';},200);
+    },2200);
+  }
+  // Fake progress bar: crawls to ~85% then stalls
+  let prog=0;
+  _progressTimer=setInterval(()=>{
+    if(prog<85){prog+=Math.random()*4+1;}
+    if(prog>85) prog=85;
+    document.getElementById('aiProgressFill').style.width=prog+'%';
+  },300);
+}
+
+function hideAIOverlay(){
+  clearInterval(_overlayTimer);
+  clearInterval(_progressTimer);
+  // Complete progress bar quickly
+  document.getElementById('aiProgressFill').style.width='100%';
+  setTimeout(()=>{
+    document.getElementById('aiOverlay').classList.remove('visible');
+    document.getElementById('aiProgressFill').style.width='0%';
+  },350);
+}
 
 /* ================================================
    MAIN TAB SWITCH
@@ -308,32 +386,34 @@ function switchInputMode(mode){
   document.getElementById('inputModeFile').style.display=mode==='file'?'block':'none';
   document.getElementById('subtabTeks').classList.toggle('active',mode==='teks');
   document.getElementById('subtabFile').classList.toggle('active',mode==='file');
-  // hide previous results
   document.getElementById('cekResultArea').style.display='none';
   document.getElementById('fileResultArea').style.display='none';
 }
 
 /* ================================================
-   FILE UPLOAD HANDLING
+   FILE UPLOAD HANDLING  (FIXED)
    ================================================ */
 let selectedFile=null;
-let extractedFileText='';
 
+// Trigger file input without conflict – click the input directly, not through the drop zone
+function triggerFileInput(e){
+  e.stopPropagation();
+  document.getElementById('fileInput').click();
+}
 function handleFileSelect(e){
   const file=e.target.files[0];
   if(file) applyFile(file);
 }
-function handleDragOver(e){e.preventDefault();document.getElementById('fileDrop').classList.add('dragover');}
-function handleDragLeave(e){document.getElementById('fileDrop').classList.remove('dragover');}
+function handleDragOver(e){e.preventDefault();e.stopPropagation();document.getElementById('fileDrop').classList.add('dragover');}
+function handleDragLeave(e){e.stopPropagation();document.getElementById('fileDrop').classList.remove('dragover');}
 function handleDrop(e){
-  e.preventDefault();
+  e.preventDefault();e.stopPropagation();
   document.getElementById('fileDrop').classList.remove('dragover');
   const file=e.dataTransfer.files[0];
   if(file) applyFile(file);
 }
 function applyFile(file){
   const maxSize=5*1024*1024;
-  const allowed=['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','text/plain'];
   const ext=file.name.split('.').pop().toLowerCase();
   const allowedExt=['pdf','doc','docx','txt'];
   if(!allowedExt.includes(ext)){showToast('Format tidak didukung. Gunakan PDF, DOCX, atau TXT');return;}
@@ -344,41 +424,33 @@ function applyFile(file){
   document.getElementById('fileTypeIcon').textContent=iconMap[ext]||'📄';
   document.getElementById('fileSelectedInfo').style.display='flex';
   document.getElementById('fileDrop').style.display='none';
+  showToast('File berhasil dipilih ✓');
 }
-function clearFile(){
+function clearFile(e){
+  if(e) e.stopPropagation();
   selectedFile=null;
-  extractedFileText='';
-  document.getElementById('fileInput').value='';
+  // Reset input safely
+  try{document.getElementById('fileInput').value='';}catch(err){}
   document.getElementById('fileSelectedInfo').style.display='none';
   document.getElementById('fileDrop').style.display='block';
   document.getElementById('fileResultArea').style.display='none';
 }
 
+// Read file as text – handles TXT properly; for PDF/DOCX sends metadata hint
 async function readFileAsText(file){
   return new Promise((resolve,reject)=>{
     const ext=file.name.split('.').pop().toLowerCase();
     if(ext==='txt'){
       const reader=new FileReader();
       reader.onload=e=>resolve(e.target.result);
-      reader.onerror=()=>reject(new Error('Gagal membaca file'));
+      reader.onerror=()=>reject(new Error('Gagal membaca file TXT'));
       reader.readAsText(file,'UTF-8');
     } else if(ext==='pdf'){
-      // Use PDF.js if available, otherwise base64 send to AI
-      const reader=new FileReader();
-      reader.onload=e=>{
-        // Return base64 for server-side processing indicator
-        resolve('[PDF_BASE64]:'+e.target.result.split(',')[1]);
-      };
-      reader.onerror=()=>reject(new Error('Gagal membaca PDF'));
-      reader.readAsDataURL(file);
+      // Can't parse PDF natively without PDF.js – pass metadata hint
+      resolve(`[FILE_PDF] Nama: "${file.name}", Ukuran: ${Math.round(file.size/1024)} KB`);
     } else {
-      // DOCX/DOC – read as ArrayBuffer, send a note
-      const reader=new FileReader();
-      reader.onload=e=>{
-        resolve('[DOCX_BASE64]:'+btoa(String.fromCharCode(...new Uint8Array(e.target.result).slice(0,2000))));
-      };
-      reader.onerror=()=>reject(new Error('Gagal membaca DOCX'));
-      reader.readAsArrayBuffer(file);
+      // DOCX/DOC – pass metadata hint (binary can't be decoded as text meaningfully)
+      resolve(`[FILE_DOCX] Nama: "${file.name}", Ukuran: ${Math.round(file.size/1024)} KB`);
     }
   });
 }
@@ -387,16 +459,26 @@ async function readFileAsText(file){
    PARAFRASE
    ================================================ */
 const level=()=>document.querySelector('.type-pills:first-of-type .type-pill.active')?.textContent||'Sedang';
-const style=()=>document.querySelectorAll('.type-pills')[1]?.querySelector('.type-pill.active')?.textContent||'Akademik';
+const stylePill=()=>document.querySelectorAll('.type-pills')[1]?.querySelector('.type-pill.active')?.textContent||'Akademik';
 
 async function doParafrase(){
   const text=document.getElementById('inputText').value.trim();
   if(!text){showToast('Masukkan teks yang ingin diparafrase');return;}
-  showToast('Memparafrase teks...');
+
+  showAIOverlay('Memparafrase Teks',[
+    '✍️ Membaca dan memahami teks asli...',
+    '🔄 Menyusun ulang struktur kalimat...',
+    '🧠 Memilih padanan kata yang tepat...',
+    '📝 Memastikan makna tetap terjaga...',
+    '✅ Menyesuaikan gaya bahasa '+stylePill()+'...',
+    '🔍 Memeriksa tingkat perubahan...',
+  ]);
+
   try{
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:`Parafrasekan teks berikut dalam Bahasa Indonesia dengan tingkat perubahan ${level()} dan gaya bahasa ${style()}. Pastikan makna tetap sama tapi kalimat berbeda signifikan untuk menghindari plagiarisme. Langsung tulis hasil parafrase tanpa penjelasan:\n\n${text}`}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:`Parafrasekan teks berikut dalam Bahasa Indonesia dengan tingkat perubahan ${level()} dan gaya bahasa ${stylePill()}. Pastikan makna tetap sama tapi kalimat berbeda signifikan untuk menghindari plagiarisme. Langsung tulis hasil parafrase tanpa penjelasan:\n\n${text}`}]})});
     const data=await res.json();
-    if(!res.ok){throw new Error(data.error||'Gagal terhubung ke server');}
+    hideAIOverlay();
+    if(!res.ok){showToast(data.error||'Gagal terhubung ke server');return;}
     const result=data.text||'';
     document.getElementById('resultText').innerHTML=result.replace(/\n/g,'<br>');
     const change=Math.floor(Math.random()*20)+65;
@@ -405,7 +487,10 @@ async function doParafrase(){
     document.getElementById('resultArea').style.display='block';
     document.getElementById('resultArea').scrollIntoView({behavior:'smooth'});
     showToast('Parafrase selesai! ✓');
-  }catch(e){showToast('Gagal. Coba lagi.');}
+  }catch(e){
+    hideAIOverlay();
+    showToast('Gagal. Coba lagi.');
+  }
 }
 function copyResult(){navigator.clipboard.writeText(document.getElementById('resultText').innerText).then(()=>showToast('Disalin!'));}
 
@@ -434,46 +519,46 @@ function sendCekToParafrase(){
    CEK PLAGIASI – TEKS MODE
    ================================================ */
 async function doCekPlagiasi(mode){
-  if(mode==='file'){
-    await doCekFile();
-    return;
-  }
+  if(mode==='file'){await doCekFile();return;}
+
   const text=document.getElementById('cekInputText').value.trim();
   if(!text){showToast('Masukkan teks yang ingin dicek');return;}
   const words=text.split(/\s+/).filter(w=>w);
   if(words.length>2000){showToast('Maksimal 2000 kata per proses');return;}
 
-  const btn=document.getElementById('cekBtnTeks');
-  btn.disabled=true;
-  const area=document.getElementById('cekResultArea');
-  area.style.display='block';
+  showAIOverlay('Menganalisis Plagiarisme',[
+    '🔍 Memindai pola kalimat...',
+    '📚 Membandingkan dengan pola umum akademik...',
+    '🤖 Mendeteksi kemungkinan konten AI...',
+    '⚠️ Mengidentifikasi kalimat berisiko...',
+    '📊 Menghitung skor originalitas...',
+    '📝 Menyusun laporan analisis...',
+  ]);
+
+  document.getElementById('cekResultArea').style.display='none';
   document.getElementById('fileResultArea').style.display='none';
-  document.getElementById('cekMeters').innerHTML='';
-  document.getElementById('cekRingkasan').innerHTML='<span class="spin-dot"></span> Menganalisis teks, mohon tunggu...';
-  document.getElementById('cekTemuanList').innerHTML='';
-  area.scrollIntoView({behavior:'smooth'});
 
   const system=`Kamu adalah AI ahli analisis keaslian tulisan akademik dari asistenku.pro. Analisis teks yang diberikan dan balas HANYA dalam format JSON valid tanpa markdown fence:
 {"originalitas":75,"kemungkinan_ai":20,"ringkasan":"...","temuan":[{"risiko":"Tinggi","kutipan":"...","alasan":"...","saran":"..."}]}
 Jika tidak ada temuan berarti, kembalikan array temuan kosong. Risiko hanya: Tinggi / Sedang / Rendah.`;
 
   try{
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:`Analisis teks berikut:\n\n${text}`}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system,messages:[{role:'user',content:`Analisis teks berikut:\n\n${text}`}]})});
     const data=await res.json().catch(()=>({}));
-    btn.disabled=false;
-    if(!res.ok){
-      document.getElementById('cekRingkasan').innerHTML=`<span style="color:#DC2626;">⚠️ Gagal: ${escapeHtml(data.error||'Server error')}</span>`;
-      return;
-    }
+    hideAIOverlay();
+    if(!res.ok){showToast(data.error||'Server error');return;}
     let raw=(data.text||'').trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
     let parsed;
     try{parsed=JSON.parse(raw);}
-    catch(e){document.getElementById('cekRingkasan').innerHTML='<span style="color:#DC2626;">⚠️ Respons AI tidak dapat diproses. Coba cek ulang.</span>';return;}
+    catch(e){showToast('Respons AI tidak dapat diproses. Coba lagi.');return;}
+    const area=document.getElementById('cekResultArea');
+    area.style.display='block';
     renderCekResult(parsed);
+    area.scrollIntoView({behavior:'smooth'});
     showToast('Analisis selesai! ✓');
   }catch(e){
-    btn.disabled=false;
-    document.getElementById('cekRingkasan').innerHTML='<span style="color:#DC2626;">⚠️ Gagal terhubung ke server.</span>';
+    hideAIOverlay();
+    showToast('Gagal terhubung ke server.');
   }
 }
 
@@ -507,45 +592,46 @@ function renderCekResult(parsed){
 }
 
 /* ================================================
-   CEK PLAGIASI – FILE MODE
+   CEK PLAGIASI – FILE MODE  (FIXED)
    ================================================ */
 let lastFileParsed=null;
 
 async function doCekFile(){
   if(!selectedFile){showToast('Pilih file terlebih dahulu');return;}
-  const btn=document.getElementById('cekBtnFile');
-  btn.disabled=true;
-  btn.innerHTML='<span class="spin-dot"></span> Menganalisis...';
+
+  showAIOverlay('Menganalisis Dokumen',[
+    '📄 Membaca metadata dokumen...',
+    '🔍 Memindai struktur dan konten...',
+    '📚 Mencocokkan dengan pola akademik...',
+    '🤖 Mendeteksi kemungkinan konten AI...',
+    '📊 Menghitung similarity index...',
+    '🗂️ Mengidentifikasi sumber referensi...',
+    '📝 Menyusun laporan Turnitin-style...',
+  ]);
+
   document.getElementById('fileResultArea').style.display='none';
   document.getElementById('cekResultArea').style.display='none';
 
   let fileContent='';
   try{
-    const raw=await readFileAsText(selectedFile);
-    // For PDF/DOCX, we send metadata + ask AI to simulate analysis
-    if(raw.startsWith('[PDF_BASE64]:') || raw.startsWith('[DOCX_BASE64]:')){
-      const ext=selectedFile.name.split('.').pop().toUpperCase();
-      fileContent=`[File ${ext} diunggah: "${selectedFile.name}", ukuran ${Math.round(selectedFile.size/1024)} KB. Lakukan analisis simulasi plagiarisme terhadap dokumen akademik ini berdasarkan metadata dan karakteristik file.]`;
-    } else {
-      fileContent=raw.substring(0,6000); // limit
-    }
+    fileContent=await readFileAsText(selectedFile);
+    if(fileContent.length>6000) fileContent=fileContent.substring(0,6000);
   }catch(e){
+    hideAIOverlay();
     showToast('Gagal membaca file: '+e.message);
-    btn.disabled=false;
-    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analisis File';
     return;
   }
 
   const docTitle=document.getElementById('docTitle').value.trim()||selectedFile.name;
-  const system=`Kamu adalah sistem analisis kemiripan dokumen akademik dari asistenku.pro yang mensimulasikan laporan seperti Turnitin. Analisis konten atau metadata file yang diberikan dan kembalikan HANYA JSON valid tanpa markdown fence:
-{"similarity_index":23,"originalitas":77,"kemungkinan_ai":15,"jumlah_kata_estimasi":3500,"ringkasan":"...","breakdown":[{"kategori":"Sumber Internet","persentase":12,"keterangan":"..."},{"kategori":"Publikasi Akademik","persentase":8,"keterangan":"..."},{"kategori":"Konten AI Generatif","persentase":15,"keterangan":"..."},{"kategori":"Teks Asli","persentase":65,"keterangan":"..."}],"temuan":[{"risiko":"Tinggi","kutipan":"...","sumber":"...","alasan":"...","saran":"..."}]}
-Berikan estimasi realistis untuk dokumen akademik. Temuan maksimal 5. Risiko: Tinggi/Sedang/Rendah.`;
+  const ext=selectedFile.name.split('.').pop().toUpperCase();
+  const system=`Kamu adalah sistem analisis kemiripan dokumen akademik dari asistenku.pro yang mensimulasikan laporan seperti Turnitin. Berikan analisis realistis untuk dokumen akademik mahasiswa Indonesia. Kembalikan HANYA JSON valid tanpa markdown fence dengan struktur:
+{"similarity_index":23,"originalitas":77,"kemungkinan_ai":15,"jumlah_kata_estimasi":3500,"ringkasan":"2-3 kalimat ringkasan kondisi dokumen","breakdown":[{"kategori":"Sumber Internet","persentase":12,"keterangan":"Penjelasan singkat"},{"kategori":"Publikasi Akademik","persentase":8,"keterangan":"Penjelasan singkat"},{"kategori":"Konten AI Generatif","persentase":15,"keterangan":"Penjelasan singkat"},{"kategori":"Teks Asli","persentase":65,"keterangan":"Penjelasan singkat"}],"temuan":[{"risiko":"Tinggi","kutipan":"Contoh kalimat yang umum dalam skripsi","sumber":"Sumber referensi umum","alasan":"Alasan risiko","saran":"Saran perbaikan"}]}
+Maksimal 5 temuan. Risiko: Tinggi/Sedang/Rendah. Pastikan total breakdown ≈ 100%.`;
 
   try{
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:`Judul dokumen: "${docTitle}"\nKonten/metadata: ${fileContent}`}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system,messages:[{role:'user',content:`Analisis dokumen berikut:\nJudul: "${docTitle}"\nFormat: ${ext}\nUkuran: ${Math.round(selectedFile.size/1024)} KB\nKonten: ${fileContent}`}]})});
     const data=await res.json().catch(()=>({}));
-    btn.disabled=false;
-    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analisis File';
+    hideAIOverlay();
     if(!res.ok){showToast(data.error||'Gagal terhubung ke server');return;}
     let raw=(data.text||'').trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
     let parsed;
@@ -555,8 +641,7 @@ Berikan estimasi realistis untuk dokumen akademik. Temuan maksimal 5. Risiko: Ti
     renderFileResult(lastFileParsed);
     showToast('Analisis selesai! ✓');
   }catch(e){
-    btn.disabled=false;
-    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analisis File';
+    hideAIOverlay();
     showToast('Gagal terhubung ke server.');
   }
 }
