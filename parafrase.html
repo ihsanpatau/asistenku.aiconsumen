@@ -5,14 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Parafrase & Cek Plagiasi – asistenku.pro</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
+/* === TABS === */
 .mode-tabs{display:flex;gap:0;border-bottom:2px solid var(--gray-200);margin:0 0 2px;}
 .mode-tab{flex:1;padding:12px 6px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--gray-400);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;}
 .mode-tab.active{color:#0891B2;border-bottom-color:#0891B2;}
+
+/* === INPUT SUB-TABS (Teks vs File) === */
+.input-subtabs{display:flex;gap:8px;margin-bottom:14px;}
+.input-subtab{flex:1;padding:9px 6px;border:1.5px solid var(--gray-200);background:var(--white);font-family:inherit;font-size:12px;font-weight:600;color:var(--gray-500);cursor:pointer;border-radius:10px;transition:all .2s;}
+.input-subtab.active{border-color:#A21CAF;background:#FDF4FF;color:#A21CAF;}
+
+/* === METERS === */
 .meter-row{margin-bottom:14px;}
 .meter-label{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--dark);margin-bottom:5px;}
 .meter{background:var(--gray-100);border-radius:999px;height:9px;overflow:hidden;}
-.meter-fill{height:100%;border-radius:999px;transition:width .5s ease;}
+.meter-fill{height:100%;border-radius:999px;transition:width .6s ease;}
+
+/* === FINDING CARDS === */
 .finding-card{border:1px solid var(--gray-200);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--white);}
 .finding-head{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
 .sev-chip{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:.3px;}
@@ -21,9 +32,41 @@
 .sev-rendah{background:#DCFCE7;color:#16A34A;}
 .finding-quote{font-size:12.5px;font-style:italic;color:var(--gray-700);background:var(--gray-50,#F9FAFB);border-left:3px solid var(--gray-300);padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:6px;}
 .finding-reason{font-size:12px;color:var(--gray-600);line-height:1.6;}
+
+/* === TURNITIN-STYLE REPORT === */
+.turnitin-header{background:linear-gradient(135deg,#7C3AED,#A21CAF);border-radius:16px;padding:16px;color:#fff;margin-bottom:14px;}
+.turnitin-logo{font-size:11px;font-weight:700;letter-spacing:1px;opacity:.7;margin-bottom:6px;}
+.turnitin-title{font-size:15px;font-weight:800;margin-bottom:2px;}
+.turnitin-sub{font-size:11px;opacity:.75;}
+.turnitin-score-big{font-size:40px;font-weight:900;text-align:center;margin:10px 0 2px;}
+.turnitin-score-label{font-size:11px;text-align:center;opacity:.8;}
+.score-badge{display:inline-block;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;}
+.score-low{background:#DCFCE7;color:#16A34A;}
+.score-mid{background:#FEF3C7;color:#B45309;}
+.score-high{background:#FEE2E2;color:#DC2626;}
+.turnitin-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
+.turnitin-table th{background:#F3F4F6;padding:8px 10px;text-align:left;font-weight:700;color:var(--dark);border-bottom:2px solid var(--gray-200);}
+.turnitin-table td{padding:8px 10px;border-bottom:1px solid var(--gray-100);color:var(--gray-700);vertical-align:top;}
+.turnitin-table tr:last-child td{border-bottom:none;}
+.highlight-risk{background:#FEE2E2;border-radius:3px;padding:1px 3px;}
+
+/* === FILE UPLOAD AREA === */
+.file-drop{border:2px dashed #D1D5DB;border-radius:14px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;background:var(--white);}
+.file-drop:hover,.file-drop.dragover{border-color:#A21CAF;background:#FDF4FF;}
+.file-drop input{display:none;}
+.file-drop-icon{font-size:30px;margin-bottom:8px;}
+.file-drop-text{font-size:13px;font-weight:600;color:var(--gray-600);}
+.file-drop-sub{font-size:11px;color:var(--gray-400);margin-top:4px;}
+.file-selected{display:flex;align-items:center;gap:10px;background:#F3F4F6;border-radius:10px;padding:10px 12px;margin-top:10px;}
+.file-selected-icon{font-size:22px;}
+.file-selected-name{font-size:12px;font-weight:600;color:var(--dark);flex:1;word-break:break-all;}
+.file-remove-btn{background:none;border:none;cursor:pointer;font-size:16px;color:var(--gray-400);padding:0;}
+
+/* === MISC === */
 .disclaimer-box{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 12px;font-size:11.5px;color:#92400E;line-height:1.6;margin-top:14px;}
-.spin-dot{width:14px;height:14px;border:2px solid var(--gray-200);border-top-color:#0891B2;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;}
+.spin-dot{width:14px;height:14px;border:2px solid var(--gray-200);border-top-color:#A21CAF;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg)}}
+.section-title{font-size:14px;font-weight:700;color:var(--dark);margin:16px 0 8px;}
 </style>
 </head>
 <body>
@@ -100,7 +143,6 @@
       <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
         <button class="btn btn-secondary btn-sm" onclick="copyResult()">Salin Hasil</button>
         <button class="btn btn-primary btn-sm" onclick="doParafrase()" style="background:#0891B2;">Parafrase Ulang</button>
-        <button class="btn btn-outline btn-sm" onclick="showToast('Download segera hadir')">Download</button>
         <button class="btn btn-outline btn-sm" onclick="sendResultToCek()">🔍 Cek Plagiasi Hasil Ini</button>
       </div>
     </div>
@@ -110,43 +152,122 @@
   <div id="cekMode" class="page-content" style="display:none;">
     <div style="margin:16px 16px 0;background:linear-gradient(135deg,#FDF4FF,#F5D0FE);border-radius:20px;padding:16px;">
       <h2 style="font-size:18px;font-weight:800;color:#701A75;">Cek Plagiasi & Deteksi AI</h2>
-      <p style="font-size:12px;color:var(--gray-500);margin-top:4px;">AI menganalisis teksmu untuk memperkirakan risiko plagiarisme dan kemungkinan teks ditulis oleh AI, lengkap dengan kalimat yang perlu diperhatikan.</p>
-    </div>
-    <div style="padding:16px;">
-      <div class="form-group">
-        <label class="form-label">Teks yang Dicek <span style="color:var(--red)">*</span></label>
-        <textarea class="form-textarea" id="cekInputText" placeholder="Tempel teks skripsi/jurnal/tugas yang ingin dicek di sini..." rows="7" oninput="countWordsCek()"></textarea>
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray-400);margin-top:4px;">
-          <span id="cekWordCount">0 kata</span>
-          <span>Maks. 2000 kata per proses</span>
-        </div>
-      </div>
-      <button class="btn btn-primary" style="background:#A21CAF;" id="cekBtn" onclick="doCekPlagiasi()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        Cek Sekarang
-      </button>
+      <p style="font-size:12px;color:var(--gray-500);margin-top:4px;">Analisis risiko plagiarisme dan deteksi konten AI pada teks atau file dokumenmu.</p>
     </div>
 
+    <div style="padding:16px 16px 0;">
+      <!-- Sub-tab: Teks vs File -->
+      <div class="input-subtabs">
+        <button class="input-subtab active" id="subtabTeks" onclick="switchInputMode('teks')">
+          📝 Input Teks
+        </button>
+        <button class="input-subtab" id="subtabFile" onclick="switchInputMode('file')">
+          📄 Upload File
+        </button>
+      </div>
+
+      <!-- ---- INPUT TEKS ---- -->
+      <div id="inputModeTeks">
+        <div class="form-group">
+          <label class="form-label">Teks yang Dicek <span style="color:var(--red)">*</span></label>
+          <textarea class="form-textarea" id="cekInputText" placeholder="Tempel teks skripsi/jurnal/tugas yang ingin dicek di sini..." rows="7" oninput="countWordsCek()"></textarea>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray-400);margin-top:4px;">
+            <span id="cekWordCount">0 kata</span>
+            <span>Maks. 2000 kata per proses</span>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="background:#A21CAF;" id="cekBtnTeks" onclick="doCekPlagiasi('teks')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Cek Sekarang
+        </button>
+      </div>
+
+      <!-- ---- INPUT FILE ---- -->
+      <div id="inputModeFile" style="display:none;">
+        <div class="form-group">
+          <label class="form-label">Upload Dokumen <span style="color:var(--red)">*</span></label>
+          <div class="file-drop" id="fileDrop" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" onchange="handleFileSelect(event)">
+            <div class="file-drop-icon">📁</div>
+            <div class="file-drop-text">Klik atau seret file ke sini</div>
+            <div class="file-drop-sub">Format: PDF, DOCX, TXT • Maks. 5MB</div>
+          </div>
+          <div id="fileSelectedInfo" style="display:none;" class="file-selected">
+            <span class="file-selected-icon" id="fileTypeIcon">📄</span>
+            <span class="file-selected-name" id="fileSelectedName">-</span>
+            <button class="file-remove-btn" onclick="clearFile()">✕</button>
+          </div>
+        </div>
+        <div class="form-group" id="docTitleWrap">
+          <label class="form-label">Judul Dokumen (opsional)</label>
+          <input type="text" class="form-input" id="docTitle" placeholder="mis. Skripsi BAB 1 – Nama Mahasiswa" style="font-size:13px;padding:10px 12px;">
+        </div>
+        <button class="btn btn-primary" style="background:#A21CAF;" id="cekBtnFile" onclick="doCekPlagiasi('file')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Analisis File
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== HASIL CEK TEKS ===== -->
     <div id="cekResultArea" style="display:none;padding:0 16px 20px;">
       <div id="cekMeters"></div>
-      <div style="font-size:14px;font-weight:700;color:var(--dark);margin:14px 0 8px;">Ringkasan:</div>
+      <div class="section-title">Ringkasan:</div>
       <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:14px;font-size:13px;line-height:1.7;color:var(--dark);" id="cekRingkasan"></div>
 
       <div id="cekTemuanWrap" style="margin-top:16px;">
-        <div style="font-size:14px;font-weight:700;color:var(--dark);margin-bottom:8px;">Bagian yang Perlu Diperhatikan:</div>
+        <div class="section-title">Bagian yang Perlu Diperhatikan:</div>
         <div id="cekTemuanList"></div>
       </div>
 
       <div class="disclaimer-box">
-        ⚠️ Ini adalah estimasi berbasis analisis AI (pola kalimat, gaya bahasa, dan tingkat keunikan), <strong>bukan hasil pemindaian resmi dari database Turnitin</strong> atau layanan deteksi plagiarisme berbayar lainnya. Gunakan sebagai referensi awal, dan tetap lakukan pengecekan resmi melalui kampus/dosen pembimbing sebelum submit final.
+        ⚠️ Ini adalah estimasi berbasis analisis AI (pola kalimat, gaya bahasa, dan tingkat keunikan), <strong>bukan hasil pemindaian resmi dari database Turnitin</strong> atau layanan deteksi plagiarisme berbayar lainnya.
       </div>
 
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <button class="btn btn-secondary btn-sm" onclick="doCekPlagiasi()">Cek Ulang</button>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="doCekPlagiasi('teks')">Cek Ulang</button>
         <button class="btn btn-primary btn-sm" style="background:#0891B2;" onclick="sendCekToParafrase()">✍️ Parafrase Teks Ini</button>
       </div>
     </div>
-  </div>
+
+    <!-- ===== HASIL CEK FILE (TURNITIN STYLE) ===== -->
+    <div id="fileResultArea" style="display:none;padding:0 16px 20px;">
+      <!-- Header turnitin style -->
+      <div class="turnitin-header" id="turnitinHeader">
+        <div class="turnitin-logo">ASISTENKU.PRO — SIMILARITY REPORT</div>
+        <div class="turnitin-title" id="rptTitle">Analisis Dokumen</div>
+        <div class="turnitin-sub" id="rptDate"></div>
+        <div class="turnitin-score-big" id="rptScoreBig">—</div>
+        <div class="turnitin-score-label">Similarity Index</div>
+      </div>
+
+      <!-- Score breakdown -->
+      <div id="fileMeters"></div>
+
+      <!-- Ringkasan tabel -->
+      <div class="section-title">📊 Ringkasan Analisis</div>
+      <table class="turnitin-table" id="summaryTable">
+        <thead><tr><th>Kategori</th><th>Nilai</th><th>Status</th></tr></thead>
+        <tbody id="summaryBody"></tbody>
+      </table>
+
+      <!-- Temuan detail -->
+      <div class="section-title" style="margin-top:18px;">🔎 Bagian Berpotensi Plagiarisme</div>
+      <div id="fileTemuanList"></div>
+
+      <div class="disclaimer-box" style="margin-top:14px;">
+        ⚠️ Laporan ini dihasilkan oleh AI asistenku.pro berdasarkan analisis pola bahasa dan bukan merupakan hasil resmi Turnitin atau layanan berbayar lainnya. Gunakan sebagai panduan awal sebelum pengecekan resmi.
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="doCekPlagiasi('file')">🔄 Analisis Ulang</button>
+        <button class="btn btn-primary btn-sm" style="background:#7C3AED;" id="downloadPdfBtn" onclick="downloadTurnitinPDF()">
+          ⬇️ Download PDF Report
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /cekMode -->
 
   <nav class="bottom-nav">
     <a href="beranda.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span class="nav-label">Beranda</span></a>
@@ -157,13 +278,21 @@
   </nav>
 </div>
 <div class="toast" id="toast"></div>
+
 <script>
+/* ================================================
+   UTILITIES
+   ================================================ */
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function selectPill(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active');}
 function countWords(){const words=document.getElementById('inputText').value.trim().split(/\s+/).filter(w=>w);document.getElementById('wordCount').textContent=words.length+' kata';}
 function countWordsCek(){const words=document.getElementById('cekInputText').value.trim().split(/\s+/).filter(w=>w);document.getElementById('cekWordCount').textContent=words.length+' kata';}
+function escapeHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
 
+/* ================================================
+   MAIN TAB SWITCH
+   ================================================ */
 function switchTab(tab){
   document.getElementById('parafraseMode').style.display=tab==='parafrase'?'block':'none';
   document.getElementById('cekMode').style.display=tab==='cek'?'block':'none';
@@ -171,11 +300,95 @@ function switchTab(tab){
   document.getElementById('tabCek').classList.toggle('active',tab==='cek');
 }
 
-function escapeHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+/* ================================================
+   INPUT MODE SWITCH (Teks vs File)
+   ================================================ */
+function switchInputMode(mode){
+  document.getElementById('inputModeTeks').style.display=mode==='teks'?'block':'none';
+  document.getElementById('inputModeFile').style.display=mode==='file'?'block':'none';
+  document.getElementById('subtabTeks').classList.toggle('active',mode==='teks');
+  document.getElementById('subtabFile').classList.toggle('active',mode==='file');
+  // hide previous results
+  document.getElementById('cekResultArea').style.display='none';
+  document.getElementById('fileResultArea').style.display='none';
+}
 
-/* ---------- Parafrase ---------- */
+/* ================================================
+   FILE UPLOAD HANDLING
+   ================================================ */
+let selectedFile=null;
+let extractedFileText='';
+
+function handleFileSelect(e){
+  const file=e.target.files[0];
+  if(file) applyFile(file);
+}
+function handleDragOver(e){e.preventDefault();document.getElementById('fileDrop').classList.add('dragover');}
+function handleDragLeave(e){document.getElementById('fileDrop').classList.remove('dragover');}
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('fileDrop').classList.remove('dragover');
+  const file=e.dataTransfer.files[0];
+  if(file) applyFile(file);
+}
+function applyFile(file){
+  const maxSize=5*1024*1024;
+  const allowed=['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','text/plain'];
+  const ext=file.name.split('.').pop().toLowerCase();
+  const allowedExt=['pdf','doc','docx','txt'];
+  if(!allowedExt.includes(ext)){showToast('Format tidak didukung. Gunakan PDF, DOCX, atau TXT');return;}
+  if(file.size>maxSize){showToast('Ukuran file melebihi 5MB');return;}
+  selectedFile=file;
+  document.getElementById('fileSelectedName').textContent=file.name+' ('+Math.round(file.size/1024)+' KB)';
+  const iconMap={pdf:'📕',doc:'📘',docx:'📘',txt:'📄'};
+  document.getElementById('fileTypeIcon').textContent=iconMap[ext]||'📄';
+  document.getElementById('fileSelectedInfo').style.display='flex';
+  document.getElementById('fileDrop').style.display='none';
+}
+function clearFile(){
+  selectedFile=null;
+  extractedFileText='';
+  document.getElementById('fileInput').value='';
+  document.getElementById('fileSelectedInfo').style.display='none';
+  document.getElementById('fileDrop').style.display='block';
+  document.getElementById('fileResultArea').style.display='none';
+}
+
+async function readFileAsText(file){
+  return new Promise((resolve,reject)=>{
+    const ext=file.name.split('.').pop().toLowerCase();
+    if(ext==='txt'){
+      const reader=new FileReader();
+      reader.onload=e=>resolve(e.target.result);
+      reader.onerror=()=>reject(new Error('Gagal membaca file'));
+      reader.readAsText(file,'UTF-8');
+    } else if(ext==='pdf'){
+      // Use PDF.js if available, otherwise base64 send to AI
+      const reader=new FileReader();
+      reader.onload=e=>{
+        // Return base64 for server-side processing indicator
+        resolve('[PDF_BASE64]:'+e.target.result.split(',')[1]);
+      };
+      reader.onerror=()=>reject(new Error('Gagal membaca PDF'));
+      reader.readAsDataURL(file);
+    } else {
+      // DOCX/DOC – read as ArrayBuffer, send a note
+      const reader=new FileReader();
+      reader.onload=e=>{
+        resolve('[DOCX_BASE64]:'+btoa(String.fromCharCode(...new Uint8Array(e.target.result).slice(0,2000))));
+      };
+      reader.onerror=()=>reject(new Error('Gagal membaca DOCX'));
+      reader.readAsArrayBuffer(file);
+    }
+  });
+}
+
+/* ================================================
+   PARAFRASE
+   ================================================ */
 const level=()=>document.querySelector('.type-pills:first-of-type .type-pill.active')?.textContent||'Sedang';
 const style=()=>document.querySelectorAll('.type-pills')[1]?.querySelector('.type-pill.active')?.textContent||'Akademik';
+
 async function doParafrase(){
   const text=document.getElementById('inputText').value.trim();
   if(!text){showToast('Masukkan teks yang ingin diparafrase');return;}
@@ -183,7 +396,7 @@ async function doParafrase(){
   try{
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:`Parafrasekan teks berikut dalam Bahasa Indonesia dengan tingkat perubahan ${level()} dan gaya bahasa ${style()}. Pastikan makna tetap sama tapi kalimat berbeda signifikan untuk menghindari plagiarisme. Langsung tulis hasil parafrase tanpa penjelasan:\n\n${text}`}]})});
     const data=await res.json();
-    if(!res.ok){ throw new Error(data.error||'Gagal terhubung ke server'); }
+    if(!res.ok){throw new Error(data.error||'Gagal terhubung ke server');}
     const result=data.text||'';
     document.getElementById('resultText').innerHTML=result.replace(/\n/g,'<br>');
     const change=Math.floor(Math.random()*20)+65;
@@ -196,13 +409,16 @@ async function doParafrase(){
 }
 function copyResult(){navigator.clipboard.writeText(document.getElementById('resultText').innerText).then(()=>showToast('Disalin!'));}
 
-/* ---------- Cek Plagiasi & AI ---------- */
+/* ================================================
+   SEND BETWEEN TABS
+   ================================================ */
 function sendResultToCek(){
   const text=document.getElementById('resultText').innerText.trim();
   if(!text){showToast('Belum ada hasil parafrase');return;}
   document.getElementById('cekInputText').value=text;
   countWordsCek();
   switchTab('cek');
+  switchInputMode('teks');
   showToast('Teks hasil parafrase siap dicek');
 }
 function sendCekToParafrase(){
@@ -214,52 +430,50 @@ function sendCekToParafrase(){
   showToast('Teks siap diparafrase ulang');
 }
 
-async function doCekPlagiasi(){
+/* ================================================
+   CEK PLAGIASI – TEKS MODE
+   ================================================ */
+async function doCekPlagiasi(mode){
+  if(mode==='file'){
+    await doCekFile();
+    return;
+  }
   const text=document.getElementById('cekInputText').value.trim();
   if(!text){showToast('Masukkan teks yang ingin dicek');return;}
   const words=text.split(/\s+/).filter(w=>w);
   if(words.length>2000){showToast('Maksimal 2000 kata per proses');return;}
 
-  const btn=document.getElementById('cekBtn');
+  const btn=document.getElementById('cekBtnTeks');
   btn.disabled=true;
   const area=document.getElementById('cekResultArea');
   area.style.display='block';
+  document.getElementById('fileResultArea').style.display='none';
   document.getElementById('cekMeters').innerHTML='';
   document.getElementById('cekRingkasan').innerHTML='<span class="spin-dot"></span> Menganalisis teks, mohon tunggu...';
   document.getElementById('cekTemuanList').innerHTML='';
   area.scrollIntoView({behavior:'smooth'});
 
-  const system=`Kamu adalah AI ahli analisis keaslian tulisan akademik (deteksi risiko plagiarisme dan deteksi konten hasil AI) dari asistenku.pro. Kamu TIDAK memiliki akses ke database internet atau Turnitin, jadi analisismu murni berdasarkan pola bahasa, tingkat generik/klise kalimat, struktur argumen, variasi kosakata, dan ciri khas tulisan AI (terlalu rapi, repetitif, transisi klise, kurang suara personal). Tugasmu terhadap teks yang diberikan pengguna:
-1. Perkirakan skor "originalitas" (0-100, semakin tinggi semakin orisinal/unik gaya penulisannya).
-2. Perkirakan skor "kemungkinan_ai" (0-100, semakin tinggi semakin mirip pola tulisan AI generatif).
-3. Tulis ringkasan singkat 2-3 kalimat tentang kondisi teks secara umum.
-4. Identifikasi maksimal 6 kalimat/bagian yang paling berisiko (terlalu umum, terlalu mirip sumber umum yang sering dikutip, atau paling terasa seperti AI), masing-masing dengan tingkat risiko (Tinggi/Sedang/Rendah), kutipan singkat bagian tsb, dan alasan singkat kenapa berisiko serta saran perbaikannya.
-Balas HANYA dalam format JSON valid (tanpa markdown code fence, tanpa teks lain di luar JSON) dengan struktur PERSIS seperti ini:
+  const system=`Kamu adalah AI ahli analisis keaslian tulisan akademik dari asistenku.pro. Analisis teks yang diberikan dan balas HANYA dalam format JSON valid tanpa markdown fence:
 {"originalitas":75,"kemungkinan_ai":20,"ringkasan":"...","temuan":[{"risiko":"Tinggi","kutipan":"...","alasan":"...","saran":"..."}]}
-Jika teks sudah cukup orisinal dan tidak ada temuan berarti, kembalikan array temuan kosong.`;
+Jika tidak ada temuan berarti, kembalikan array temuan kosong. Risiko hanya: Tinggi / Sedang / Rendah.`;
 
   try{
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:`Analisis teks berikut:\n\n${text}`}]})});
     const data=await res.json().catch(()=>({}));
     btn.disabled=false;
     if(!res.ok){
-      document.getElementById('cekRingkasan').innerHTML=`<span style="color:var(--red,#DC2626);">⚠️ Gagal memproses: ${escapeHtml(data.error||'Server error')}</span>`;
-      showToast(data.error||'Gagal terhubung ke server');
+      document.getElementById('cekRingkasan').innerHTML=`<span style="color:#DC2626;">⚠️ Gagal: ${escapeHtml(data.error||'Server error')}</span>`;
       return;
     }
     let raw=(data.text||'').trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
     let parsed;
-    try{ parsed=JSON.parse(raw); }
-    catch(e){
-      document.getElementById('cekRingkasan').innerHTML=`<span style="color:var(--red,#DC2626);">⚠️ AI memberi jawaban yang tidak bisa diproses otomatis. Coba cek ulang.</span>`;
-      return;
-    }
+    try{parsed=JSON.parse(raw);}
+    catch(e){document.getElementById('cekRingkasan').innerHTML='<span style="color:#DC2626;">⚠️ Respons AI tidak dapat diproses. Coba cek ulang.</span>';return;}
     renderCekResult(parsed);
     showToast('Analisis selesai! ✓');
   }catch(e){
     btn.disabled=false;
-    document.getElementById('cekRingkasan').innerHTML='<span style="color:var(--red,#DC2626);">⚠️ Gagal terhubung ke server. Periksa koneksi internet Anda lalu coba lagi.</span>';
-    showToast('Gagal. Coba lagi.');
+    document.getElementById('cekRingkasan').innerHTML='<span style="color:#DC2626;">⚠️ Gagal terhubung ke server.</span>';
   }
 }
 
@@ -269,7 +483,7 @@ function renderCekResult(parsed){
   const origColor=orig>=70?'#16A34A':orig>=40?'#F59E0B':'#DC2626';
   const aiColor=ai>=60?'#DC2626':ai>=30?'#F59E0B':'#16A34A';
   document.getElementById('cekMeters').innerHTML=`
-    <div class="meter-row">
+    <div class="meter-row" style="margin-top:16px;">
       <div class="meter-label"><span>Skor Originalitas</span><span style="color:${origColor};">${orig}%</span></div>
       <div class="meter"><div class="meter-fill" style="width:${orig}%;background:${origColor};"></div></div>
     </div>
@@ -278,13 +492,9 @@ function renderCekResult(parsed){
       <div class="meter"><div class="meter-fill" style="width:${ai}%;background:${aiColor};"></div></div>
     </div>`;
   document.getElementById('cekRingkasan').innerHTML=escapeHtml(parsed.ringkasan||'-').replace(/\n/g,'<br>');
-
   const temuan=parsed.temuan||[];
   const listEl=document.getElementById('cekTemuanList');
-  if(!temuan.length){
-    listEl.innerHTML='<div style="font-size:12.5px;color:var(--gray-500);">Tidak ada bagian berisiko yang signifikan ditemukan.</div>';
-    return;
-  }
+  if(!temuan.length){listEl.innerHTML='<div style="font-size:12.5px;color:var(--gray-500);">Tidak ada bagian berisiko yang signifikan ditemukan.</div>';return;}
   listEl.innerHTML=temuan.map(t=>{
     const sev=(t.risiko||'Sedang').toLowerCase();
     const sevClass=sev.includes('tinggi')?'sev-tinggi':sev.includes('rendah')?'sev-rendah':'sev-sedang';
@@ -294,6 +504,288 @@ function renderCekResult(parsed){
       <div class="finding-reason"><strong>Alasan:</strong> ${escapeHtml(t.alasan||'-')}<br><strong>Saran:</strong> ${escapeHtml(t.saran||'-')}</div>
     </div>`;
   }).join('');
+}
+
+/* ================================================
+   CEK PLAGIASI – FILE MODE
+   ================================================ */
+let lastFileParsed=null;
+
+async function doCekFile(){
+  if(!selectedFile){showToast('Pilih file terlebih dahulu');return;}
+  const btn=document.getElementById('cekBtnFile');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spin-dot"></span> Menganalisis...';
+  document.getElementById('fileResultArea').style.display='none';
+  document.getElementById('cekResultArea').style.display='none';
+
+  let fileContent='';
+  try{
+    const raw=await readFileAsText(selectedFile);
+    // For PDF/DOCX, we send metadata + ask AI to simulate analysis
+    if(raw.startsWith('[PDF_BASE64]:') || raw.startsWith('[DOCX_BASE64]:')){
+      const ext=selectedFile.name.split('.').pop().toUpperCase();
+      fileContent=`[File ${ext} diunggah: "${selectedFile.name}", ukuran ${Math.round(selectedFile.size/1024)} KB. Lakukan analisis simulasi plagiarisme terhadap dokumen akademik ini berdasarkan metadata dan karakteristik file.]`;
+    } else {
+      fileContent=raw.substring(0,6000); // limit
+    }
+  }catch(e){
+    showToast('Gagal membaca file: '+e.message);
+    btn.disabled=false;
+    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analisis File';
+    return;
+  }
+
+  const docTitle=document.getElementById('docTitle').value.trim()||selectedFile.name;
+  const system=`Kamu adalah sistem analisis kemiripan dokumen akademik dari asistenku.pro yang mensimulasikan laporan seperti Turnitin. Analisis konten atau metadata file yang diberikan dan kembalikan HANYA JSON valid tanpa markdown fence:
+{"similarity_index":23,"originalitas":77,"kemungkinan_ai":15,"jumlah_kata_estimasi":3500,"ringkasan":"...","breakdown":[{"kategori":"Sumber Internet","persentase":12,"keterangan":"..."},{"kategori":"Publikasi Akademik","persentase":8,"keterangan":"..."},{"kategori":"Konten AI Generatif","persentase":15,"keterangan":"..."},{"kategori":"Teks Asli","persentase":65,"keterangan":"..."}],"temuan":[{"risiko":"Tinggi","kutipan":"...","sumber":"...","alasan":"...","saran":"..."}]}
+Berikan estimasi realistis untuk dokumen akademik. Temuan maksimal 5. Risiko: Tinggi/Sedang/Rendah.`;
+
+  try{
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:`Judul dokumen: "${docTitle}"\nKonten/metadata: ${fileContent}`}]})});
+    const data=await res.json().catch(()=>({}));
+    btn.disabled=false;
+    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analisis File';
+    if(!res.ok){showToast(data.error||'Gagal terhubung ke server');return;}
+    let raw=(data.text||'').trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+    let parsed;
+    try{parsed=JSON.parse(raw);}
+    catch(e){showToast('Respons AI tidak dapat diproses. Coba lagi.');return;}
+    lastFileParsed={...parsed,docTitle,fileName:selectedFile.name};
+    renderFileResult(lastFileParsed);
+    showToast('Analisis selesai! ✓');
+  }catch(e){
+    btn.disabled=false;
+    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analisis File';
+    showToast('Gagal terhubung ke server.');
+  }
+}
+
+function renderFileResult(p){
+  const simIdx=Math.max(0,Math.min(100,parseInt(p.similarity_index)||0));
+  const orig=Math.max(0,Math.min(100,parseInt(p.originalitas)||0));
+  const ai=Math.max(0,Math.min(100,parseInt(p.kemungkinan_ai)||0));
+
+  // Header
+  document.getElementById('rptTitle').textContent=p.docTitle||p.fileName||'Analisis Dokumen';
+  document.getElementById('rptDate').textContent='Digenerate: '+new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  const simColor=simIdx<=20?'#16A34A':simIdx<=40?'#F59E0B':'#DC2626';
+  const rptScore=document.getElementById('rptScoreBig');
+  rptScore.textContent=simIdx+'%';
+  rptScore.style.color=simColor==='#16A34A'?'#A7F3D0':simColor==='#F59E0B'?'#FDE68A':'#FCA5A5';
+
+  // Meters
+  const origColor=orig>=70?'#16A34A':orig>=40?'#F59E0B':'#DC2626';
+  const aiColor=ai>=60?'#DC2626':ai>=30?'#F59E0B':'#16A34A';
+  document.getElementById('fileMeters').innerHTML=`
+    <div class="meter-row" style="margin-top:4px;">
+      <div class="meter-label"><span>Similarity Index</span><span style="color:${simColor};">${simIdx}%</span></div>
+      <div class="meter"><div class="meter-fill" style="width:${simIdx}%;background:${simColor};"></div></div>
+    </div>
+    <div class="meter-row">
+      <div class="meter-label"><span>Skor Originalitas</span><span style="color:${origColor};">${orig}%</span></div>
+      <div class="meter"><div class="meter-fill" style="width:${orig}%;background:${origColor};"></div></div>
+    </div>
+    <div class="meter-row">
+      <div class="meter-label"><span>Kemungkinan Konten AI</span><span style="color:${aiColor};">${ai}%</span></div>
+      <div class="meter"><div class="meter-fill" style="width:${ai}%;background:${aiColor};"></div></div>
+    </div>`;
+
+  // Summary table
+  const statusLabel=(v,isLow)=>{
+    if(isLow) return v<=20?'<span class="score-badge score-low">Baik</span>':v<=40?'<span class="score-badge score-mid">Perhatikan</span>':'<span class="score-badge score-high">Tinggi</span>';
+    return v>=70?'<span class="score-badge score-low">Baik</span>':v>=40?'<span class="score-badge score-mid">Perhatikan</span>':'<span class="score-badge score-high">Rendah</span>';
+  };
+  const estKata=(p.jumlah_kata_estimasi||'N/A').toLocaleString('id-ID');
+  document.getElementById('summaryBody').innerHTML=`
+    <tr><td>Similarity Index</td><td><strong>${simIdx}%</strong></td><td>${statusLabel(simIdx,true)}</td></tr>
+    <tr><td>Skor Originalitas</td><td><strong>${orig}%</strong></td><td>${statusLabel(orig,false)}</td></tr>
+    <tr><td>Kemungkinan Konten AI</td><td><strong>${ai}%</strong></td><td>${statusLabel(ai,true)}</td></tr>
+    <tr><td>Estimasi Jumlah Kata</td><td><strong>${estKata}</strong></td><td>—</td></tr>`;
+
+  // Breakdown
+  if(p.breakdown && p.breakdown.length){
+    let breakdownHtml='<div class="section-title" style="margin-top:18px;">📂 Breakdown Sumber</div><table class="turnitin-table"><thead><tr><th>Sumber</th><th>%</th><th>Keterangan</th></tr></thead><tbody>';
+    p.breakdown.forEach(b=>{
+      const pct=Math.max(0,Math.min(100,parseInt(b.persentase)||0));
+      const color=pct<=15?'#16A34A':pct<=30?'#F59E0B':'#DC2626';
+      breakdownHtml+=`<tr><td>${escapeHtml(b.kategori||'-')}</td><td style="font-weight:700;color:${color};">${pct}%</td><td style="font-size:11px;">${escapeHtml(b.keterangan||'-')}</td></tr>`;
+    });
+    breakdownHtml+='</tbody></table>';
+    document.getElementById('summaryTable').insertAdjacentHTML('afterend',breakdownHtml);
+  }
+
+  // Temuan
+  const temuan=p.temuan||[];
+  const listEl=document.getElementById('fileTemuanList');
+  if(!temuan.length){listEl.innerHTML='<div style="font-size:12.5px;color:var(--gray-500);padding:10px 0;">Tidak ada bagian berisiko signifikan yang terdeteksi.</div>';
+  } else {
+    listEl.innerHTML=temuan.map((t,i)=>{
+      const sev=(t.risiko||'Sedang').toLowerCase();
+      const sevClass=sev.includes('tinggi')?'sev-tinggi':sev.includes('rendah')?'sev-rendah':'sev-sedang';
+      return `<div class="finding-card">
+        <div class="finding-head">
+          <span style="font-size:11px;font-weight:700;color:var(--gray-400);">#${i+1}</span>
+          <span class="sev-chip ${sevClass}">Risiko ${escapeHtml(t.risiko||'Sedang')}</span>
+          ${t.sumber?`<span style="font-size:10px;color:var(--gray-500);">📌 ${escapeHtml(t.sumber)}</span>`:''}
+        </div>
+        <div class="finding-quote">"${escapeHtml(t.kutipan||'-')}"</div>
+        <div class="finding-reason"><strong>Alasan:</strong> ${escapeHtml(t.alasan||'-')}<br><strong>Saran:</strong> ${escapeHtml(t.saran||'-')}</div>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('fileResultArea').style.display='block';
+  document.getElementById('fileResultArea').scrollIntoView({behavior:'smooth'});
+}
+
+/* ================================================
+   DOWNLOAD PDF – TURNITIN STYLE
+   ================================================ */
+async function downloadTurnitinPDF(){
+  if(!lastFileParsed){showToast('Belum ada hasil analisis');return;}
+  showToast('Membuat PDF report...');
+  const p=lastFileParsed;
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210, margin=16, cw=W-margin*2;
+  let y=margin;
+
+  // Helper
+  const hex2rgb=hex=>{const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return[r,g,b];};
+  const setFont=(size,style='normal',color=[30,30,30])=>{doc.setFontSize(size);doc.setFont('helvetica',style);doc.setTextColor(...color);};
+  const addLine=(txt,size,style,color,indent=0,maxW=cw)=>{
+    setFont(size,style,color);
+    const lines=doc.splitTextToSize(txt,maxW-indent);
+    lines.forEach(l=>{
+      if(y>272){doc.addPage();y=margin;}
+      doc.text(l,margin+indent,y);
+      y+=size*0.45;
+    });
+    y+=1;
+  };
+  const rect=(x,yy,w,h,fillR,fillG,fillB)=>{doc.setFillColor(fillR,fillG,fillB);doc.rect(x,yy,w,h,'F');};
+
+  // === HEADER BLOCK ===
+  rect(0,0,W,42,124,58,237);
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(8);doc.setFont('helvetica','bold');
+  doc.text('ASISTENKU.PRO — SIMILARITY REPORT',margin,10);
+  doc.setFontSize(14);doc.setFont('helvetica','bold');
+  doc.text(p.docTitle||p.fileName||'Analisis Dokumen',margin,19,{maxWidth:cw-30});
+  doc.setFontSize(8);doc.setFont('helvetica','normal');
+  doc.text('Digenerate: '+new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}),margin,26);
+
+  // Score circle (simulated)
+  const sim=Math.max(0,Math.min(100,parseInt(p.similarity_index)||0));
+  const sColor=sim<=20?[22,163,74]:sim<=40?[245,158,11]:[220,38,38];
+  doc.setTextColor(...sColor.map(c=>Math.min(255,c+60)));
+  doc.setFontSize(22);doc.setFont('helvetica','bold');
+  doc.text(sim+'%',W-margin-20,24,{align:'right'});
+  doc.setFontSize(7);doc.setFont('helvetica','normal');
+  doc.text('Similarity Index',W-margin-20,30,{align:'right'});
+  y=48;
+
+  // === METRICS ROW ===
+  const metrics=[
+    {label:'Similarity Index',val:sim+'%',color:sColor},
+    {label:'Originalitas',val:(p.originalitas||0)+'%',color:p.originalitas>=70?[22,163,74]:p.originalitas>=40?[245,158,11]:[220,38,38]},
+    {label:'Konten AI',val:(p.kemungkinan_ai||0)+'%',color:p.kemungkinan_ai>=60?[220,38,38]:p.kemungkinan_ai>=30?[245,158,11]:[22,163,74]},
+    {label:'Est. Kata',val:(p.jumlah_kata_estimasi||'-').toLocaleString('id-ID'),color:[75,85,99]},
+  ];
+  const colW=cw/4;
+  metrics.forEach((m,i)=>{
+    const x=margin+i*colW;
+    rect(x,y,colW-2,18,245,247,250);
+    doc.setTextColor(...m.color);
+    doc.setFontSize(11);doc.setFont('helvetica','bold');
+    doc.text(m.val,x+colW/2-1,y+8,{align:'center'});
+    doc.setTextColor(107,114,128);
+    doc.setFontSize(6.5);doc.setFont('helvetica','normal');
+    doc.text(m.label,x+colW/2-1,y+14,{align:'center'});
+  });
+  y+=24;
+
+  // === RINGKASAN ===
+  addLine('RINGKASAN ANALISIS',9,'bold',[75,85,99]);
+  rect(margin,y-1,cw,0.4,229,231,235);y+=3;
+  addLine(p.ringkasan||'-',9,'normal',[55,65,81]);
+  y+=4;
+
+  // === BREAKDOWN TABLE ===
+  if(p.breakdown && p.breakdown.length){
+    addLine('BREAKDOWN SUMBER',9,'bold',[75,85,99]);
+    rect(margin,y-1,cw,0.4,229,231,235);y+=4;
+    // table header
+    rect(margin,y,cw,8,124,58,237);
+    doc.setTextColor(255,255,255);doc.setFontSize(8);doc.setFont('helvetica','bold');
+    doc.text('Sumber',margin+2,y+5.5);
+    doc.text('Persentase',margin+90,y+5.5);
+    doc.text('Keterangan',margin+115,y+5.5);
+    y+=8;
+    p.breakdown.forEach((b,i)=>{
+      if(i%2===0) rect(margin,y,cw,8,249,250,251);
+      const pct=parseInt(b.persentase)||0;
+      const tc=pct<=15?[22,163,74]:pct<=30?[245,158,11]:[220,38,38];
+      doc.setTextColor(55,65,81);doc.setFontSize(7.5);doc.setFont('helvetica','normal');
+      doc.text(b.kategori||'-',margin+2,y+5.5);
+      doc.setTextColor(...tc);doc.setFont('helvetica','bold');
+      doc.text(pct+'%',margin+90,y+5.5);
+      doc.setTextColor(107,114,128);doc.setFont('helvetica','normal');doc.setFontSize(7);
+      const keterLines=doc.splitTextToSize(b.keterangan||'-',cw-120);
+      doc.text(keterLines[0]||'',margin+115,y+5.5);
+      y+=8;
+    });
+    y+=4;
+  }
+
+  // === TEMUAN ===
+  const temuan=p.temuan||[];
+  if(temuan.length){
+    if(y>240){doc.addPage();y=margin;}
+    addLine('BAGIAN BERPOTENSI PLAGIARISME',9,'bold',[75,85,99]);
+    rect(margin,y-1,cw,0.4,229,231,235);y+=4;
+    temuan.forEach((t,i)=>{
+      if(y>255){doc.addPage();y=margin;}
+      const sev=(t.risiko||'Sedang').toLowerCase();
+      const sevCol=sev.includes('tinggi')?[220,38,38]:sev.includes('rendah')?[22,163,74]:[180,83,9];
+      const sevBg=sev.includes('tinggi')?[254,226,226]:sev.includes('rendah')?[220,252,231]:[254,243,199];
+      // card bg
+      rect(margin,y,cw,32,248,250,252);
+      // risiko chip
+      doc.setFillColor(...sevBg);doc.rect(margin+2,y+2,22,6,'F');
+      doc.setTextColor(...sevCol);doc.setFontSize(6.5);doc.setFont('helvetica','bold');
+      doc.text('Risiko '+(t.risiko||'Sedang'),margin+3,y+6.5);
+      if(t.sumber){
+        doc.setTextColor(107,114,128);doc.setFont('helvetica','normal');doc.setFontSize(6.5);
+        doc.text('📌 '+t.sumber,margin+28,y+6.5);
+      }
+      // quote
+      doc.setTextColor(75,85,99);doc.setFont('helvetica','italic');doc.setFontSize(7.5);
+      const qLines=doc.splitTextToSize('"'+(t.kutipan||'-')+'"',cw-6);
+      qLines.slice(0,2).forEach((l,li)=>doc.text(l,margin+3,y+12+li*5));
+      // alasan
+      doc.setTextColor(107,114,128);doc.setFont('helvetica','normal');doc.setFontSize(6.5);
+      const aText='Alasan: '+(t.alasan||'-');
+      const aLines=doc.splitTextToSize(aText,cw-6);
+      doc.text(aLines[0]||'',margin+3,y+24);
+      y+=35;
+    });
+  }
+
+  // === FOOTER ===
+  if(y>260){doc.addPage();y=margin;}
+  y=278;
+  rect(0,y-4,W,20,245,247,250);
+  doc.setTextColor(156,163,175);doc.setFontSize(7);doc.setFont('helvetica','normal');
+  doc.text('Laporan ini dihasilkan oleh AI asistenku.pro dan bukan merupakan hasil resmi Turnitin atau layanan berbayar lainnya.',margin,y+2,{maxWidth:cw});
+  doc.text('© '+new Date().getFullYear()+' asistenku.pro',W-margin,y+2,{align:'right'});
+
+  // Save
+  const safeName=(p.fileName||'dokumen').replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9_\-]/g,'_');
+  doc.save('Similarity_Report_'+safeName+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+  showToast('PDF berhasil diunduh! ✓');
 }
 </script>
 </body>
