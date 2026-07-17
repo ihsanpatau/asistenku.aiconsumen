@@ -3,18 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Parafrase – asistenku.pro</title>
+<title>Parafrase & Cek Plagiasi – asistenku.pro</title>
 <link rel="stylesheet" href="style.css">
+<style>
+.mode-tabs{display:flex;gap:0;border-bottom:2px solid var(--gray-200);margin:0 0 2px;}
+.mode-tab{flex:1;padding:12px 6px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--gray-400);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;}
+.mode-tab.active{color:#0891B2;border-bottom-color:#0891B2;}
+.meter-row{margin-bottom:14px;}
+.meter-label{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--dark);margin-bottom:5px;}
+.meter{background:var(--gray-100);border-radius:999px;height:9px;overflow:hidden;}
+.meter-fill{height:100%;border-radius:999px;transition:width .5s ease;}
+.finding-card{border:1px solid var(--gray-200);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--white);}
+.finding-head{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.sev-chip{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:.3px;}
+.sev-tinggi{background:#FEE2E2;color:#DC2626;}
+.sev-sedang{background:#FEF3C7;color:#B45309;}
+.sev-rendah{background:#DCFCE7;color:#16A34A;}
+.finding-quote{font-size:12.5px;font-style:italic;color:var(--gray-700);background:var(--gray-50,#F9FAFB);border-left:3px solid var(--gray-300);padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:6px;}
+.finding-reason{font-size:12px;color:var(--gray-600);line-height:1.6;}
+.disclaimer-box{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 12px;font-size:11.5px;color:#92400E;line-height:1.6;margin-top:14px;}
+.spin-dot{width:14px;height:14px;border:2px solid var(--gray-200);border-top-color:#0891B2;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
 <div class="app">
   <div class="backnav">
     <div class="backnav-left">
       <button class="back-btn" onclick="history.back()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></button>
-      <div><div class="backnav-title">Parafrase</div><div class="backnav-sub">Tulis ulang teks bebas plagiarisme</div></div>
+      <div><div class="backnav-title">Parafrase & Cek Plagiasi</div><div class="backnav-sub">Tulis ulang teks & deteksi risiko plagiarisme/AI</div></div>
     </div>
   </div>
-  <div class="page-content">
+
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="tabParafrase" onclick="switchTab('parafrase')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      Parafrase
+    </button>
+    <button class="mode-tab" id="tabCek" onclick="switchTab('cek')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Cek Plagiasi & AI
+    </button>
+  </div>
+
+  <!-- ================= PARAFRASE TAB ================= -->
+  <div id="parafraseMode" class="page-content">
     <div style="margin:16px 16px 0;background:linear-gradient(135deg,#ECFEFF,#A5F3FC);border-radius:20px;padding:16px;">
       <h2 style="font-size:18px;font-weight:800;color:#164E63;">Parafrase AI Anti-Plagiarisme</h2>
       <p style="font-size:12px;color:var(--gray-500);margin-top:4px;">Tulis ulang teks agar bebas plagiarisme namun tetap mempertahankan makna aslinya.</p>
@@ -64,13 +97,57 @@
       <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:14px;">
         <div id="resultText" style="font-size:13px;line-height:1.7;color:var(--dark);"></div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:12px;">
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
         <button class="btn btn-secondary btn-sm" onclick="copyResult()">Salin Hasil</button>
         <button class="btn btn-primary btn-sm" onclick="doParafrase()" style="background:#0891B2;">Parafrase Ulang</button>
         <button class="btn btn-outline btn-sm" onclick="showToast('Download segera hadir')">Download</button>
+        <button class="btn btn-outline btn-sm" onclick="sendResultToCek()">🔍 Cek Plagiasi Hasil Ini</button>
       </div>
     </div>
   </div>
+
+  <!-- ================= CEK PLAGIASI & AI TAB ================= -->
+  <div id="cekMode" class="page-content" style="display:none;">
+    <div style="margin:16px 16px 0;background:linear-gradient(135deg,#FDF4FF,#F5D0FE);border-radius:20px;padding:16px;">
+      <h2 style="font-size:18px;font-weight:800;color:#701A75;">Cek Plagiasi & Deteksi AI</h2>
+      <p style="font-size:12px;color:var(--gray-500);margin-top:4px;">AI menganalisis teksmu untuk memperkirakan risiko plagiarisme dan kemungkinan teks ditulis oleh AI, lengkap dengan kalimat yang perlu diperhatikan.</p>
+    </div>
+    <div style="padding:16px;">
+      <div class="form-group">
+        <label class="form-label">Teks yang Dicek <span style="color:var(--red)">*</span></label>
+        <textarea class="form-textarea" id="cekInputText" placeholder="Tempel teks skripsi/jurnal/tugas yang ingin dicek di sini..." rows="7" oninput="countWordsCek()"></textarea>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray-400);margin-top:4px;">
+          <span id="cekWordCount">0 kata</span>
+          <span>Maks. 2000 kata per proses</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="background:#A21CAF;" id="cekBtn" onclick="doCekPlagiasi()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Cek Sekarang
+      </button>
+    </div>
+
+    <div id="cekResultArea" style="display:none;padding:0 16px 20px;">
+      <div id="cekMeters"></div>
+      <div style="font-size:14px;font-weight:700;color:var(--dark);margin:14px 0 8px;">Ringkasan:</div>
+      <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:14px;font-size:13px;line-height:1.7;color:var(--dark);" id="cekRingkasan"></div>
+
+      <div id="cekTemuanWrap" style="margin-top:16px;">
+        <div style="font-size:14px;font-weight:700;color:var(--dark);margin-bottom:8px;">Bagian yang Perlu Diperhatikan:</div>
+        <div id="cekTemuanList"></div>
+      </div>
+
+      <div class="disclaimer-box">
+        ⚠️ Ini adalah estimasi berbasis analisis AI (pola kalimat, gaya bahasa, dan tingkat keunikan), <strong>bukan hasil pemindaian resmi dari database Turnitin</strong> atau layanan deteksi plagiarisme berbayar lainnya. Gunakan sebagai referensi awal, dan tetap lakukan pengecekan resmi melalui kampus/dosen pembimbing sebelum submit final.
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn btn-secondary btn-sm" onclick="doCekPlagiasi()">Cek Ulang</button>
+        <button class="btn btn-primary btn-sm" style="background:#0891B2;" onclick="sendCekToParafrase()">✍️ Parafrase Teks Ini</button>
+      </div>
+    </div>
+  </div>
+
   <nav class="bottom-nav">
     <a href="beranda.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span class="nav-label">Beranda</span></a>
     <a href="mahasiswa.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6L23 9z"/></svg><span class="nav-label">Mahasiswa</span></a>
@@ -84,7 +161,19 @@
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function selectPill(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active');}
 function countWords(){const words=document.getElementById('inputText').value.trim().split(/\s+/).filter(w=>w);document.getElementById('wordCount').textContent=words.length+' kata';}
+function countWordsCek(){const words=document.getElementById('cekInputText').value.trim().split(/\s+/).filter(w=>w);document.getElementById('cekWordCount').textContent=words.length+' kata';}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
+
+function switchTab(tab){
+  document.getElementById('parafraseMode').style.display=tab==='parafrase'?'block':'none';
+  document.getElementById('cekMode').style.display=tab==='cek'?'block':'none';
+  document.getElementById('tabParafrase').classList.toggle('active',tab==='parafrase');
+  document.getElementById('tabCek').classList.toggle('active',tab==='cek');
+}
+
+function escapeHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ---------- Parafrase ---------- */
 const level=()=>document.querySelector('.type-pills:first-of-type .type-pill.active')?.textContent||'Sedang';
 const style=()=>document.querySelectorAll('.type-pills')[1]?.querySelector('.type-pill.active')?.textContent||'Akademik';
 async function doParafrase(){
@@ -106,6 +195,106 @@ async function doParafrase(){
   }catch(e){showToast('Gagal. Coba lagi.');}
 }
 function copyResult(){navigator.clipboard.writeText(document.getElementById('resultText').innerText).then(()=>showToast('Disalin!'));}
+
+/* ---------- Cek Plagiasi & AI ---------- */
+function sendResultToCek(){
+  const text=document.getElementById('resultText').innerText.trim();
+  if(!text){showToast('Belum ada hasil parafrase');return;}
+  document.getElementById('cekInputText').value=text;
+  countWordsCek();
+  switchTab('cek');
+  showToast('Teks hasil parafrase siap dicek');
+}
+function sendCekToParafrase(){
+  const text=document.getElementById('cekInputText').value.trim();
+  if(!text){return;}
+  document.getElementById('inputText').value=text;
+  countWords();
+  switchTab('parafrase');
+  showToast('Teks siap diparafrase ulang');
+}
+
+async function doCekPlagiasi(){
+  const text=document.getElementById('cekInputText').value.trim();
+  if(!text){showToast('Masukkan teks yang ingin dicek');return;}
+  const words=text.split(/\s+/).filter(w=>w);
+  if(words.length>2000){showToast('Maksimal 2000 kata per proses');return;}
+
+  const btn=document.getElementById('cekBtn');
+  btn.disabled=true;
+  const area=document.getElementById('cekResultArea');
+  area.style.display='block';
+  document.getElementById('cekMeters').innerHTML='';
+  document.getElementById('cekRingkasan').innerHTML='<span class="spin-dot"></span> Menganalisis teks, mohon tunggu...';
+  document.getElementById('cekTemuanList').innerHTML='';
+  area.scrollIntoView({behavior:'smooth'});
+
+  const system=`Kamu adalah AI ahli analisis keaslian tulisan akademik (deteksi risiko plagiarisme dan deteksi konten hasil AI) dari asistenku.pro. Kamu TIDAK memiliki akses ke database internet atau Turnitin, jadi analisismu murni berdasarkan pola bahasa, tingkat generik/klise kalimat, struktur argumen, variasi kosakata, dan ciri khas tulisan AI (terlalu rapi, repetitif, transisi klise, kurang suara personal). Tugasmu terhadap teks yang diberikan pengguna:
+1. Perkirakan skor "originalitas" (0-100, semakin tinggi semakin orisinal/unik gaya penulisannya).
+2. Perkirakan skor "kemungkinan_ai" (0-100, semakin tinggi semakin mirip pola tulisan AI generatif).
+3. Tulis ringkasan singkat 2-3 kalimat tentang kondisi teks secara umum.
+4. Identifikasi maksimal 6 kalimat/bagian yang paling berisiko (terlalu umum, terlalu mirip sumber umum yang sering dikutip, atau paling terasa seperti AI), masing-masing dengan tingkat risiko (Tinggi/Sedang/Rendah), kutipan singkat bagian tsb, dan alasan singkat kenapa berisiko serta saran perbaikannya.
+Balas HANYA dalam format JSON valid (tanpa markdown code fence, tanpa teks lain di luar JSON) dengan struktur PERSIS seperti ini:
+{"originalitas":75,"kemungkinan_ai":20,"ringkasan":"...","temuan":[{"risiko":"Tinggi","kutipan":"...","alasan":"...","saran":"..."}]}
+Jika teks sudah cukup orisinal dan tidak ada temuan berarti, kembalikan array temuan kosong.`;
+
+  try{
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:`Analisis teks berikut:\n\n${text}`}]})});
+    const data=await res.json().catch(()=>({}));
+    btn.disabled=false;
+    if(!res.ok){
+      document.getElementById('cekRingkasan').innerHTML=`<span style="color:var(--red,#DC2626);">⚠️ Gagal memproses: ${escapeHtml(data.error||'Server error')}</span>`;
+      showToast(data.error||'Gagal terhubung ke server');
+      return;
+    }
+    let raw=(data.text||'').trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+    let parsed;
+    try{ parsed=JSON.parse(raw); }
+    catch(e){
+      document.getElementById('cekRingkasan').innerHTML=`<span style="color:var(--red,#DC2626);">⚠️ AI memberi jawaban yang tidak bisa diproses otomatis. Coba cek ulang.</span>`;
+      return;
+    }
+    renderCekResult(parsed);
+    showToast('Analisis selesai! ✓');
+  }catch(e){
+    btn.disabled=false;
+    document.getElementById('cekRingkasan').innerHTML='<span style="color:var(--red,#DC2626);">⚠️ Gagal terhubung ke server. Periksa koneksi internet Anda lalu coba lagi.</span>';
+    showToast('Gagal. Coba lagi.');
+  }
+}
+
+function renderCekResult(parsed){
+  const orig=Math.max(0,Math.min(100,parseInt(parsed.originalitas)||0));
+  const ai=Math.max(0,Math.min(100,parseInt(parsed.kemungkinan_ai)||0));
+  const origColor=orig>=70?'#16A34A':orig>=40?'#F59E0B':'#DC2626';
+  const aiColor=ai>=60?'#DC2626':ai>=30?'#F59E0B':'#16A34A';
+  document.getElementById('cekMeters').innerHTML=`
+    <div class="meter-row">
+      <div class="meter-label"><span>Skor Originalitas</span><span style="color:${origColor};">${orig}%</span></div>
+      <div class="meter"><div class="meter-fill" style="width:${orig}%;background:${origColor};"></div></div>
+    </div>
+    <div class="meter-row">
+      <div class="meter-label"><span>Kemungkinan Ditulis AI</span><span style="color:${aiColor};">${ai}%</span></div>
+      <div class="meter"><div class="meter-fill" style="width:${ai}%;background:${aiColor};"></div></div>
+    </div>`;
+  document.getElementById('cekRingkasan').innerHTML=escapeHtml(parsed.ringkasan||'-').replace(/\n/g,'<br>');
+
+  const temuan=parsed.temuan||[];
+  const listEl=document.getElementById('cekTemuanList');
+  if(!temuan.length){
+    listEl.innerHTML='<div style="font-size:12.5px;color:var(--gray-500);">Tidak ada bagian berisiko yang signifikan ditemukan.</div>';
+    return;
+  }
+  listEl.innerHTML=temuan.map(t=>{
+    const sev=(t.risiko||'Sedang').toLowerCase();
+    const sevClass=sev.includes('tinggi')?'sev-tinggi':sev.includes('rendah')?'sev-rendah':'sev-sedang';
+    return `<div class="finding-card">
+      <div class="finding-head"><span class="sev-chip ${sevClass}">Risiko ${escapeHtml(t.risiko||'Sedang')}</span></div>
+      <div class="finding-quote">"${escapeHtml(t.kutipan||'-')}"</div>
+      <div class="finding-reason"><strong>Alasan:</strong> ${escapeHtml(t.alasan||'-')}<br><strong>Saran:</strong> ${escapeHtml(t.saran||'-')}</div>
+    </div>`;
+  }).join('');
+}
 </script>
 </body>
 </html>
