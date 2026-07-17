@@ -9,66 +9,160 @@
 <script src="riwayat-store.js"></script>
 <script src="account.js"></script>
 <style>
+/* ── Legacy token aliases (fixes previously-broken var() references) ── */
+:root {
+  --dark: var(--gray-900);
+  --blue: var(--brand);
+  --blue-light: var(--brand-light);
+  --blue-pale: var(--brand-50);
+}
+
+body, .app { background: var(--bg) !important; }
+
+/* ── Elegant top nav ── */
+.topnav {
+  background: rgba(255,255,255,0.9) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1px 0 rgba(20,30,80,.05);
+}
+.topnav-logo {
+  display: flex; align-items: center;
+  text-decoration: none;
+  font-size: 21px; font-weight: 800;
+  color: var(--brand-dark);
+  letter-spacing: -.5px;
+}
+.pro-badge {
+  background: linear-gradient(135deg, var(--brand-light), var(--brand));
+  color: #fff; font-size: 12px; font-weight: 700;
+  padding: 2px 8px; border-radius: 7px; margin-left: 2px;
+  box-shadow: 0 2px 6px rgba(27,61,194,.25);
+}
+.notif-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: none; cursor: pointer; position: relative;
+  background: var(--gray-100); color: var(--gray-600);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+}
+.notif-btn:hover { background: var(--gray-200); }
+.notif-badge {
+  position: absolute; top: 8px; right: 9px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--gold); border: 2px solid #fff;
+}
+.user-chip {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--gray-100); border-radius: 999px;
+  padding: 4px 12px 4px 4px; cursor: pointer;
+  transition: background .2s;
+}
+.user-chip:hover { background: var(--gray-200); }
+.user-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-light), var(--brand));
+  color: #fff; font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; flex-shrink: 0;
+}
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.user-name { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+.chevron-down { width: 15px; height: 15px; color: var(--gray-400); }
+
+/* ── Profile banner: rich gradient, elegant & colorful ── */
 .profile-banner {
-  background: linear-gradient(135deg, #EEF2FF, #C7D5FF);
-  padding: 24px 20px 20px;
+  background: linear-gradient(135deg, #0f1f5c 0%, #1a3dc2 55%, #3b5bff 100%);
+  padding: 28px 20px 26px;
   display: flex;
   align-items: flex-start;
-  gap: 14px;
+  gap: 16px;
   position: relative;
   overflow: hidden;
+  border-radius: 0 0 26px 26px;
+  box-shadow: 0 10px 30px rgba(26,61,194,.25);
 }
-.profile-avatar-wrap { position: relative; flex-shrink: 0; }
+.profile-banner::before {
+  content: '';
+  position: absolute;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,183,3,.25), transparent 70%);
+  top: -70px; right: 30px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.profile-banner::after {
+  content: '';
+  position: absolute;
+  width: 130px; height: 130px;
+  background: radial-gradient(circle, rgba(255,255,255,.18), transparent 70%);
+  bottom: -50px; left: -20px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.profile-avatar-wrap { position: relative; flex-shrink: 0; z-index: 2; }
 .profile-avatar-large {
-  width: 72px; height: 72px; border-radius: 50%;
-  background: var(--blue-light); color: #fff;
+  width: 76px; height: 76px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-light), var(--gold));
+  color: #fff;
   font-size: 30px; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
-  border: 3px solid #fff;
-  box-shadow: 0 4px 12px rgba(59,91,255,0.3);
+  border: 3px solid rgba(255,255,255,.85);
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
   overflow: hidden;
 }
 .profile-avatar-large img { width: 100%; height: 100%; object-fit: cover; }
 .edit-avatar-btn {
   position: absolute; bottom: 0; right: 0;
-  width: 24px; height: 24px; border-radius: 50%;
-  background: var(--blue-light); color: #fff;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--gold); color: #fff;
   border: 2px solid #fff;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
 }
-.profile-info { flex: 1; }
-.profile-name { font-size: 18px; font-weight: 800; color: var(--dark); display: flex; align-items: center; gap: 6px; }
-.verified-badge { width: 18px; height: 18px; background: var(--blue-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.profile-info { flex: 1; z-index: 2; }
+.profile-name { font-size: 19px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px; letter-spacing: -.2px; }
+.verified-badge { width: 19px; height: 19px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(255,255,255,.3); }
 .verified-badge svg { width: 11px; height: 11px; color: #fff; }
-.profile-email { font-size: 12px; color: var(--gray-500); margin-top: 3px; }
-.profile-joined { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+.profile-email { font-size: 12.5px; color: rgba(255,255,255,.78); margin-top: 4px; }
+.profile-joined { font-size: 11px; color: rgba(255,255,255,.55); margin-top: 2px; }
 .edit-profile-btn {
   display: inline-flex; align-items: center; gap: 5px;
-  margin-top: 8px; padding: 6px 14px;
-  background: var(--white); border: none; border-radius: 20px;
-  font-family: inherit; font-size: 12px; font-weight: 600; color: var(--dark);
-  cursor: pointer; box-shadow: var(--shadow-sm);
+  margin-top: 10px; padding: 7px 16px;
+  background: rgba(255,255,255,.95); border: none; border-radius: 20px;
+  font-family: inherit; font-size: 12.5px; font-weight: 700; color: var(--brand-dark);
+  cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,.15);
+  transition: transform .15s;
 }
-.profile-mascot { position: absolute; right: 0; bottom: 0; width: 90px; opacity: 0.9; }
+.edit-profile-btn:hover { transform: translateY(-1px); }
+.profile-mascot {
+  position: absolute; right: 6px; bottom: -6px; width: 108px; z-index: 1;
+  filter: drop-shadow(0 8px 14px rgba(0,0,0,.3));
+}
+.profile-mascot img { width: 100%; height: auto; display: block; }
 
+/* ── Quota / plan card ── */
 .quota-card {
-  margin: 12px 16px;
+  margin: -18px 16px 12px;
   background: var(--white);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-  padding: 14px;
+  border: 1px solid var(--gray-100);
+  border-radius: var(--r-xl, 18px);
+  padding: 16px;
+  position: relative;
+  z-index: 3;
+  box-shadow: 0 12px 28px rgba(20,30,80,.10);
 }
-.quota-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.quota-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .quota-plan-info { display: flex; flex-direction: column; gap: 2px; }
-.quota-plan-label { font-size: 13px; font-weight: 700; color: var(--dark); }
+.quota-plan-label { font-size: 13.5px; font-weight: 800; color: var(--dark); }
 .quota-plan-expiry { font-size: 11px; color: var(--gray-400); }
 
 .avatar-edit-wrap { display:flex; flex-direction:column; align-items:center; margin-bottom:18px; }
 .avatar-edit-preview {
-  width:88px; height:88px; border-radius:50%; background:var(--blue-light); color:#fff;
+  width:88px; height:88px; border-radius:50%; background:linear-gradient(135deg, var(--brand-light), var(--gold)); color:#fff;
   font-size:34px; font-weight:800; display:flex; align-items:center; justify-content:center;
   overflow:hidden; position:relative; border:3px solid var(--gray-100);
+  box-shadow: 0 6px 16px rgba(27,61,194,.2);
 }
 .avatar-edit-preview img { width:100%; height:100%; object-fit:cover; }
 .avatar-edit-btn {
@@ -77,10 +171,25 @@
 }
 .modal-title { font-size:16px; font-weight:800; color:var(--dark); margin-bottom:14px; text-align:center; }
 
-.plan-badge { font-size:12px; font-weight:800; letter-spacing:.5px; padding:5px 12px; border-radius:20px; background:var(--gray-100); color:var(--gray-500); }
-.plan-badge.pro { background:#1A2B6D; color:#fff; }
+.plan-badge { font-size:11.5px; font-weight:800; letter-spacing:.5px; padding:6px 13px; border-radius:20px; background:var(--gray-100); color:var(--gray-500); }
+.plan-badge.pro { background:linear-gradient(135deg,#0f1f5c,#1a3dc2); color:#fff; box-shadow:0 3px 10px rgba(27,61,194,.3); }
 .plan-badge.standar { background:var(--blue-pale); color:var(--blue-light); }
-.plan-badge.lanjutan { background:linear-gradient(135deg,#F5A623,#D97706); color:#fff; }
+.plan-badge.lanjutan { background:linear-gradient(135deg,#F5A623,#D97706); color:#fff; box-shadow:0 3px 10px rgba(217,119,6,.3); }
+
+/* ── Elegant menu sections ── */
+.profile-section {
+  background: var(--white);
+  border-radius: var(--r-lg, 16px);
+  overflow: hidden;
+  box-shadow: 0 3px 14px rgba(20,30,80,.06);
+  border: 1px solid var(--gray-100);
+}
+.profile-item-icon {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: var(--brand-50);
+  display: flex; align-items: center; justify-content: center;
+  margin-right: 12px; flex-shrink: 0;
+}
 </style>
 </head>
 <body>
@@ -122,32 +231,7 @@
         </button>
       </div>
       <div class="profile-mascot">
-        <svg viewBox="0 0 120 150" fill="none">
-          <ellipse cx="60" cy="132" rx="36" ry="22" fill="#1A2B6D" opacity="0.5"/>
-          <ellipse cx="60" cy="108" rx="28" ry="28" fill="#1A2B6D"/>
-          <ellipse cx="60" cy="78" rx="28" ry="26" fill="#F5F5F5"/>
-          <ellipse cx="60" cy="54" rx="28" ry="25" fill="#F5F5F5"/>
-          <polygon points="42,42 32,24 52,37" fill="#F5F5F5"/>
-          <polygon points="78,42 88,24 68,37" fill="#F5F5F5"/>
-          <ellipse cx="50" cy="55" rx="6" ry="7" fill="#1A90FF"/>
-          <ellipse cx="70" cy="55" rx="6" ry="7" fill="#1A90FF"/>
-          <ellipse cx="50" cy="56" rx="3.5" ry="4.5" fill="#0A2060"/>
-          <ellipse cx="70" cy="56" rx="3.5" ry="4.5" fill="#0A2060"/>
-          <ellipse cx="48.5" cy="53.5" rx="1.5" ry="1.5" fill="#fff"/>
-          <ellipse cx="68.5" cy="53.5" rx="1.5" ry="1.5" fill="#fff"/>
-          <ellipse cx="60" cy="65" rx="3" ry="2" fill="#FFB6C1"/>
-          <path d="M53 69 Q60 74 67 69" stroke="#888" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-          <ellipse cx="44" cy="69" rx="6" ry="4" fill="#FFB6C1" opacity="0.5"/>
-          <ellipse cx="76" cy="69" rx="6" ry="4" fill="#FFB6C1" opacity="0.5"/>
-          <rect x="36" y="38" width="48" height="7" rx="3" fill="#1A2B6D"/>
-          <polygon points="60,24 37,38 83,38" fill="#1A2B6D"/>
-          <line x1="83" y1="38" x2="89" y2="48" stroke="#F5A623" stroke-width="1.5"/>
-          <rect x="86" y="48" width="6" height="7" rx="2" fill="#F5A623"/>
-          <circle cx="60" cy="100" r="10" fill="#3B5BFF"/>
-          <text x="60" y="104" text-anchor="middle" fill="#fff" font-size="9" font-family="sans-serif" font-weight="bold">a</text>
-          <!-- Waving paw -->
-          <ellipse cx="26" cy="95" rx="14" ry="11" fill="#F5F5F5" transform="rotate(-30 26 95)"/>
-        </svg>
+        <img src="mascot-logo.png" alt="Maskot asistenku.pro">
       </div>
     </div>
 
