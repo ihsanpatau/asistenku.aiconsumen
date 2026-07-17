@@ -6,6 +6,7 @@
 <title>DoktrAI – asistenku.pro</title>
 <link rel="stylesheet" href="style.css">
 <script src="riwayat-store.js"></script>
+<script src="account.js"></script>
 <style>
 .doktrai-intro {
 background: linear-gradient(135deg, #F5F3FF, #DDD6FE);
@@ -239,6 +240,7 @@ if(!msg)return;
 inp.value='';inp.style.height='auto';
 document.getElementById('quickReplies').style.display='none';
 addMsg('user',msg.replace(/\n/g,'<br>'),msg);
+AkAccount.catatPesan(1);
 
 try{
   // Jawab langsung pertanyaan seputar identitas pemilik/pencipta,
