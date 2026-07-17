@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="account.js"></script>
 <style>
 :root{--blue:#1A3DC2;--blue-light:#3B5BFF;--blue-pale:#EEF2FF;--dark:#111827;}
 .app{display:flex;flex-direction:column;height:100vh;}
@@ -307,6 +308,7 @@ Jika tidak ada revisi yang bisa diidentifikasi, kembalikan poin sebagai array ko
     }
     revisiLastResult=parsed;
     renderRevisiResult(parsed);
+    AkAccount.catatPesan(1);
     showToast('Revisi selesai! ✓');
   }catch(e){
     genBtn.disabled=false;
@@ -452,6 +454,7 @@ async function doBelajar(instruction, btn){
       return;
     }
     box.innerHTML=result.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    AkAccount.catatPesan(1);
     showToast('Selesai! ✓');
   }catch(e){
     document.querySelectorAll('#genreGrid .genre-chip').forEach(c=>c.disabled=false);

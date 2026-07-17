@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dokumen Saya – asistenku.pro</title>
 <link rel="stylesheet" href="style.css">
+<script src="riwayat-store.js"></script>
+<script src="account.js"></script>
 <style>
 .doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px; }
 .doc-card {
@@ -40,81 +42,32 @@
   <div class="page-content">
     <div class="search-bar" style="margin-top:12px;">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" placeholder="Cari dokumen...">
+      <input type="text" id="cariDokumen" placeholder="Cari dokumen...">
     </div>
     <div class="toggle-tab" style="margin:0 16px 14px;">
-      <button class="tab-btn active">Semua</button>
-      <button class="tab-btn">Skripsi</button>
-      <button class="tab-btn">Tugas</button>
-      <button class="tab-btn">Jurnal</button>
+      <button class="tab-btn active" onclick="filterTab(this,'semua')">Semua</button>
+      <button class="tab-btn" onclick="filterTab(this,'skripsi')">Skripsi</button>
+      <button class="tab-btn" onclick="filterTab(this,'tugas')">Tugas</button>
+      <button class="tab-btn" onclick="filterTab(this,'jurnal')">Jurnal</button>
     </div>
 
     <!-- Stats -->
     <div style="display:flex;gap:10px;padding:0 16px;margin-bottom:16px;">
       <div style="flex:1;background:var(--blue-pale);border-radius:12px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:var(--blue);">12</div>
+        <div style="font-size:22px;font-weight:800;color:var(--blue);" id="statTotal">0</div>
         <div style="font-size:11px;color:var(--gray-500);">Total Dokumen</div>
       </div>
       <div style="flex:1;background:#ECFDF5;border-radius:12px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:var(--green);">245</div>
+        <div style="font-size:22px;font-weight:800;color:var(--green);" id="statHalaman">0</div>
         <div style="font-size:11px;color:var(--gray-500);">Total Halaman</div>
       </div>
       <div style="flex:1;background:#F5F3FF;border-radius:12px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:var(--purple);">3</div>
+        <div style="font-size:22px;font-weight:800;color:var(--purple);" id="statBulan">0</div>
         <div style="font-size:11px;color:var(--gray-500);">Bulan Ini</div>
       </div>
     </div>
 
-    <div class="doc-grid">
-      <div class="doc-card" onclick="window.location.href='hasil-skripsi.html'">
-        <div class="doc-card-icon" style="background:#2B579A;">W</div>
-        <div class="doc-card-title">Analisis Pengaruh Digital Marketing...</div>
-        <div class="doc-card-meta">120 hal • 20 Mei 2026</div>
-        <div class="doc-card-badge" style="background:#DCFCE7;color:#166534;">Skripsi</div>
-      </div>
-      <div class="doc-card" onclick="window.location.href='hasil-tugas.html'">
-        <div class="doc-card-icon" style="background:#DC2626;">PDF</div>
-        <div class="doc-card-title">Laporan Analisis Data Penjualan Q1</div>
-        <div class="doc-card-meta">24 hal • 19 Mei 2026</div>
-        <div class="doc-card-badge" style="background:#FEF3C7;color:#92400E;">Tugas</div>
-      </div>
-      <div class="doc-card">
-        <div class="doc-card-icon" style="background:#16A34A;">XLS</div>
-        <div class="doc-card-title">Analisis Data Survey Kepuasan</div>
-        <div class="doc-card-meta">18 hal • 18 Mei 2026</div>
-        <div class="doc-card-badge" style="background:#FEF3C7;color:#92400E;">Tugas</div>
-      </div>
-      <div class="doc-card">
-        <div class="doc-card-icon" style="background:#D97706;">PPT</div>
-        <div class="doc-card-title">Presentasi Strategi Pemasaran Digital</div>
-        <div class="doc-card-meta">15 slide • 16 Mei 2026</div>
-        <div class="doc-card-badge" style="background:#FEF3C7;color:#92400E;">Tugas</div>
-      </div>
-      <div class="doc-card">
-        <div class="doc-card-icon" style="background:#7C3AED;">W</div>
-        <div class="doc-card-title">Makalah Pengaruh Teknologi Pendidikan</div>
-        <div class="doc-card-meta">18 hal • 17 Mei 2026</div>
-        <div class="doc-card-badge" style="background:#EDE9FE;color:#5B21B6;">Makalah</div>
-      </div>
-      <div class="doc-card">
-        <div class="doc-card-icon" style="background:#0891B2;">W</div>
-        <div class="doc-card-title">Abstrak Penelitian Kuantitatif</div>
-        <div class="doc-card-meta">3 hal • 15 Mei 2026</div>
-        <div class="doc-card-badge" style="background:#CFFAFE;color:#164E63;">Abstrak</div>
-      </div>
-      <div class="doc-card">
-        <div class="doc-card-icon" style="background:#16A34A;">W</div>
-        <div class="doc-card-title">Jurnal Manajemen Pemasaran Digital</div>
-        <div class="doc-card-meta">15 hal • 12 Mei 2026</div>
-        <div class="doc-card-badge" style="background:#DCFCE7;color:#166534;">Jurnal</div>
-      </div>
-      <div class="doc-card">
-        <div class="doc-card-icon" style="background:#6B7280;">TXT</div>
-        <div class="doc-card-title">Parafrase BAB II Tinjauan Pustaka</div>
-        <div class="doc-card-meta">8 hal • 15 Mei 2026</div>
-        <div class="doc-card-badge" style="background:#F3F4F6;color:#374151;">Parafrase</div>
-      </div>
-    </div>
+    <div class="doc-grid" id="docGrid"></div>
     <div style="height:20px;"></div>
   </div>
   <nav class="bottom-nav">
@@ -129,6 +82,76 @@
 <script>
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
+
+const docIconMap = {
+  tugas:   { bg:'#2B579A', label:'DOC', badgeBg:'#FEF3C7', badgeColor:'#92400E', badgeLabel:'Tugas' },
+  makalah: { bg:'#7C3AED', label:'DOC', badgeBg:'#EDE9FE', badgeColor:'#5B21B6', badgeLabel:'Makalah' },
+  jurnal:  { bg:'#16A34A', label:'DOC', badgeBg:'#DCFCE7', badgeColor:'#166534', badgeLabel:'Jurnal' },
+  skripsi: { bg:'#2B579A', label:'W',   badgeBg:'#DCFCE7', badgeColor:'#166534', badgeLabel:'Skripsi' }
+};
+let currentTab='semua';
+
+function formatTanggal(iso){
+  try{ return new Date(iso).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }
+  catch(e){ return ''; }
+}
+
+function getDokumenItems(){
+  let items=[];
+  try{ items = typeof RiwayatStore!=='undefined' ? RiwayatStore.semua() : []; }catch(e){}
+  return items.filter(x=>x.kategori!=='chat');
+}
+
+function renderStats(){
+  const all=getDokumenItems();
+  const now=new Date();
+  const totalHalaman=all.reduce((sum,x)=>sum+(x.halaman||(x.kataTerhitung?Math.max(1,Math.round(x.kataTerhitung/275)):0)),0);
+  const bulanIni=all.filter(x=>{ const d=new Date(x.waktu); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); }).length;
+  document.getElementById('statTotal').textContent=all.length;
+  document.getElementById('statHalaman').textContent=totalHalaman;
+  document.getElementById('statBulan').textContent=bulanIni;
+}
+
+function renderDokumen(){
+  let items=getDokumenItems();
+  if(currentTab!=='semua') items=items.filter(x=>x.kategori===currentTab);
+  const q=(document.getElementById('cariDokumen').value||'').toLowerCase().trim();
+  if(q) items=items.filter(x=>(x.judul||'').toLowerCase().includes(q));
+  items.sort((a,b)=>new Date(b.waktu)-new Date(a.waktu));
+
+  const grid=document.getElementById('docGrid');
+  if(!items.length){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:36px 16px;color:var(--gray-400);">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:10px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      <div style="font-size:13px;font-weight:600;color:var(--gray-500);">Belum ada dokumen</div>
+      <div style="font-size:12px;margin-top:2px;">Dokumen yang Anda buat lewat Skripsi, Tugas, Makalah &amp; Jurnal akan muncul di sini.</div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML=items.map(it=>{
+    const meta=docIconMap[it.kategori]||docIconMap.tugas;
+    const halaman=it.halaman||(it.kataTerhitung?Math.max(1,Math.round(it.kataTerhitung/275)):0);
+    return `
+      <div class="doc-card" onclick="${it.link?`window.location.href='${it.link}'`:''}">
+        <div class="doc-card-icon" style="background:${meta.bg};">${meta.label}</div>
+        <div class="doc-card-title">${(it.judul||'Tanpa judul').replace(/</g,'&lt;')}</div>
+        <div class="doc-card-meta">${halaman? halaman+' hal • ':''}${formatTanggal(it.waktu)}</div>
+        <div class="doc-card-badge" style="background:${meta.badgeBg};color:${meta.badgeColor};">${it.kategoriLabel||meta.badgeLabel}</div>
+      </div>`;
+  }).join('');
+}
+
+function filterTab(btn,tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentTab=tab;
+  renderDokumen();
+}
+document.getElementById('cariDokumen').addEventListener('input', renderDokumen);
+
+renderStats();
+renderDokumen();
 </script>
 </body>
 </html>

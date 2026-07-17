@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Favorit – asistenku.pro</title>
+<link rel="stylesheet" href="style.css">
+<script src="riwayat-store.js"></script>
+<script src="account.js"></script>
+</head>
+<body>
+<div class="app">
+  <div class="backnav">
+    <div class="backnav-left">
+      <button class="back-btn" onclick="history.back()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></button>
+      <div><div class="backnav-title">Favorit</div><div class="backnav-sub">Dokumen dan percakapan favorit Anda</div></div>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="history-list" id="favList" style="margin-top:12px;"></div>
+    <div style="height:20px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <a href="beranda.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span class="nav-label">Beranda</span></a>
+    <a href="riwayat.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="nav-label">Riwayat</span></a>
+    <a href="dokumen.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span class="nav-label">Dokumen</span></a>
+    <a href="upgrade.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span class="nav-label">Kuota Saya</span></a>
+    <a href="profil.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="nav-label">Profil</span></a>
+  </nav>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
+
+const riwayatIconMap = {
+  tugas:   { bg:'#2B579A', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' },
+  makalah: { bg:'#16A34A', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' },
+  jurnal:  { bg:'#D97706', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' },
+  skripsi: { bg:'#2B579A', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' },
+  chat:    { bg:'#7C3AED', svg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' }
+};
+const kategoriLabelMap = { tugas:'Tugas & Project', makalah:'Makalah', jurnal:'Jurnal', skripsi:'Skripsi', chat:'DoktrAI' };
+
+function renderFavorit(){
+  const wrap=document.getElementById('favList');
+  const favIds=AkAccount.getFavoritIds();
+  const items=RiwayatStore.semua().filter(it=>favIds.includes(it.id));
+  items.sort((a,b)=>new Date(b.waktu)-new Date(a.waktu));
+
+  if(!items.length){
+    wrap.innerHTML=`
+      <div style="text-align:center;padding:36px 16px;color:var(--gray-400);">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:10px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <div style="font-size:13px;font-weight:600;color:var(--gray-500);">Belum ada favorit</div>
+        <div style="font-size:12px;margin-top:2px;">Tandai bintang pada item di Riwayat untuk menyimpannya di sini.</div>
+      </div>`;
+    return;
+  }
+
+  wrap.innerHTML=items.map(it=>{
+    const icon=riwayatIconMap[it.kategori]||riwayatIconMap.tugas;
+    const bg=it.iconBg||icon.bg;
+    const label=it.kategoriLabel||kategoriLabelMap[it.kategori]||'Aktivitas';
+    return `
+      <div class="history-item">
+        <div class="history-icon" style="background:${bg};cursor:pointer;" onclick="${it.link?`window.location.href='${it.link}'`:''}"><svg viewBox="0 0 24 24" fill="white" width="18" height="18">${icon.svg}</svg></div>
+        <div class="history-body" style="cursor:pointer;" onclick="${it.link?`window.location.href='${it.link}'`:''}">
+          <div class="history-title">${(it.judul||'Tanpa judul').replace(/</g,'&lt;')}</div>
+          <div class="history-time">${label} • ${RiwayatStore.waktuRelatif(it.waktu)}</div>
+        </div>
+        <button onclick="unfav('${it.id}')" style="background:none;border:none;cursor:pointer;padding:4px;flex-shrink:0;" aria-label="Hapus dari favorit">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </button>
+      </div>`;
+  }).join('');
+}
+function unfav(id){
+  AkAccount.toggleFavorit(id);
+  showToast('Dihapus dari favorit');
+  renderFavorit();
+}
+renderFavorit();
+</script>
+</body>
+</html>

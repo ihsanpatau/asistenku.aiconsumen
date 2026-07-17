@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hasil Skripsi – asistenku.pro</title>
 <link rel="stylesheet" href="style.css">
+<script src="riwayat-store.js"></script>
+<script src="account.js"></script>
 <style>
 .preview-page {
   background: var(--white);
@@ -178,7 +180,7 @@
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-100);font-size:13px;"><span style="color:var(--gray-500);">Model AI</span><span style="font-weight:700;">Claude Sonnet 4.6</span></div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-100);font-size:13px;"><span style="color:var(--gray-500);">Waktu Proses</span><span style="font-weight:700;">~3 menit</span></div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-100);font-size:13px;"><span style="color:var(--gray-500);">Total Kata</span><span style="font-weight:700;" id="totalKata">~54.000 kata</span></div>
-        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;"><span style="color:var(--gray-500);">Kuota Terpakai</span><span style="font-weight:700;color:var(--blue);">6 halaman</span></div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;"><span style="color:var(--gray-500);">Kuota Terpakai</span><span style="font-weight:700;color:var(--blue);" id="kuotaTerpakaiVal">- halaman</span></div>
       </div>
     </div>
 
@@ -270,6 +272,24 @@ if(skripsiHasil){
   isiDiv.style.cssText='font-size:13px;color:var(--gray-700);line-height:1.7;white-space:pre-wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--gray-100);';
   isiDiv.textContent=skripsiHasil;
   document.getElementById('tab-ringkasan').appendChild(isiDiv);
+
+  // Catat sebagai riwayat & kuota nyata (id stabil supaya tidak dobel dihitung saat direfresh)
+  const halamanCount=Math.max(1, Math.round(wc/275));
+  document.getElementById('kuotaTerpakaiVal').textContent=halamanCount+' halaman';
+  const skripsiId='skripsi_'+(data.judul||'x').substring(0,40).replace(/\s+/g,'_')+'_'+wc;
+  if(typeof RiwayatStore!=='undefined'){
+    RiwayatStore.tambah({
+      id: skripsiId,
+      judul: data.judul || 'Skripsi',
+      kategori: 'skripsi',
+      kategoriLabel: 'Skripsi',
+      kataTerhitung: wc,
+      halaman: halamanCount,
+      status: 'done',
+      link: 'hasil-skripsi.html'
+    });
+  }
+  if(typeof AkAccount!=='undefined'){ AkAccount.catatHalaman(skripsiId, halamanCount); }
 } else if(data.judul){
   document.getElementById('ringkasanText').textContent=`Penelitian ini berjudul "${data.judul}". Penelitian ini menggunakan metode ${data.jenis||'kuantitatif'} untuk menganalisis topik yang telah ditentukan. Belum ada isi lengkap tersimpan — buat dari halaman Skripsi atau Konfirmasi Generate terlebih dahulu.`;
 }

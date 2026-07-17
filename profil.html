@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profil – asistenku.pro</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="riwayat-store.js"></script>
+<script src="account.js"></script>
 <style>
 .profile-banner {
   background: linear-gradient(135deg, #EEF2FF, #C7D5FF);
@@ -60,6 +63,24 @@
 .quota-plan-info { display: flex; flex-direction: column; gap: 2px; }
 .quota-plan-label { font-size: 13px; font-weight: 700; color: var(--dark); }
 .quota-plan-expiry { font-size: 11px; color: var(--gray-400); }
+
+.avatar-edit-wrap { display:flex; flex-direction:column; align-items:center; margin-bottom:18px; }
+.avatar-edit-preview {
+  width:88px; height:88px; border-radius:50%; background:var(--blue-light); color:#fff;
+  font-size:34px; font-weight:800; display:flex; align-items:center; justify-content:center;
+  overflow:hidden; position:relative; border:3px solid var(--gray-100);
+}
+.avatar-edit-preview img { width:100%; height:100%; object-fit:cover; }
+.avatar-edit-btn {
+  margin-top:10px; font-size:12px; font-weight:700; color:var(--blue-light);
+  background:var(--blue-pale); border:none; border-radius:20px; padding:7px 16px; cursor:pointer;
+}
+.modal-title { font-size:16px; font-weight:800; color:var(--dark); margin-bottom:14px; text-align:center; }
+
+.plan-badge { font-size:12px; font-weight:800; letter-spacing:.5px; padding:5px 12px; border-radius:20px; background:var(--gray-100); color:var(--gray-500); }
+.plan-badge.pro { background:#1A2B6D; color:#fff; }
+.plan-badge.standar { background:var(--blue-pale); color:var(--blue-light); }
+.plan-badge.lanjutan { background:linear-gradient(135deg,#F5A623,#D97706); color:#fff; }
 </style>
 </head>
 <body>
@@ -135,7 +156,7 @@
       <div class="quota-top-row">
         <div class="quota-plan-info">
           <div class="quota-plan-label">Paket Anda</div>
-          <div class="quota-plan-expiry">Berlaku hingga 20 Mei 2026</div>
+          <div class="quota-plan-expiry" id="planExpiry">Berlaku hingga 20 Mei 2026</div>
         </div>
         <div class="plan-badge pro" id="planBadge">PRO</div>
       </div>
@@ -145,16 +166,16 @@
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
             Halaman Dokumen
           </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:74%;"></div></div>
-          <div style="font-size:11px;color:var(--dark);font-weight:700;margin-top:3px;">26 / 35 halaman</div>
+          <div class="progress-bar"><div class="progress-fill" id="halamanFill" style="width:0%;"></div></div>
+          <div style="font-size:11px;color:var(--dark);font-weight:700;margin-top:3px;" id="halamanText">0 / 5 halaman</div>
         </div>
         <div>
           <div style="font-size:12px;color:var(--gray-500);margin-bottom:4px;display:flex;align-items:center;gap:5px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             Chat DoktrAI
           </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:64%;"></div></div>
-          <div style="font-size:11px;color:var(--dark);font-weight:700;margin-top:3px;">32 / 50 pesan</div>
+          <div class="progress-bar"><div class="progress-fill" id="pesanFill" style="width:0%;"></div></div>
+          <div style="font-size:11px;color:var(--dark);font-weight:700;margin-top:3px;" id="pesanText">0 / 5 pesan</div>
         </div>
       </div>
       <a href="upgrade.html" style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;font-weight:700;color:var(--blue-light);text-decoration:none;">
@@ -165,7 +186,7 @@
     <!-- Menu List -->
     <div style="padding:0 16px;margin-bottom:12px;">
       <div class="profile-section">
-        <a href="info-akun.html" class="profile-item">
+        <a href="#" class="profile-item" onclick="event.preventDefault();editProfile();">
           <div class="profile-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
           <div class="profile-item-body">
             <div class="profile-item-title">Informasi Akun</div>
@@ -273,23 +294,156 @@
   </nav>
 </div>
 
+<!-- Edit Profil Modal -->
+<div class="modal-overlay" id="editProfileModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Edit Profil</div>
+    <div class="avatar-edit-wrap">
+      <div class="avatar-edit-preview" id="avatarEditPreview">A</div>
+      <input type="file" accept="image/*" id="avatarFileInput" style="display:none;" onchange="onAvatarChosen(event)">
+      <button type="button" class="avatar-edit-btn" onclick="document.getElementById('avatarFileInput').click()">Ganti Foto</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nama Lengkap</label>
+      <input type="text" class="form-input" id="editNameInput" placeholder="Nama lengkap">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" id="editEmailInput" disabled style="opacity:.6;">
+    </div>
+    <button class="btn btn-primary" id="saveProfileBtn" onclick="saveProfile()" style="width:100%;margin-top:6px;">Simpan Perubahan</button>
+    <button class="btn btn-outline" onclick="closeEditProfile()" style="width:100%;margin-top:8px;">Batal</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script>
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
-const user=JSON.parse(localStorage.getItem('ak_user')||'{}');
-const name=user.user_metadata?.full_name||'Pengguna';
-const email=user.email||'pengguna@email.com';
-const firstName=name.split(' ')[0];
-document.getElementById('profileName').textContent=name;
-document.getElementById('profileEmail').textContent=email;
-document.getElementById('profileAvatar').textContent=firstName[0].toUpperCase();
-document.getElementById('userAvatar').textContent=firstName[0].toUpperCase();
-document.getElementById('userName').textContent='Halo, '+firstName;
 
-function editProfile(){showToast('Edit profil segera hadir');}
+const SB_URL='https://dkpztybbcvvzatgwhano.supabase.co';
+const SB_KEY='sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm';
+const _sb=window.supabase.createClient(SB_URL,SB_KEY);
+
+const user=AkAccount.getUser();
+const email=user.email||'pengguna@email.com';
+let pendingAvatarDataUrl=null;
+
+function renderAvatar(el, url, initial){
+  if(url){ el.innerHTML=`<img src="${url}" alt="Foto profil">`; }
+  else { el.textContent=initial; }
+}
+
+function renderProfile(){
+  const name=AkAccount.getDisplayName();
+  const avatarUrl=AkAccount.getAvatarUrl();
+  const firstInitial=(name[0]||'P').toUpperCase();
+  document.getElementById('profileName').textContent=name;
+  document.getElementById('profileEmail').textContent=email;
+  document.getElementById('userName').textContent='Halo, '+name.split(' ')[0];
+  renderAvatar(document.getElementById('profileAvatar'), avatarUrl, firstInitial);
+  renderAvatar(document.getElementById('userAvatar'), avatarUrl, firstInitial);
+
+  const join=AkAccount.getJoinDate();
+  const joinEl=document.querySelector('.profile-joined');
+  if(joinEl) joinEl.textContent = join ? ('Bergabung sejak '+join) : 'Bergabung baru-baru ini';
+}
+
+function renderKuota(){
+  const k=AkAccount.getKuota();
+  document.getElementById('planBadge').textContent=k.planLabel.toUpperCase();
+  document.getElementById('planBadge').className='plan-badge '+(k.planKey==='gratis'?'':k.planKey);
+
+  const halamanPct=Math.min(100, Math.round((k.halamanUsed/k.halamanLimit)*100));
+  document.getElementById('halamanFill').style.width=halamanPct+'%';
+  document.getElementById('halamanText').textContent=`${k.halamanUsed} / ${k.halamanLimit} halaman`;
+
+  if(k.pesanUnlimited){
+    document.getElementById('pesanFill').style.width='100%';
+    document.getElementById('pesanText').textContent=`${k.pesanUsed} pesan (tanpa batas)`;
+  } else {
+    const pesanPct=Math.min(100, Math.round((k.pesanUsed/k.pesanLimit)*100));
+    document.getElementById('pesanFill').style.width=pesanPct+'%';
+    document.getElementById('pesanText').textContent=`${k.pesanUsed} / ${k.pesanLimit} pesan`;
+  }
+
+  const expiryEl=document.getElementById('planExpiry');
+  if(k.planKey==='gratis'){
+    expiryEl.textContent='Paket gratis \u2013 tidak ada tanggal berakhir';
+  } else {
+    const exp=localStorage.getItem('user_plan_expiry');
+    expiryEl.textContent = exp ? ('Berlaku hingga '+new Date(exp).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})) : 'Paket aktif';
+  }
+}
+
+renderProfile();
+renderKuota();
+
+// --- Edit Profil ---
+function editProfile(){
+  document.getElementById('editNameInput').value=AkAccount.getDisplayName();
+  document.getElementById('editEmailInput').value=email;
+  pendingAvatarDataUrl=null;
+  const avatarUrl=AkAccount.getAvatarUrl();
+  renderAvatar(document.getElementById('avatarEditPreview'), avatarUrl, (AkAccount.getDisplayName()[0]||'P').toUpperCase());
+  document.getElementById('editProfileModal').classList.add('open');
+}
+function closeEditProfile(){ document.getElementById('editProfileModal').classList.remove('open'); }
+
+function onAvatarChosen(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ showToast('Pilih file gambar'); return; }
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      // Perkecil ke maks 200px supaya ringan disimpan & diunggah
+      const maxSize=200;
+      let w=img.width, h=img.height;
+      if(w>h){ if(w>maxSize){ h=Math.round(h*maxSize/w); w=maxSize; } }
+      else { if(h>maxSize){ w=Math.round(w*maxSize/h); h=maxSize; } }
+      const canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      pendingAvatarDataUrl=canvas.toDataURL('image/jpeg',0.85);
+      renderAvatar(document.getElementById('avatarEditPreview'), pendingAvatarDataUrl, '');
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveProfile(){
+  const newName=document.getElementById('editNameInput').value.trim();
+  if(!newName){ showToast('Nama tidak boleh kosong'); return; }
+  const btn=document.getElementById('saveProfileBtn');
+  btn.disabled=true; btn.textContent='Menyimpan...';
+
+  AkAccount.setDisplayName(newName);
+  if(pendingAvatarDataUrl) AkAccount.setAvatarUrl(pendingAvatarDataUrl);
+
+  // Sinkronkan ke akun Supabase (best-effort; kalau gagal/offline, data tetap
+  // tersimpan di perangkat ini lewat AkAccount di atas).
+  try{
+    const metaUpdate={ full_name:newName };
+    if(pendingAvatarDataUrl) metaUpdate.avatar_url=pendingAvatarDataUrl;
+    const { data, error } = await _sb.auth.updateUser({ data: metaUpdate });
+    if(!error && data?.user){
+      localStorage.setItem('ak_user', JSON.stringify(data.user));
+    }
+  }catch(e){ /* tetap lanjut, sudah tersimpan lokal */ }
+
+  btn.disabled=false; btn.textContent='Simpan Perubahan';
+  closeEditProfile();
+  renderProfile();
+  showToast('Profil berhasil diperbarui');
+}
+
 function handleLogout(){
   if(confirm('Yakin ingin keluar?')){
+    _sb.auth.signOut().catch(()=>{});
     localStorage.removeItem('ak_token');
     localStorage.removeItem('ak_user');
     window.location.href='login.html';

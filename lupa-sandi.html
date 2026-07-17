@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lupa Kata Sandi – asistenku.pro</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+body{ background:var(--gray-50); }
+.auth-wrap{ max-width:420px; margin:0 auto; padding:32px 20px; }
+.auth-logo{ text-align:center; margin-bottom:22px; font-size:20px; font-weight:800; color:var(--blue); }
+.auth-card{ background:var(--white); border-radius:var(--radius-lg); border:1px solid var(--gray-200); padding:24px; }
+.auth-title{ font-size:18px; font-weight:800; color:var(--dark); margin-bottom:6px; }
+.auth-sub{ font-size:13px; color:var(--gray-400); margin-bottom:20px; line-height:1.5; }
+.success-msg { display:none; align-items:center; gap:7px; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:8px; padding:12px 13px; font-size:13px; color:#166534; margin-bottom:14px; }
+.error-msg { display:none; align-items:center; gap:7px; background:#FEF2F2; border:1px solid #FECACA; border-radius:8px; padding:12px 13px; font-size:13px; color:#DC2626; margin-bottom:14px; }
+.back-link{ display:block; text-align:center; margin-top:16px; font-size:13px; color:var(--blue-light); text-decoration:none; font-weight:600; }
+</style>
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="auth-logo">asistenku.pro</div>
+  <div class="auth-card">
+    <div class="auth-title">Lupa Kata Sandi</div>
+    <div class="auth-sub">Masukkan email akun Anda. Kami akan mengirimkan tautan untuk mengatur ulang kata sandi.</div>
+
+    <div class="success-msg" id="okMsg"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Tautan reset kata sandi telah dikirim ke email Anda. Periksa juga folder spam.</span></div>
+    <div class="error-msg" id="errMsg"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span id="errText"></span></div>
+
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" id="emailInput" placeholder="nama@email.com" autocomplete="email">
+    </div>
+    <button class="btn btn-primary" id="sendBtn" style="width:100%;" onclick="kirimReset()">Kirim Tautan Reset</button>
+    <a href="login.html" class="back-link">← Kembali ke Masuk</a>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+const SB_URL='https://dkpztybbcvvzatgwhano.supabase.co';
+const SB_KEY='sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm';
+const _sb=window.supabase.createClient(SB_URL,SB_KEY);
+
+async function kirimReset(){
+  const email=document.getElementById('emailInput').value.trim();
+  document.getElementById('okMsg').style.display='none';
+  document.getElementById('errMsg').style.display='none';
+  if(!email || !email.includes('@')){
+    document.getElementById('errText').textContent='Masukkan email yang valid';
+    document.getElementById('errMsg').style.display='flex';
+    return;
+  }
+  const btn=document.getElementById('sendBtn');
+  btn.disabled=true; btn.textContent='Mengirim...';
+  try{
+    const { error } = await _sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/login.html'
+    });
+    if(error){
+      document.getElementById('errText').textContent=error.message || 'Gagal mengirim email reset';
+      document.getElementById('errMsg').style.display='flex';
+    } else {
+      document.getElementById('okMsg').style.display='flex';
+      showToast('Email reset terkirim');
+    }
+  }catch(e){
+    document.getElementById('errText').textContent='Tidak bisa terhubung ke server. Coba lagi.';
+    document.getElementById('errMsg').style.display='flex';
+  }
+  btn.disabled=false; btn.textContent='Kirim Tautan Reset';
+}
+</script>
+</body>
+</html>

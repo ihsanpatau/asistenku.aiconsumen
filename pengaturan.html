@@ -190,7 +190,23 @@
 <script>
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
-function toggleSwitch(el){el.classList.toggle('on');showToast(el.classList.contains('on')?'Diaktifkan':'Dinonaktifkan');}
+
+const TOGGLE_IDS=['notifPush','notifEmail','notifPromo','notifTugas','saveChat','shareAnalytics'];
+function loadToggles(){
+  TOGGLE_IDS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    const saved=localStorage.getItem('ak_setting_'+id);
+    const on = saved===null ? el.classList.contains('on') : saved==='1';
+    el.classList.toggle('on', on);
+  });
+}
+function toggleSwitch(el){
+  el.classList.toggle('on');
+  if(el.id) localStorage.setItem('ak_setting_'+el.id, el.classList.contains('on')?'1':'0');
+  showToast(el.classList.contains('on')?'Diaktifkan':'Dinonaktifkan');
+}
+loadToggles();
 function showLangModal(){showToast('Saat ini hanya tersedia Bahasa Indonesia');}
 function confirmClearData(){if(confirm('Hapus semua data lokal? Tindakan ini tidak dapat dibatalkan.')){localStorage.clear();showToast('Semua data dihapus');setTimeout(()=>window.location.href='login.html',1500);}}
 </script>

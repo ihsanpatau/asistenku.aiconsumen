@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voucher & Promo – asistenku.pro</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.voucher-card {
+  margin:16px; border-radius:16px; padding:16px; color:#fff;
+  background:linear-gradient(135deg,#3B5BFF,#1A3DC2); position:relative; overflow:hidden;
+}
+.voucher-code { font-size:20px; font-weight:800; letter-spacing:1px; }
+.voucher-desc { font-size:12px; opacity:.9; margin-top:2px; }
+.voucher-expiry { font-size:11px; opacity:.75; margin-top:8px; }
+.applied-banner { margin:0 16px 16px; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:12px; padding:12px 14px; font-size:12px; color:#166534; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="backnav">
+    <div class="backnav-left">
+      <button class="back-btn" onclick="history.back()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg></button>
+      <div><div class="backnav-title">Voucher &amp; Promo</div><div class="backnav-sub">Lihat voucher dan promo yang tersedia</div></div>
+    </div>
+  </div>
+  <div class="page-content">
+
+    <div style="padding:16px 16px 0;">
+      <div class="search-bar">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="kodeInput" placeholder="Masukkan kode voucher" style="text-transform:uppercase;">
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="redeem()">Gunakan Kode</button>
+    </div>
+
+    <div id="appliedWrap"></div>
+
+    <div style="padding:16px 16px 8px;font-size:14px;font-weight:700;color:var(--dark);">Voucher Tersedia</div>
+    <div id="voucherList"></div>
+
+    <div style="height:20px;"></div>
+  </div>
+  <nav class="bottom-nav">
+    <a href="beranda.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span class="nav-label">Beranda</span></a>
+    <a href="riwayat.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="nav-label">Riwayat</span></a>
+    <a href="dokumen.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span class="nav-label">Dokumen</span></a>
+    <a href="upgrade.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span class="nav-label">Kuota Saya</span></a>
+    <a href="profil.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="nav-label">Profil</span></a>
+  </nav>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
+
+// Daftar voucher yang benar-benar bisa dipakai (bukan contoh statis).
+const VOUCHERS = [
+  { code:'HEMAT10',  discountPercent:10, desc:'Diskon 10% untuk semua paket berbayar' },
+  { code:'MAHASISWA20', discountPercent:20, desc:'Diskon 20% khusus mahasiswa baru' },
+  { code:'PROMO50', discountPercent:50, desc:'Diskon 50% - kuota terbatas' }
+];
+
+function renderVoucherList(){
+  document.getElementById('voucherList').innerHTML = VOUCHERS.map(v=>`
+    <div class="voucher-card">
+      <div class="voucher-code">${v.code}</div>
+      <div class="voucher-desc">${v.desc}</div>
+      <div class="voucher-expiry">Berlaku untuk pembelian paket berikutnya</div>
+    </div>`).join('');
+}
+
+function getApplied(){
+  try{ return JSON.parse(localStorage.getItem('ak_voucher_applied')||'null'); }catch(e){ return null; }
+}
+
+function renderApplied(){
+  const v=getApplied();
+  const wrap=document.getElementById('appliedWrap');
+  if(!v){ wrap.innerHTML=''; return; }
+  wrap.innerHTML=`
+    <div class="applied-banner">
+      <span>✅ Voucher <strong>${v.code}</strong> aktif — diskon ${v.discountPercent}% siap dipakai saat beli paket.</span>
+      <button onclick="removeApplied()" style="background:none;border:none;color:#166534;font-weight:700;cursor:pointer;flex-shrink:0;">Hapus</button>
+    </div>`;
+}
+
+function redeem(){
+  const code=document.getElementById('kodeInput').value.trim().toUpperCase();
+  if(!code){ showToast('Masukkan kode voucher dulu'); return; }
+  const found=VOUCHERS.find(v=>v.code===code);
+  if(!found){ showToast('Kode voucher tidak ditemukan atau sudah tidak berlaku'); return; }
+  localStorage.setItem('ak_voucher_applied', JSON.stringify(found));
+  document.getElementById('kodeInput').value='';
+  renderApplied();
+  showToast('Voucher '+code+' berhasil digunakan!');
+}
+function removeApplied(){
+  localStorage.removeItem('ak_voucher_applied');
+  renderApplied();
+  showToast('Voucher dihapus');
+}
+
+renderVoucherList();
+renderApplied();
+</script>
+</body>
+</html>

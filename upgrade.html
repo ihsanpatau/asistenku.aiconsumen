@@ -416,11 +416,20 @@ const user=JSON.parse(localStorage.getItem('ak_user')||'{}');
 if(user.user_metadata?.full_name){const n=user.user_metadata.full_name.split(' ')[0];document.getElementById('userName').textContent='Halo, '+n;document.getElementById('userAvatar').textContent=n[0].toUpperCase();}
 
 function toggleFaq(el){el.classList.toggle('open');}
+let voucherDiscount=0, voucherCode=null;
+try{
+  const v=JSON.parse(localStorage.getItem('ak_voucher_applied')||'null');
+  if(v && v.code){ voucherDiscount=v.discountPercent||0; voucherCode=v.code; }
+}catch(e){}
+
 function beliPaket(name,harga){
+  const finalHarga = voucherDiscount ? Math.round(parseInt(harga) * (1 - voucherDiscount/100)) : parseInt(harga);
   document.getElementById('payPaket').textContent=name;
-  document.getElementById('payHarga').textContent='Rp'+parseInt(harga).toLocaleString('id-ID');
+  document.getElementById('payHarga').textContent='Rp'+finalHarga.toLocaleString('id-ID');
   document.getElementById('payModal').dataset.planKey=name.toLowerCase();
   document.getElementById('payModal').classList.add('open');
+  const bonusNote=document.querySelector('#payModal [style*="Bonus"]');
+  if(voucherCode && bonusNote){ bonusNote.textContent = `🎟️ Voucher ${voucherCode} diterapkan: diskon ${voucherDiscount}%!`; }
 }
 function selectPay(btn){document.querySelectorAll('.pay-method').forEach(b=>{b.style.borderColor='var(--gray-200)';b.style.background='#fff';b.style.color='var(--dark)';});btn.style.borderColor='var(--blue-light)';btn.style.background='var(--blue-pale)';btn.style.color='var(--blue)';}
 function prosesPayment(){
@@ -429,10 +438,34 @@ function prosesPayment(){
   setTimeout(()=>{
     // NOTE: pembayaran sungguhan belum terintegrasi (Midtrans). Untuk sekarang paket langsung aktif secara lokal.
     localStorage.setItem('user_plan', planKey);
+    const expiry=new Date(); expiry.setDate(expiry.getDate()+37); // 30 hari + bonus 7 hari
+    localStorage.setItem('user_plan_expiry', expiry.toISOString());
+    if(voucherCode){ localStorage.removeItem('ak_voucher_applied'); }
     document.getElementById('payModal').classList.remove('open');
     showToast('Paket '+planKey.charAt(0).toUpperCase()+planKey.slice(1)+' aktif!');
+    highlightCurrentPlan();
   },1500);
 }
+function highlightCurrentPlan(){
+  const activePlan=(localStorage.getItem('user_plan')||'gratis');
+  const order=['gratis','standar','pro','lanjutan'];
+  const cards=document.querySelectorAll('.plan-card');
+  cards.forEach((card,i)=>{
+    const key=order[i];
+    const btn=card.querySelector('.plan-btn');
+    card.classList.toggle('current', key===activePlan);
+    if(!btn) return;
+    if(key===activePlan){
+      btn.classList.add('disabled'); btn.textContent='Paket Aktif'; btn.onclick=null;
+    } else {
+      btn.classList.remove('disabled'); btn.textContent='Beli Sekarang';
+      const hargaMap={standar:'20000', pro:'59000', lanjutan:'99000'};
+      const nameMap={standar:'Standar', pro:'Pro', lanjutan:'Lanjutan'};
+      if(hargaMap[key]) btn.setAttribute('onclick',`beliPaket('${nameMap[key]}','${hargaMap[key]}')`);
+    }
+  });
+}
+highlightCurrentPlan();
 document.getElementById('payModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 </script>
 </body>
