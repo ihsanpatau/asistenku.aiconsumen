@@ -128,7 +128,24 @@
       "settings.logout.confirm": "Yakin ingin keluar dari akun?",
       "settings.logout.toast": "Berhasil keluar",
       "settings.lang.arSoon": "Bahasa Arab segera hadir",
-      "settings.tz.toast": "Zona waktu diperbarui"
+      "settings.tz.toast": "Zona waktu diperbarui",
+      "terms.title": "Syarat &amp; Ketentuan",
+      "terms.sub": "Ketentuan penggunaan asistenku.pro",
+      "terms.updated": "Terakhir diperbarui: Juli 2026",
+      "terms.h1": "1. Penerimaan Ketentuan",
+      "terms.p1": "Dengan mengakses dan menggunakan asistenku.pro, Anda menyetujui untuk terikat oleh Syarat &amp; Ketentuan ini. Jika Anda tidak menyetujui salah satu bagian dari ketentuan ini, mohon untuk tidak menggunakan layanan kami.",
+      "terms.h2": "2. Deskripsi Layanan",
+      "terms.p2": "asistenku.pro menyediakan alat bantu berbasis AI untuk membantu penyusunan tugas akademik seperti skripsi, makalah, jurnal, presentasi, dan parafrase. Hasil yang dihasilkan oleh AI bersifat sebagai draf/bantuan awal dan tetap memerlukan tinjauan serta penyuntingan dari pengguna sebelum digunakan secara resmi.",
+      "terms.h3": "3. Akun Pengguna",
+      "terms.p3": "Anda bertanggung jawab untuk menjaga kerahasiaan informasi akun dan kata sandi Anda, serta atas seluruh aktivitas yang terjadi di bawah akun Anda. Segera hubungi kami jika Anda menduga terjadi penggunaan akun tanpa izin.",
+      "terms.h4": "4. Penggunaan yang Wajar",
+      "terms.p4": "Pengguna dilarang menggunakan layanan untuk tujuan yang melanggar hukum, menyalahgunakan sistem kuota, atau mendistribusikan ulang hasil AI secara komersial tanpa izin. Pengguna bertanggung jawab penuh atas orisinalitas dan kepatuhan akademik dari dokumen akhir yang diserahkan ke institusi masing-masing.",
+      "terms.h5": "5. Pembayaran &amp; Kuota",
+      "terms.p5": "Paket berbayar memberikan kuota penggunaan sesuai dengan tier yang dipilih. Kuota yang tidak terpakai tidak dapat diuangkan kembali (non-refundable), kecuali diwajibkan oleh peraturan perundang-undangan yang berlaku.",
+      "terms.h6": "6. Perubahan Ketentuan",
+      "terms.p6": "Kami dapat memperbarui Syarat &amp; Ketentuan ini dari waktu ke waktu. Perubahan akan berlaku efektif sejak dipublikasikan di halaman ini. Penggunaan layanan secara berkelanjutan setelah perubahan dianggap sebagai persetujuan Anda terhadap ketentuan yang baru.",
+      "terms.h7": "7. Kontak",
+      "terms.p7": "Untuk pertanyaan mengenai Syarat &amp; Ketentuan ini, silakan hubungi kami melalui support@asistenku.pro."
     },
     en: {
       "auth.agree1": "I agree to the",
@@ -250,7 +267,24 @@
       "settings.logout.confirm": "Are you sure you want to log out?",
       "settings.logout.toast": "Logged out successfully",
       "settings.lang.arSoon": "Arabic is coming soon",
-      "settings.tz.toast": "Time zone updated"
+      "settings.tz.toast": "Time zone updated",
+      "terms.title": "Terms &amp; Conditions",
+      "terms.sub": "Terms of use for asistenku.pro",
+      "terms.updated": "Last updated: July 2026",
+      "terms.h1": "1. Acceptance of Terms",
+      "terms.p1": "By accessing and using asistenku.pro, you agree to be bound by these Terms &amp; Conditions. If you do not agree with any part of these terms, please do not use our service.",
+      "terms.h2": "2. Service Description",
+      "terms.p2": "asistenku.pro provides AI-based tools to help with academic assignments such as theses, papers, journals, presentations, and paraphrasing. AI-generated output is intended as an initial draft/aid and still requires review and editing by the user before official use.",
+      "terms.h3": "3. User Accounts",
+      "terms.p3": "You are responsible for keeping your account information and password confidential, and for all activity that occurs under your account. Contact us immediately if you suspect any unauthorized use of your account.",
+      "terms.h4": "4. Fair Use",
+      "terms.p4": "Users may not use the service for unlawful purposes, abuse the quota system, or redistribute AI output commercially without permission. Users are fully responsible for the originality and academic integrity of the final document submitted to their institution.",
+      "terms.h5": "5. Payments &amp; Quota",
+      "terms.p5": "Paid plans grant usage quota based on the selected tier. Unused quota is non-refundable, except where required by applicable law.",
+      "terms.h6": "6. Changes to Terms",
+      "terms.p6": "We may update these Terms &amp; Conditions from time to time. Changes take effect once published on this page. Continued use of the service after changes constitutes your acceptance of the new terms.",
+      "terms.h7": "7. Contact",
+      "terms.p7": "For questions about these Terms &amp; Conditions, please contact us at support@asistenku.pro."
     }
   };
 
