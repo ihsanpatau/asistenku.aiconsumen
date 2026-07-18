@@ -9,6 +9,35 @@
 <script src="i18n.js"></script>
 <script src="riwayat-store.js"></script>
 <script src="account.js"></script>
+<style>
+  .riwayat-stats { display:flex; gap:10px; padding:0 16px; margin-bottom:16px; }
+  .riwayat-stat { flex:1; border-radius:14px; padding:12px 10px; text-align:center; }
+  .riwayat-stat-num { font-size:20px; font-weight:800; line-height:1.1; }
+  .riwayat-stat-lbl { font-size:10.5px; color:var(--gray-500); margin-top:3px; font-weight:600; }
+
+  .riwayat-group-lbl {
+    font-size:11.5px; font-weight:800; color:var(--gray-400);
+    text-transform:uppercase; letter-spacing:.04em;
+    padding:0 16px; margin:18px 0 8px;
+  }
+  .riwayat-group-lbl:first-of-type { margin-top:0; }
+
+  .history-item { align-items:flex-start; }
+  .history-icon { position:relative; }
+  .history-top-row { display:flex; align-items:flex-start; gap:8px; }
+  .history-actions { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+  .fav-btn { background:none; border:none; cursor:pointer; padding:2px; line-height:0; }
+  .history-cat-dot { display:inline-block; width:4px; height:4px; border-radius:50%; background:var(--gray-300); margin:0 6px; vertical-align:middle; }
+
+  .empty-wrap { text-align:center; padding:56px 24px 40px; }
+  .empty-badge {
+    width:76px; height:76px; border-radius:50%; margin:0 auto 16px;
+    background:linear-gradient(135deg,var(--brand-50),#E6ECFF);
+    display:flex; align-items:center; justify-content:center; color:var(--brand-light);
+  }
+  .empty-title { font-size:14.5px; font-weight:700; color:var(--gray-700); }
+  .empty-sub { font-size:12.5px; color:var(--gray-400); margin-top:4px; max-width:260px; margin-left:auto; margin-right:auto; line-height:1.5; }
+</style>
 </head>
 <body>
 <div class="app">
@@ -24,7 +53,7 @@
   <div class="page-content">
     <div class="search-bar" style="margin-top:12px;">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="cariRiwayat" placeholder="Cari riwayat...">
+      <input type="text" class="search-input" id="cariRiwayat" placeholder="Cari riwayat...">
     </div>
     <div class="toggle-tab" style="margin:0 16px 14px;">
       <button class="tab-btn active" onclick="filterTab(this,'semua')">Semua</button>
@@ -32,7 +61,23 @@
       <button class="tab-btn" onclick="filterTab(this,'tugas')">Tugas</button>
       <button class="tab-btn" onclick="filterTab(this,'chat')">Chat AI</button>
     </div>
-    <div class="history-list" id="historyList"></div>
+
+    <div class="riwayat-stats">
+      <div class="riwayat-stat" style="background:#EEF2FF;">
+        <div class="riwayat-stat-num" style="color:var(--brand-light);" id="statTotalAktivitas">0</div>
+        <div class="riwayat-stat-lbl">Total Aktivitas</div>
+      </div>
+      <div class="riwayat-stat" style="background:#ECFDF5;">
+        <div class="riwayat-stat-num" style="color:var(--green);" id="statSelesai">0</div>
+        <div class="riwayat-stat-lbl">Selesai</div>
+      </div>
+      <div class="riwayat-stat" style="background:#FFFBEB;">
+        <div class="riwayat-stat-num" style="color:#D97706;" id="statFavorit">0</div>
+        <div class="riwayat-stat-lbl">Difavoritkan</div>
+      </div>
+    </div>
+
+    <div id="historyList"></div>
     <div style="height:20px;"></div>
   </div>
     <nav class="bottom-nav">
@@ -49,11 +94,11 @@ function showToast(msg,d=2500){const t=document.getElementById('toast');t.textCo
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
 
 const riwayatIconMap = {
-  tugas:   { bg:'#2B579A', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' },
-  makalah: { bg:'#16A34A', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' },
-  jurnal:  { bg:'#D97706', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' },
-  skripsi: { bg:'#2B579A', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' },
-  chat:    { bg:'#7C3AED', svg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' }
+  tugas:   { bg:'linear-gradient(135deg,#2B579A,#1E3E75)', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' },
+  makalah: { bg:'linear-gradient(135deg,#16A34A,#0F7A37)', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' },
+  jurnal:  { bg:'linear-gradient(135deg,#D97706,#B45E05)', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' },
+  skripsi: { bg:'linear-gradient(135deg,#2B579A,#1E3E75)', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' },
+  chat:    { bg:'linear-gradient(135deg,#7C3AED,#5B21B6)', svg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' }
 };
 const kategoriLabelMap = { tugas:'Tugas & Project', makalah:'Makalah', jurnal:'Jurnal', skripsi:'Skripsi', chat:'DoktrAI' };
 let currentTab = 'semua';
@@ -71,6 +116,52 @@ function toggleUrutan(btn){
   renderRiwayat();
 }
 
+function updateStats(){
+  const all = RiwayatStore.semua();
+  const selesai = all.filter(x=>x.status==='done').length;
+  const favCount = all.filter(x=>AkAccount.isFavorit(x.id)).length;
+  document.getElementById('statTotalAktivitas').textContent = all.length;
+  document.getElementById('statSelesai').textContent = selesai;
+  document.getElementById('statFavorit').textContent = favCount;
+}
+
+function groupLabel(iso){
+  const d = new Date(iso), now = new Date();
+  const startOf = x => new Date(x.getFullYear(),x.getMonth(),x.getDate()).getTime();
+  const diffDays = Math.round((startOf(now)-startOf(d))/86400000);
+  if(diffDays<=0) return 'Hari Ini';
+  if(diffDays===1) return 'Kemarin';
+  if(diffDays<7) return '7 Hari Terakhir';
+  return 'Lebih Lama';
+}
+
+function itemCardHtml(it){
+  const icon = riwayatIconMap[it.kategori] || riwayatIconMap.tugas;
+  const bg = it.iconBg || icon.bg;
+  const label = it.kategoriLabel || kategoriLabelMap[it.kategori] || 'Aktivitas';
+  const kataInfo = it.kataTerhitung ? `${it.kataTerhitung.toLocaleString('id-ID')} kata` : '';
+  const pillClass = it.status==='done' ? 'done' : it.status==='error' ? 'fail' : 'proc';
+  const pillLabel = it.status==='done' ? 'Selesai' : it.status==='error' ? 'Gagal' : 'Diproses';
+  const clickable = it.link ? `style="cursor:pointer;" onclick="window.location.href='${it.link}'"` : '';
+  const isFav = AkAccount.isFavorit(it.id);
+  return `
+    <div class="history-item">
+      <div class="history-top-row" style="flex:1;min-width:0;">
+        <div class="history-icon" ${clickable} style="background:${bg};"><svg viewBox="0 0 24 24" fill="white" width="18" height="18">${icon.svg}</svg></div>
+        <div class="history-body" ${clickable}>
+          <div class="history-title">${(it.judul||'Tanpa judul').replace(/</g,'&lt;')}</div>
+          <div class="history-time">${label}${kataInfo?`<span class="history-cat-dot"></span>${kataInfo}`:''}<span class="history-cat-dot"></span>${RiwayatStore.waktuRelatif(it.waktu)}</div>
+        </div>
+      </div>
+      <div class="history-actions">
+        <button onclick="event.stopPropagation();toggleFav('${it.id}')" class="fav-btn" aria-label="Favorit">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="${isFav?'#F59E0B':'none'}" stroke="${isFav?'#F59E0B':'#9CA3AF'}" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </button>
+        <span class="status-pill ${pillClass}">${pillLabel}</span>
+      </div>
+    </div>`;
+}
+
 function renderRiwayat(){
   const wrap = document.getElementById('historyList');
   const q = (document.getElementById('cariRiwayat').value || '').toLowerCase().trim();
@@ -79,41 +170,38 @@ function renderRiwayat(){
 
   if(!items.length){
     wrap.innerHTML = `
-      <div style="text-align:center;padding:36px 16px;color:var(--gray-400);">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <div style="font-size:13px;font-weight:600;color:var(--gray-500);">Belum ada riwayat${currentTab!=='semua'?' untuk kategori ini':''}</div>
-        <div style="font-size:12px;margin-top:2px;">Riwayat aktivitasmu (tugas, makalah, jurnal, dll.) akan muncul di sini setelah kamu benar-benar membuatnya.</div>
+      <div class="empty-wrap">
+        <div class="empty-badge">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+        </div>
+        <div class="empty-title">Belum ada riwayat${currentTab!=='semua'?' untuk kategori ini':''}</div>
+        <div class="empty-sub">Riwayat aktivitasmu (tugas, makalah, jurnal, dll.) akan muncul di sini setelah kamu benar-benar membuatnya.</div>
       </div>`;
     return;
   }
 
-  wrap.innerHTML = items.map(it=>{
-    const icon = riwayatIconMap[it.kategori] || riwayatIconMap.tugas;
-    const bg = it.iconBg || icon.bg;
-    const label = it.kategoriLabel || kategoriLabelMap[it.kategori] || 'Aktivitas';
-    const kataInfo = it.kataTerhitung ? `${it.kataTerhitung.toLocaleString('id-ID')} kata • ` : '';
-    const pillClass = it.status==='done' ? 'done' : it.status==='error' ? 'fail' : 'proc';
-    const pillLabel = it.status==='done' ? 'Selesai' : it.status==='error' ? 'Gagal' : 'Diproses';
-    const clickable = it.link ? `style="cursor:pointer;" onclick="window.location.href='${it.link}'"` : '';
-    const isFav = AkAccount.isFavorit(it.id);
-    return `
-      <div class="history-item">
-        <div class="history-icon" ${clickable} style="background:${bg};"><svg viewBox="0 0 24 24" fill="white" width="18" height="18">${icon.svg}</svg></div>
-        <div class="history-body" ${clickable}>
-          <div class="history-title">${(it.judul||'Tanpa judul').replace(/</g,'&lt;')}</div>
-          <div class="history-time">${label} • ${kataInfo}${RiwayatStore.waktuRelatif(it.waktu)}</div>
-        </div>
-        <button onclick="event.stopPropagation();toggleFav('${it.id}')" style="background:none;border:none;cursor:pointer;padding:4px;flex-shrink:0;" aria-label="Favorit">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="${isFav?'#F59E0B':'none'}" stroke="${isFav?'#F59E0B':'#9CA3AF'}" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </button>
-        <span class="status-pill ${pillClass}">${pillLabel}</span>
-      </div>`;
-  }).join('');
+  if(!q && currentTab==='semua'){
+    // grouped timeline view
+    const groups = {};
+    const order = [];
+    items.forEach(it=>{
+      const g = groupLabel(it.waktu);
+      if(!groups[g]){ groups[g]=[]; order.push(g); }
+      groups[g].push(it);
+    });
+    wrap.innerHTML = order.map(g=>`
+      <div class="riwayat-group-lbl">${g}</div>
+      <div class="history-list">${groups[g].map(itemCardHtml).join('')}</div>
+    `).join('');
+  } else {
+    wrap.innerHTML = `<div class="history-list">${items.map(itemCardHtml).join('')}</div>`;
+  }
 }
 
 function toggleFav(id){
   AkAccount.toggleFavorit(id);
   renderRiwayat();
+  updateStats();
 }
 function filterTab(btn,tab){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -122,6 +210,7 @@ function filterTab(btn,tab){
   renderRiwayat();
 }
 document.getElementById('cariRiwayat').addEventListener('input', renderRiwayat);
+updateStats();
 renderRiwayat();
 </script>
 </body>

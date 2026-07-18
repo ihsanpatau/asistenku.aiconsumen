@@ -10,24 +10,41 @@
 <script src="riwayat-store.js"></script>
 <script src="account.js"></script>
 <style>
-.doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px; }
+.doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px; }
 .doc-card {
   background: var(--white);
   border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-  padding: 12px;
+  border-radius: var(--r-lg);
+  padding: 14px;
   cursor: pointer;
-  transition: box-shadow 0.2s;
+  transition: box-shadow .2s, transform .2s;
 }
-.doc-card:hover { box-shadow: var(--shadow); }
+.doc-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.doc-card-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; }
 .doc-card-icon {
-  width: 40px; height: 46px; border-radius: 6px;
+  width: 42px; height: 42px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 800; color: #fff; margin-bottom: 8px;
+  flex-shrink: 0;
 }
-.doc-card-title { font-size: 12px; font-weight: 700; color: var(--dark); line-height: 1.3; margin-bottom: 4px; }
-.doc-card-meta { font-size: 10px; color: var(--gray-400); }
-.doc-card-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px; margin-top: 6px; }
+.doc-card-icon svg { width: 20px; height: 20px; color: #fff; }
+.doc-card-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 99px; }
+.doc-card-title { font-size: 12.5px; font-weight: 700; color: var(--gray-900); line-height: 1.35; margin-bottom: 8px; min-height: 34px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.doc-card-meta { display:flex; align-items:center; gap:5px; font-size: 10.5px; color: var(--gray-400); font-weight:600; }
+.doc-card-meta svg { width:12px; height:12px; flex-shrink:0; }
+
+.dok-stats { display:flex; gap:10px; padding:0 16px; margin-bottom:16px; }
+.dok-stat { flex:1; border-radius:14px; padding:12px 10px; text-align:center; }
+.dok-stat-num { font-size:20px; font-weight:800; line-height:1.1; }
+.dok-stat-lbl { font-size:10.5px; color:var(--gray-500); margin-top:3px; font-weight:600; }
+
+.empty-wrap { text-align:center; padding:56px 24px 40px; grid-column:1/-1; }
+.empty-badge {
+  width:76px; height:76px; border-radius:50%; margin:0 auto 16px;
+  background:linear-gradient(135deg,var(--brand-50),#E6ECFF);
+  display:flex; align-items:center; justify-content:center; color:var(--brand-light);
+}
+.empty-title { font-size:14.5px; font-weight:700; color:var(--gray-700); }
+.empty-sub { font-size:12.5px; color:var(--gray-400); margin-top:4px; max-width:260px; margin-left:auto; margin-right:auto; line-height:1.5; }
 </style>
 </head>
 <body>
@@ -44,7 +61,7 @@
   <div class="page-content">
     <div class="search-bar" style="margin-top:12px;">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="cariDokumen" placeholder="Cari dokumen...">
+      <input type="text" class="search-input" id="cariDokumen" placeholder="Cari dokumen...">
     </div>
     <div class="toggle-tab" style="margin:0 16px 14px;">
       <button class="tab-btn active" onclick="filterTab(this,'semua')">Semua</button>
@@ -54,18 +71,18 @@
     </div>
 
     <!-- Stats -->
-    <div style="display:flex;gap:10px;padding:0 16px;margin-bottom:16px;">
-      <div style="flex:1;background:var(--blue-pale);border-radius:12px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:var(--blue);" id="statTotal">0</div>
-        <div style="font-size:11px;color:var(--gray-500);">Total Dokumen</div>
+    <div class="dok-stats">
+      <div class="dok-stat" style="background:#EEF2FF;">
+        <div class="dok-stat-num" style="color:var(--brand-light);" id="statTotal">0</div>
+        <div class="dok-stat-lbl">Total Dokumen</div>
       </div>
-      <div style="flex:1;background:#ECFDF5;border-radius:12px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:var(--green);" id="statHalaman">0</div>
-        <div style="font-size:11px;color:var(--gray-500);">Total Halaman</div>
+      <div class="dok-stat" style="background:#ECFDF5;">
+        <div class="dok-stat-num" style="color:var(--green);" id="statHalaman">0</div>
+        <div class="dok-stat-lbl">Total Halaman</div>
       </div>
-      <div style="flex:1;background:#F5F3FF;border-radius:12px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:var(--purple);" id="statBulan">0</div>
-        <div style="font-size:11px;color:var(--gray-500);">Bulan Ini</div>
+      <div class="dok-stat" style="background:#F5F3FF;">
+        <div class="dok-stat-num" style="color:var(--purple);" id="statBulan">0</div>
+        <div class="dok-stat-lbl">Bulan Ini</div>
       </div>
     </div>
 
@@ -85,11 +102,12 @@
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
 
+const docIconSvg = '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>';
 const docIconMap = {
-  tugas:   { bg:'#2B579A', label:'DOC', badgeBg:'#FEF3C7', badgeColor:'#92400E', badgeLabel:'Tugas' },
-  makalah: { bg:'#7C3AED', label:'DOC', badgeBg:'#EDE9FE', badgeColor:'#5B21B6', badgeLabel:'Makalah' },
-  jurnal:  { bg:'#16A34A', label:'DOC', badgeBg:'#DCFCE7', badgeColor:'#166534', badgeLabel:'Jurnal' },
-  skripsi: { bg:'#2B579A', label:'W',   badgeBg:'#DCFCE7', badgeColor:'#166534', badgeLabel:'Skripsi' }
+  tugas:   { bg:'linear-gradient(135deg,#2B579A,#1E3E75)', badgeBg:'#FEF3C7', badgeColor:'#92400E', badgeLabel:'Tugas' },
+  makalah: { bg:'linear-gradient(135deg,#7C3AED,#5B21B6)', badgeBg:'#EDE9FE', badgeColor:'#5B21B6', badgeLabel:'Makalah' },
+  jurnal:  { bg:'linear-gradient(135deg,#16A34A,#0F7A37)', badgeBg:'#DCFCE7', badgeColor:'#166534', badgeLabel:'Jurnal' },
+  skripsi: { bg:'linear-gradient(135deg,#2B579A,#1E3E75)', badgeBg:'#DCFCE7', badgeColor:'#166534', badgeLabel:'Skripsi' }
 };
 let currentTab='semua';
 
@@ -123,10 +141,12 @@ function renderDokumen(){
 
   const grid=document.getElementById('docGrid');
   if(!items.length){
-    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:36px 16px;color:var(--gray-400);">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:10px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-      <div style="font-size:13px;font-weight:600;color:var(--gray-500);">Belum ada dokumen</div>
-      <div style="font-size:12px;margin-top:2px;">Dokumen yang Anda buat lewat Skripsi, Tugas, Makalah &amp; Jurnal akan muncul di sini.</div>
+    grid.innerHTML=`<div class="empty-wrap">
+      <div class="empty-badge">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="empty-title">Belum ada dokumen${currentTab!=='semua'?' untuk kategori ini':''}</div>
+      <div class="empty-sub">Dokumen yang kamu buat lewat Skripsi, Tugas, Makalah &amp; Jurnal akan muncul di sini.</div>
     </div>`;
     return;
   }
@@ -136,10 +156,15 @@ function renderDokumen(){
     const halaman=it.halaman||(it.kataTerhitung?Math.max(1,Math.round(it.kataTerhitung/275)):0);
     return `
       <div class="doc-card" onclick="${it.link?`window.location.href='${it.link}'`:''}">
-        <div class="doc-card-icon" style="background:${meta.bg};">${meta.label}</div>
+        <div class="doc-card-top">
+          <div class="doc-card-icon" style="background:${meta.bg};"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${docIconSvg}</svg></div>
+          <div class="doc-card-badge" style="background:${meta.badgeBg};color:${meta.badgeColor};">${it.kategoriLabel||meta.badgeLabel}</div>
+        </div>
         <div class="doc-card-title">${(it.judul||'Tanpa judul').replace(/</g,'&lt;')}</div>
-        <div class="doc-card-meta">${halaman? halaman+' hal • ':''}${formatTanggal(it.waktu)}</div>
-        <div class="doc-card-badge" style="background:${meta.badgeBg};color:${meta.badgeColor};">${it.kategoriLabel||meta.badgeLabel}</div>
+        <div class="doc-card-meta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${formatTanggal(it.waktu)}${halaman? ' • '+halaman+' hal':''}
+        </div>
       </div>`;
   }).join('');
 }
