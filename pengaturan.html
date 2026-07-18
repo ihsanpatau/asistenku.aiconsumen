@@ -4,550 +4,447 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pengaturan – asistenku.pro</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="account.js"></script>
 <style>
-  :root {
-    --bg: #F0F4FF;
-    --card: #ffffff;
-    --dark: #1E2340;
-    --gray: #6B7280;
-    --gray-light: #E5E8F0;
-    --radius: 14px;
-    --radius-sm: 10px;
-    --shadow: 0 2px 12px rgba(0,0,0,0.07);
-    --shadow-md: 0 4px 20px rgba(0,0,0,0.10);
-    --blue: #4F6EF7;
-    --purple: #8B5CF6;
-    --green: #10B981;
-    --orange: #F59E0B;
-    --pink: #EC4899;
-    --teal: #14B8A6;
-    --red: #EF4444;
-    --indigo: #6366F1;
-    --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body {
-    background: var(--bg);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    min-height: 100vh;
-    color: var(--dark);
-  }
-  .app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+/* ── Token aliases (konsisten dengan halaman lain) ── */
+:root {
+  --dark: var(--gray-900);
+  --blue: var(--brand);
+  --blue-light: var(--brand-light);
+  --blue-pale: var(--brand-50);
+  --radius: var(--r);
+  --radius-lg: var(--r-lg);
+}
 
-  /* ---- Header ---- */
-  .header {
-    background: linear-gradient(135deg, #4F6EF7 0%, #8B5CF6 100%);
-    padding: 20px 16px 28px;
-    position: sticky; top: 0; z-index: 100;
-  }
-  .header-top { display: flex; align-items: center; gap: 10px; }
-  .back-btn {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: rgba(255,255,255,0.2);
-    border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background var(--transition);
-    flex-shrink: 0;
-  }
-  .back-btn:hover { background: rgba(255,255,255,0.3); }
-  .back-btn svg { width: 18px; height: 18px; color: white; }
-  .header-title { font-size: 20px; font-weight: 700; color: white; }
-  .header-sub { font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+body, .app { background: var(--bg) !important; }
 
-  /* ---- Page Content ---- */
-  .page-content {
-    flex: 1;
-    padding: 20px 14px 120px;
-    display: flex; flex-direction: column; gap: 20px;
-  }
+/* ── backnav override: backdrop blur sesuai profil.html ── */
+.backnav {
+  background: rgba(255,255,255,0.92) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 1px 0 rgba(20,30,80,.06);
+}
 
-  /* ---- Section ---- */
-  .section-label {
-    font-size: 11px; font-weight: 800; letter-spacing: 1.2px;
-    text-transform: uppercase; color: var(--gray);
-    padding: 0 4px; margin-bottom: 8px;
-  }
-  .section-card {
-    background: var(--card);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
+/* ── Setting sections ── */
+.setting-section { margin: 0 0 6px; }
+.setting-section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .9px;
+  text-transform: uppercase; color: var(--gray-400);
+  padding: 14px 16px 6px;
+}
+.setting-group {
+  margin: 0 16px;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
 
-  /* ---- Setting Item ---- */
-  .setting-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 16px; cursor: pointer;
-    border-bottom: 1px solid #F3F4F6;
-    transition: background var(--transition);
-    position: relative;
-  }
-  .setting-item:last-child { border-bottom: none; }
-  .setting-item:hover { background: #FAFBFF; }
-  .setting-item:active { background: #F0F4FF; }
-  .setting-left { display: flex; align-items: center; gap: 13px; flex: 1; min-width: 0; }
+/* ── Setting item ── */
+.setting-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px; cursor: pointer;
+  border-bottom: 1px solid var(--gray-100);
+  transition: background var(--fast) var(--ease);
+  text-decoration: none;
+}
+.setting-item:last-child { border-bottom: none; }
+.setting-item:hover { background: var(--gray-50); }
+.setting-item:active { background: var(--brand-50); }
 
-  /* ---- Colorful Icons ---- */
-  .s-icon {
-    width: 40px; height: 40px; border-radius: 11px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .s-icon svg { width: 20px; height: 20px; }
-  .s-icon.blue   { background: linear-gradient(135deg,#EEF2FF,#C7D2FE); }
-  .s-icon.blue svg { color: #4F6EF7; }
-  .s-icon.purple { background: linear-gradient(135deg,#F5F3FF,#DDD6FE); }
-  .s-icon.purple svg { color: #8B5CF6; }
-  .s-icon.green  { background: linear-gradient(135deg,#ECFDF5,#A7F3D0); }
-  .s-icon.green svg { color: #10B981; }
-  .s-icon.orange { background: linear-gradient(135deg,#FFFBEB,#FDE68A); }
-  .s-icon.orange svg { color: #F59E0B; }
-  .s-icon.pink   { background: linear-gradient(135deg,#FDF2F8,#FBCFE8); }
-  .s-icon.pink svg { color: #EC4899; }
-  .s-icon.teal   { background: linear-gradient(135deg,#F0FDFA,#99F6E4); }
-  .s-icon.teal svg { color: #14B8A6; }
-  .s-icon.indigo { background: linear-gradient(135deg,#EEF2FF,#C7D2FE); }
-  .s-icon.indigo svg { color: #6366F1; }
-  .s-icon.sky    { background: linear-gradient(135deg,#F0F9FF,#BAE6FD); }
-  .s-icon.sky svg { color: #0EA5E9; }
-  .s-icon.red    { background: linear-gradient(135deg,#FFF1F2,#FECDD3); }
-  .s-icon.red svg { color: #EF4444; }
+.setting-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
 
-  .setting-text { min-width: 0; }
-  .setting-title { font-size: 14px; font-weight: 600; color: var(--dark); }
-  .setting-title.danger { color: var(--red); }
-  .setting-sub { font-size: 12px; color: var(--gray); margin-top: 2px; }
-  .chevron { width: 16px; height: 16px; flex-shrink: 0; color: #CBD5E1; }
+/* ── Icon box: sesuai .profile-item-icon dari style.css ── */
+.si-icon {
+  width: 36px; height: 36px; border-radius: var(--r);
+  background: var(--brand-50);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.si-icon svg { width: 18px; height: 18px; color: var(--brand); }
+.si-icon.green   { background: var(--green-50); }
+.si-icon.green svg { color: var(--green); }
+.si-icon.purple  { background: var(--purple-50); }
+.si-icon.purple svg { color: var(--purple); }
+.si-icon.gold    { background: #FFFBEB; }
+.si-icon.gold svg { color: var(--gold); }
+.si-icon.red     { background: var(--red-50); }
+.si-icon.red svg { color: var(--red); }
 
-  /* ---- Badge ---- */
-  .badge {
-    font-size: 11px; font-weight: 700; padding: 3px 8px;
-    border-radius: 99px; background: linear-gradient(135deg,#4F6EF7,#8B5CF6);
-    color: white; flex-shrink: 0;
-  }
-  .badge.green { background: linear-gradient(135deg,#10B981,#34D399); }
-  .badge.coming { background: #F3F4F6; color: var(--gray); }
+.si-body { flex: 1; min-width: 0; }
+.si-title { font-size: 14px; font-weight: 600; color: var(--gray-900); }
+.si-title.red { color: var(--red); }
+.si-sub { font-size: 12px; color: var(--gray-500); margin-top: 1px; }
 
-  /* ---- Toggle Switch ---- */
-  .toggle-wrap { display: flex; align-items: center; }
-  .toggle {
-    width: 48px; height: 27px; border-radius: 99px;
-    background: #E5E7EB; position: relative; cursor: pointer;
-    transition: background var(--transition);
-    flex-shrink: 0; border: none; outline: none; padding: 0;
-  }
-  .toggle.on { background: linear-gradient(135deg,#4F6EF7,#8B5CF6); }
-  .toggle-knob {
-    width: 21px; height: 21px; border-radius: 50%; background: #fff;
-    position: absolute; top: 3px; left: 3px;
-    transition: transform var(--transition);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    pointer-events: none;
-  }
-  .toggle.on .toggle-knob { transform: translateX(21px); }
+.si-arrow svg { width: 16px; height: 16px; color: var(--gray-300); flex-shrink: 0; }
+.si-arrow.red svg { color: var(--red); }
 
-  /* ---- Font Size Picker (hidden by default) ---- */
-  .font-picker {
-    display: none; padding: 12px 16px; border-top: 1px solid #F3F4F6;
-    gap: 8px; flex-wrap: wrap;
-  }
-  .font-picker.open { display: flex; }
-  .font-opt {
-    flex: 1; min-width: 70px; padding: 8px 0; text-align: center;
-    border: 2px solid var(--gray-light); border-radius: var(--radius-sm);
-    font-size: 13px; font-weight: 600; color: var(--gray); cursor: pointer;
-    transition: all var(--transition);
-  }
-  .font-opt.active {
-    border-color: var(--blue); color: var(--blue);
-    background: #EEF2FF;
-  }
+/* ── Toggle switch ── */
+.toggle {
+  width: 46px; height: 26px; border-radius: 999px;
+  background: var(--gray-200); position: relative;
+  cursor: pointer; transition: background var(--mid) var(--ease);
+  flex-shrink: 0; border: none; padding: 0; outline: none;
+}
+.toggle.on { background: var(--brand-light); }
+.toggle-knob {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--white); position: absolute; top: 3px; left: 3px;
+  transition: transform var(--mid) var(--ease);
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  pointer-events: none;
+}
+.toggle.on .toggle-knob { transform: translateX(20px); }
 
-  /* ---- Language Modal ---- */
-  .overlay {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-    z-index: 200; align-items: flex-end; justify-content: center;
-    backdrop-filter: blur(2px);
-  }
-  .overlay.open { display: flex; }
-  .modal-sheet {
-    background: white; border-radius: 22px 22px 0 0;
-    width: 100%; max-width: 480px; padding: 24px 16px 40px;
-    animation: slideUp 0.25s ease-out;
-  }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  .modal-handle {
-    width: 36px; height: 4px; border-radius: 99px; background: #E5E7EB;
-    margin: 0 auto 20px;
-  }
-  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; text-align: center; }
-  .lang-option {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 13px 14px; border-radius: var(--radius-sm); cursor: pointer;
-    margin-bottom: 6px; border: 2px solid transparent;
-    transition: all var(--transition);
-  }
-  .lang-option:hover { background: #F0F4FF; }
-  .lang-option.selected { background: #EEF2FF; border-color: var(--blue); }
-  .lang-name { font-size: 14px; font-weight: 600; }
-  .lang-flag { font-size: 22px; }
-  .check-icon { color: var(--blue); display: none; }
-  .lang-option.selected .check-icon { display: block; }
+/* ── Pill / badge ── */
+.si-pill {
+  font-size: 11px; font-weight: 700;
+  padding: 3px 9px; border-radius: 999px;
+  flex-shrink: 0;
+}
+.si-pill.soon  { background: var(--gray-100); color: var(--gray-500); }
+.si-pill.green { background: var(--green-100); color: #166534; }
+.si-pill.blue  { background: var(--brand-50); color: var(--brand); }
 
-  /* ---- Confirm Modal ---- */
-  .confirm-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5); z-index: 300;
-    align-items: center; justify-content: center;
-    backdrop-filter: blur(2px);
-  }
-  .confirm-overlay.open { display: flex; }
-  .confirm-box {
-    background: white; border-radius: 20px; width: 300px;
-    padding: 28px 24px; text-align: center;
-    animation: popIn 0.2s ease-out;
-  }
-  @keyframes popIn { from { transform: scale(0.85); opacity:0; } to { transform: scale(1); opacity:1; } }
-  .confirm-icon-wrap {
-    width: 64px; height: 64px; border-radius: 50%;
-    background: #FFF1F2; margin: 0 auto 16px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .confirm-icon-wrap svg { width: 30px; height: 30px; color: var(--red); }
-  .confirm-h { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-  .confirm-p { font-size: 13px; color: var(--gray); line-height: 1.5; }
-  .confirm-btns { display: flex; gap: 10px; margin-top: 20px; }
-  .confirm-btns button {
-    flex: 1; padding: 12px; border-radius: var(--radius-sm);
-    font-size: 14px; font-weight: 700; border: none; cursor: pointer;
-    transition: opacity var(--transition);
-  }
-  .confirm-btns button:hover { opacity: 0.85; }
-  .btn-cancel { background: #F3F4F6; color: var(--gray); }
-  .btn-danger { background: var(--red); color: white; }
+/* ── Font size picker (inline expand) ── */
+.font-picker {
+  display: none; padding: 10px 16px 14px;
+  gap: 8px; background: var(--gray-50);
+  border-top: 1px solid var(--gray-100);
+}
+.font-picker.open { display: flex; }
+.font-opt {
+  flex: 1; padding: 9px 4px; text-align: center;
+  border: 1.5px solid var(--gray-200); border-radius: var(--r);
+  background: var(--white); font-family: inherit;
+  font-weight: 600; color: var(--gray-500); cursor: pointer;
+  transition: all var(--fast) var(--ease);
+}
+.font-opt:hover { border-color: var(--brand-light); color: var(--brand-light); }
+.font-opt.active { border-color: var(--brand-light); background: var(--brand-50); color: var(--brand); }
 
-  /* ---- Toast ---- */
-  .toast {
-    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: #1E2340; color: white; padding: 10px 20px;
-    border-radius: 99px; font-size: 13px; font-weight: 600;
-    opacity: 0; transition: all 0.25s ease; z-index: 500;
-    white-space: nowrap; pointer-events: none; box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* ── Confirm modal (alert dialog style) ── */
+.confirm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  z-index: 2000; display: none;
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.confirm-overlay.open { display: flex; }
+.confirm-box {
+  background: var(--white); border-radius: var(--r-xl);
+  width: 300px; padding: 28px 22px 22px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,.18);
+  animation: popIn var(--mid) var(--ease);
+}
+@keyframes popIn { from{transform:scale(.88);opacity:0} to{transform:scale(1);opacity:1} }
+.confirm-icon {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: var(--red-50);
+  margin: 0 auto 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+.confirm-icon svg { width: 26px; height: 26px; color: var(--red); }
+.confirm-h { font-size: 16px; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+.confirm-p { font-size: 13px; color: var(--gray-500); line-height: 1.55; }
+.confirm-btns { display: flex; gap: 8px; margin-top: 20px; }
+.confirm-btns button {
+  flex: 1; padding: 11px; border-radius: var(--r);
+  border: none; font-family: inherit;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  transition: filter var(--fast) var(--ease);
+}
+.confirm-btns button:hover { filter: brightness(1.07); }
+.btn-cancel { background: var(--gray-100); color: var(--gray-600); }
+.btn-del    { background: var(--red); color: var(--white); }
 
-  /* ---- Bottom Nav ---- */
-  .bottom-nav {
-    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 100%; max-width: 480px;
-    background: white; border-top: 1px solid #F0F0F0;
-    display: flex; padding: 8px 0 16px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
-  }
-  .nav-item {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; gap: 4px; text-decoration: none;
-    color: #9CA3AF; transition: color var(--transition);
-  }
-  .nav-item.active { color: var(--blue); }
-  .nav-item svg { width: 22px; height: 22px; }
-  .nav-label { font-size: 10px; font-weight: 600; }
-
-  /* ---- Profile Banner ---- */
-  .profile-banner {
-    background: linear-gradient(135deg,#4F6EF7 0%,#8B5CF6 100%);
-    border-radius: var(--radius); padding: 18px 16px;
-    display: flex; align-items: center; gap: 14px;
-    box-shadow: 0 4px 16px rgba(79,110,247,0.35);
-  }
-  .avatar {
-    width: 52px; height: 52px; border-radius: 50%;
-    background: rgba(255,255,255,0.25);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; font-weight: 800; color: white;
-    flex-shrink: 0; border: 2px solid rgba(255,255,255,0.4);
-  }
-  .profile-info { flex: 1; min-width: 0; }
-  .profile-name { font-size: 15px; font-weight: 700; color: white; }
-  .profile-email { font-size: 12px; color: rgba(255,255,255,0.75); margin-top: 2px; }
-  .profile-plan {
-    background: rgba(255,255,255,0.2); padding: 4px 10px;
-    border-radius: 99px; font-size: 11px; font-weight: 700; color: white;
-    margin-top: 6px; display: inline-block;
-  }
-  .edit-avatar-btn {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: rgba(255,255,255,0.2); border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; transition: background var(--transition);
-  }
-  .edit-avatar-btn:hover { background: rgba(255,255,255,0.35); }
-  .edit-avatar-btn svg { width: 16px; height: 16px; color: white; }
+/* ── Language modal sheet ── */
+.lang-opt {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-radius: var(--r);
+  cursor: pointer; transition: background var(--fast) var(--ease);
+  border: 1.5px solid transparent; margin-bottom: 6px;
+}
+.lang-opt:hover { background: var(--gray-50); }
+.lang-opt.selected { background: var(--brand-50); border-color: var(--brand-100); }
+.lang-left { display: flex; align-items: center; gap: 10px; }
+.lang-flag { font-size: 22px; line-height: 1; }
+.lang-name { font-size: 14px; font-weight: 600; color: var(--gray-900); }
+.lang-check { display: none; color: var(--brand-light); }
+.lang-check svg { width: 18px; height: 18px; }
+.lang-opt.selected .lang-check { display: block; }
+.lang-coming {
+  background: var(--brand-50); border-radius: var(--r);
+  padding: 9px 12px; margin-top: 6px;
+  font-size: 12px; color: var(--brand); line-height: 1.5;
+}
+.lang-coming strong { font-weight: 700; }
 </style>
 </head>
 <body>
 <div class="app">
-  <!-- Header -->
-  <div class="header">
-    <div class="header-top">
+
+  <!-- ── Back Nav ── -->
+  <div class="backnav">
+    <div class="backnav-left">
       <button class="back-btn" onclick="history.back()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
       </button>
       <div>
-        <div class="header-title">Pengaturan</div>
-        <div class="header-sub">Sesuaikan preferensi aplikasi</div>
+        <div class="backnav-title">Pengaturan</div>
+        <div class="backnav-sub">Sesuaikan preferensi aplikasi</div>
       </div>
     </div>
   </div>
 
-  <div class="page-content">
+  <!-- ── Scrollable Content ── -->
+  <div class="page-content" style="padding-top:8px;">
 
-    <!-- Profile Banner -->
-    <div class="profile-banner">
-      <div class="avatar" id="avatarInitial">M</div>
-      <div class="profile-info">
-        <div class="profile-name" id="profileName">Mahasiswa</div>
-        <div class="profile-email" id="profileEmail">user@asistenku.pro</div>
-        <div class="profile-plan" id="profilePlan">✨ Free Plan</div>
-      </div>
-      <button class="edit-avatar-btn" onclick="showToast('Edit profil segera hadir')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      </button>
-    </div>
+    <!-- ════ BAHASA & WILAYAH ════ -->
+    <div class="setting-section">
+      <div class="setting-section-label">Bahasa &amp; Wilayah</div>
+      <div class="setting-group">
 
-    <!-- Bahasa & Wilayah -->
-    <div>
-      <div class="section-label">🌐 Bahasa &amp; Wilayah</div>
-      <div class="section-card">
         <div class="setting-item" onclick="openLangModal()">
           <div class="setting-left">
-            <div class="s-icon blue">
+            <div class="si-icon blue">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title">Bahasa Aplikasi</div>
-              <div class="setting-sub" id="currentLang">🇮🇩 Indonesia</div>
+            <div class="si-body">
+              <div class="si-title">Bahasa Aplikasi</div>
+              <div class="si-sub" id="currentLangLabel">Indonesia</div>
             </div>
           </div>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+          <div class="si-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
         </div>
-        <div class="setting-item" onclick="showToast('🕐 Zona waktu: WIB (UTC+7)')">
+
+        <div class="setting-item" onclick="showToast('Zona waktu: WIB (UTC+7)')">
           <div class="setting-left">
-            <div class="s-icon purple">
+            <div class="si-icon purple">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title">Zona Waktu</div>
-              <div class="setting-sub">WIB (UTC+7)</div>
+            <div class="si-body">
+              <div class="si-title">Zona Waktu</div>
+              <div class="si-sub">WIB (UTC+7)</div>
             </div>
           </div>
-          <div class="badge green">Auto</div>
+          <span class="si-pill blue">Auto</span>
         </div>
+
       </div>
     </div>
 
-    <!-- Notifikasi -->
-    <div>
-      <div class="section-label">🔔 Notifikasi</div>
-      <div class="section-card">
+    <!-- ════ NOTIFIKASI ════ -->
+    <div class="setting-section">
+      <div class="setting-section-label">Notifikasi</div>
+      <div class="setting-group">
+
         <div class="setting-item">
           <div class="setting-left">
-            <div class="s-icon blue">
+            <div class="si-icon blue">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title">Notifikasi Push</div>
-              <div class="setting-sub">Terima notifikasi di perangkat</div>
+            <div class="si-body">
+              <div class="si-title">Notifikasi Push</div>
+              <div class="si-sub">Terima notifikasi di perangkat</div>
             </div>
           </div>
-          <button class="toggle on" id="notifPush" onclick="toggleSwitch(this,'Notifikasi push')"><div class="toggle-knob"></div></button>
+          <button class="toggle on" id="notifPush" onclick="toggleSwitch(this,'Notifikasi Push')"><div class="toggle-knob"></div></button>
         </div>
+
         <div class="setting-item">
           <div class="setting-left">
-            <div class="s-icon teal">
+            <div class="si-icon blue">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title">Notifikasi Email</div>
-              <div class="setting-sub">Update via email</div>
+            <div class="si-body">
+              <div class="si-title">Notifikasi Email</div>
+              <div class="si-sub">Update via email</div>
             </div>
           </div>
-          <button class="toggle" id="notifEmail" onclick="toggleSwitch(this,'Notifikasi email')"><div class="toggle-knob"></div></button>
+          <button class="toggle" id="notifEmail" onclick="toggleSwitch(this,'Notifikasi Email')"><div class="toggle-knob"></div></button>
         </div>
+
         <div class="setting-item">
           <div class="setting-left">
-            <div class="s-icon orange">
+            <div class="si-icon gold">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title">Promo &amp; Penawaran</div>
-              <div class="setting-sub">Notifikasi diskon dan promo</div>
+            <div class="si-body">
+              <div class="si-title">Promo &amp; Penawaran</div>
+              <div class="si-sub">Notifikasi diskon dan promo</div>
             </div>
           </div>
-          <button class="toggle on" id="notifPromo" onclick="toggleSwitch(this,'Notifikasi promo')"><div class="toggle-knob"></div></button>
+          <button class="toggle on" id="notifPromo" onclick="toggleSwitch(this,'Notifikasi Promo')"><div class="toggle-knob"></div></button>
         </div>
+
         <div class="setting-item">
           <div class="setting-left">
-            <div class="s-icon green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 12 12 15 15"/><line x1="12" y1="12" x2="12" y2="18"/></svg>
+            <div class="si-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title">Tugas Selesai</div>
-              <div class="setting-sub">Notifikasi saat dokumen siap</div>
+            <div class="si-body">
+              <div class="si-title">Tugas Selesai</div>
+              <div class="si-sub">Notifikasi saat dokumen siap</div>
             </div>
           </div>
-          <button class="toggle on" id="notifTugas" onclick="toggleSwitch(this,'Notifikasi tugas')"><div class="toggle-knob"></div></button>
+          <button class="toggle on" id="notifTugas" onclick="toggleSwitch(this,'Notifikasi Tugas Selesai')"><div class="toggle-knob"></div></button>
         </div>
+
       </div>
     </div>
 
-    <!-- Tampilan -->
-    <div>
-      <div class="section-label">🎨 Tampilan</div>
-      <div class="section-card">
-        <div class="setting-item">
+    <!-- ════ TAMPILAN ════ -->
+    <div class="setting-section">
+      <div class="setting-section-label">Tampilan</div>
+      <div class="setting-group">
+
+        <div class="setting-item" style="cursor:default;">
           <div class="setting-left">
-            <div class="s-icon indigo">
+            <div class="si-icon purple">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title">Mode Gelap</div>
-              <div class="setting-sub">Tema gelap (segera hadir)</div>
+            <div class="si-body">
+              <div class="si-title">Mode Gelap</div>
+              <div class="si-sub">Segera tersedia</div>
             </div>
           </div>
-          <div class="badge coming">Segera</div>
+          <span class="si-pill soon">Segera</span>
         </div>
+
         <div class="setting-item" onclick="toggleFontPicker()" id="fontRow">
           <div class="setting-left">
-            <div class="s-icon pink">
+            <div class="si-icon blue">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title">Ukuran Font</div>
-              <div class="setting-sub" id="fontSizeSub">Normal</div>
+            <div class="si-body">
+              <div class="si-title">Ukuran Font</div>
+              <div class="si-sub" id="fontSizeLabel">Normal</div>
             </div>
           </div>
-          <svg class="chevron" id="fontChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+          <div class="si-arrow" id="fontChevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
         </div>
         <div class="font-picker" id="fontPicker">
-          <div class="font-opt" data-size="Kecil" onclick="setFontSize('Kecil',this)" style="font-size:12px;">Kecil</div>
-          <div class="font-opt active" data-size="Normal" onclick="setFontSize('Normal',this)" style="font-size:14px;">Normal</div>
-          <div class="font-opt" data-size="Besar" onclick="setFontSize('Besar',this)" style="font-size:16px;">Besar</div>
-          <div class="font-opt" data-size="Ekstra Besar" onclick="setFontSize('Ekstra Besar',this)" style="font-size:18px;">Ekstra</div>
+          <button class="font-opt" style="font-size:12px;" data-size="Kecil" onclick="setFontSize(this)">Kecil</button>
+          <button class="font-opt active" style="font-size:14px;" data-size="Normal" onclick="setFontSize(this)">Normal</button>
+          <button class="font-opt" style="font-size:16px;" data-size="Besar" onclick="setFontSize(this)">Besar</button>
+          <button class="font-opt" style="font-size:18px;" data-size="Ekstra" onclick="setFontSize(this)">Ekstra</button>
         </div>
+
       </div>
     </div>
 
-    <!-- Privasi & Data -->
-    <div>
-      <div class="section-label">🔒 Privasi &amp; Data</div>
-      <div class="section-card">
+    <!-- ════ PRIVASI & DATA ════ -->
+    <div class="setting-section">
+      <div class="setting-section-label">Privasi &amp; Data</div>
+      <div class="setting-group">
+
         <div class="setting-item">
           <div class="setting-left">
-            <div class="s-icon sky">
+            <div class="si-icon blue">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title">Simpan Riwayat Chat</div>
-              <div class="setting-sub">Simpan percakapan DoktrAI</div>
+            <div class="si-body">
+              <div class="si-title">Simpan Riwayat Chat</div>
+              <div class="si-sub">Simpan percakapan DoktrAI</div>
             </div>
           </div>
-          <button class="toggle on" id="saveChat" onclick="toggleSwitch(this,'Simpan riwayat chat')"><div class="toggle-knob"></div></button>
+          <button class="toggle on" id="saveChat" onclick="toggleSwitch(this,'Simpan Riwayat Chat')"><div class="toggle-knob"></div></button>
         </div>
+
         <div class="setting-item">
           <div class="setting-left">
-            <div class="s-icon purple">
+            <div class="si-icon blue">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title">Bagikan Analitik</div>
-              <div class="setting-sub">Bantu tingkatkan layanan kami</div>
+            <div class="si-body">
+              <div class="si-title">Bagikan Analitik</div>
+              <div class="si-sub">Bantu tingkatkan layanan kami</div>
             </div>
           </div>
-          <button class="toggle on" id="shareAnalytics" onclick="toggleSwitch(this,'Bagikan analitik')"><div class="toggle-knob"></div></button>
+          <button class="toggle on" id="shareAnalytics" onclick="toggleSwitch(this,'Bagikan Analitik')"><div class="toggle-knob"></div></button>
         </div>
-        <div class="setting-item" onclick="openConfirm()">
+
+        <div class="setting-item" onclick="openConfirmDelete()">
           <div class="setting-left">
-            <div class="s-icon red">
+            <div class="si-icon red">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title danger">Hapus Semua Data</div>
-              <div class="setting-sub">Hapus riwayat dan cache lokal</div>
+            <div class="si-body">
+              <div class="si-title red">Hapus Semua Data</div>
+              <div class="si-sub">Hapus riwayat dan cache</div>
             </div>
           </div>
-          <svg class="chevron" style="color:#EF4444" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+          <div class="si-arrow red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
         </div>
+
       </div>
     </div>
 
-    <!-- Tentang -->
-    <div>
-      <div class="section-label">ℹ️ Tentang</div>
-      <div class="section-card">
-        <div class="setting-item" onclick="showToast('🚀 v1.0.0 – Build 2026.07.17')">
+    <!-- ════ TENTANG ════ -->
+    <div class="setting-section">
+      <div class="setting-section-label">Tentang</div>
+      <div class="setting-group">
+
+        <div class="setting-item" onclick="showToast('v1.0.0 – Build 2026.07.17')">
           <div class="setting-left">
-            <div class="s-icon green">
+            <div class="si-icon blue">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title">Versi Aplikasi</div>
-              <div class="setting-sub">v1.0.0 – Terbaru</div>
+            <div class="si-body">
+              <div class="si-title">Versi Aplikasi</div>
+              <div class="si-sub">v1.0.0</div>
             </div>
           </div>
-          <div class="badge green">✓ Terbaru</div>
+          <span class="si-pill green">Terbaru</span>
         </div>
+
         <div class="setting-item" onclick="window.open('https://asistenku.pro/syarat','_blank')">
           <div class="setting-left">
-            <div class="s-icon orange">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <div class="si-icon blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title">Syarat &amp; Ketentuan</div>
-              <div class="setting-sub">Baca peraturan penggunaan</div>
+            <div class="si-body">
+              <div class="si-title">Syarat &amp; Ketentuan</div>
             </div>
           </div>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+          <div class="si-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
         </div>
+
         <div class="setting-item" onclick="window.open('https://asistenku.pro/privasi','_blank')">
           <div class="setting-left">
-            <div class="s-icon sky">
+            <div class="si-icon blue">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-            <div class="setting-text">
-              <div class="setting-title">Kebijakan Privasi</div>
-              <div class="setting-sub">Cara kami melindungi datamu</div>
+            <div class="si-body">
+              <div class="si-title">Kebijakan Privasi</div>
             </div>
           </div>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+          <div class="si-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
         </div>
-        <div class="setting-item" onclick="showToast('📧 support@asistenku.pro')">
-          <div class="setting-left">
-            <div class="s-icon pink">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            <div class="setting-text">
-              <div class="setting-title">Hubungi Dukungan</div>
-              <div class="setting-sub">support@asistenku.pro</div>
-            </div>
-          </div>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+
+      </div>
+    </div>
+
+    <!-- ════ LOGOUT ════ -->
+    <div class="setting-section">
+      <div class="setting-section-label">&nbsp;</div>
+      <div class="setting-group">
+        <div class="setting-item" onclick="doLogout()" style="justify-content:center;gap:8px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span style="font-size:14px;font-weight:700;color:var(--red);">Keluar dari Akun</span>
         </div>
       </div>
     </div>
 
-    <!-- Logout -->
-    <div class="section-card" style="overflow:hidden;">
-      <div class="setting-item" onclick="confirmLogout()" style="justify-content:center; gap:10px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        <span style="font-size:14px;font-weight:700;color:#EF4444;">Keluar dari Akun</span>
-      </div>
-    </div>
-
-    <div style="height:8px;"></div>
+    <div class="spacer-20"></div>
   </div>
 
-  <!-- Bottom Nav -->
+  <!-- ── Bottom Nav ── -->
   <nav class="bottom-nav">
     <a href="beranda.html" class="nav-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -572,166 +469,169 @@
   </nav>
 </div>
 
-<!-- Language Modal -->
-<div class="overlay" id="langOverlay" onclick="closeLangModal(event)">
+<!-- ── Language Modal Sheet ── -->
+<div class="modal-overlay" id="langOverlay" onclick="closeLangOnBg(event)">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">Pilih Bahasa</div>
-    <div class="lang-option selected" onclick="selectLang('🇮🇩 Indonesia','id')">
-      <div style="display:flex;align-items:center;gap:10px;">
+    <div style="font-size:16px;font-weight:700;color:var(--gray-900);margin-bottom:14px;">Pilih Bahasa</div>
+
+    <div class="lang-opt selected" id="langID" onclick="selectLang('Indonesia','id')">
+      <div class="lang-left">
         <span class="lang-flag">🇮🇩</span>
         <span class="lang-name">Bahasa Indonesia</span>
       </div>
-      <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      <span class="lang-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
     </div>
-    <div class="lang-option" onclick="selectLang('🇬🇧 English','en')">
-      <div style="display:flex;align-items:center;gap:10px;">
+    <div class="lang-opt" id="langEN" onclick="selectLang('English','en')">
+      <div class="lang-left">
         <span class="lang-flag">🇬🇧</span>
         <span class="lang-name">English</span>
       </div>
-      <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      <span class="lang-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
     </div>
-    <div class="lang-option" onclick="selectLang('🇸🇦 العربية','ar')">
-      <div style="display:flex;align-items:center;gap:10px;">
+    <div class="lang-opt" id="langAR" onclick="selectLang('العربية','ar')">
+      <div class="lang-left">
         <span class="lang-flag">🇸🇦</span>
         <span class="lang-name">العربية</span>
       </div>
-      <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      <span class="lang-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
     </div>
-    <div style="margin-top:8px;padding:10px 14px;background:#FFFBEB;border-radius:10px;font-size:12px;color:#92400E;">
-      ⚠️ Saat ini hanya Bahasa Indonesia yang sepenuhnya didukung. Bahasa lain segera hadir!
+
+    <div class="lang-coming">
+      <strong>Catatan:</strong> Saat ini hanya Bahasa Indonesia yang sepenuhnya didukung. Bahasa lain segera hadir.
     </div>
   </div>
 </div>
 
-<!-- Confirm Delete Modal -->
+<!-- ── Confirm Delete Modal ── -->
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">
-    <div class="confirm-icon-wrap">
+    <div class="confirm-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
     </div>
     <div class="confirm-h">Hapus Semua Data?</div>
-    <div class="confirm-p">Semua riwayat dan cache lokal akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.</div>
+    <div class="confirm-p">Semua riwayat dan data lokal akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.</div>
     <div class="confirm-btns">
-      <button class="btn-cancel" onclick="closeConfirm()">Batal</button>
-      <button class="btn-danger" onclick="doDeleteData()">Hapus Sekarang</button>
+      <button class="btn-cancel" onclick="closeConfirmDelete()">Batal</button>
+      <button class="btn-del" onclick="doDeleteData()">Hapus</button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
+<!-- ── Toast ── -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ---- Auth check ----
-// Jika pakai Supabase, ganti dengan session check
-// if (!localStorage.getItem('ak_token')) { window.location.href = 'login.html'; }
-
-// ---- Load profile dari localStorage / Supabase ----
-(function loadProfile(){
-  const name  = localStorage.getItem('ak_name')  || 'Mahasiswa';
-  const email = localStorage.getItem('ak_email') || 'user@asistenku.pro';
-  const plan  = localStorage.getItem('ak_plan')  || 'Free';
-  document.getElementById('profileName').textContent = name;
-  document.getElementById('profileEmail').textContent = email;
-  document.getElementById('profilePlan').textContent = (plan === 'Pro' ? '⭐ Pro Plan' : '✨ Free Plan');
-  document.getElementById('avatarInitial').textContent = name.charAt(0).toUpperCase();
-})();
-
-// ---- Toast ----
-function showToast(msg, d=2500){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(()=>t.classList.remove('show'), d);
+/* ── Auth guard ── */
+if (!localStorage.getItem('ak_token')) {
+  window.location.href = 'login.html';
 }
 
-// ---- Toggle switches ----
-const TOGGLE_IDS = ['notifPush','notifEmail','notifPromo','notifTugas','saveChat','shareAnalytics'];
+/* ── Toast ── */
+function showToast(msg, d) {
+  d = d || 2500;
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(function(){ t.classList.remove('show'); }, d);
+}
+
+/* ── Toggle switches – persist ke localStorage ── */
+var TOGGLES = ['notifPush','notifEmail','notifPromo','notifTugas','saveChat','shareAnalytics'];
 (function loadToggles(){
-  TOGGLE_IDS.forEach(id => {
-    const el = document.getElementById(id);
+  TOGGLES.forEach(function(id){
+    var el = document.getElementById(id);
     if (!el) return;
-    const saved = localStorage.getItem('ak_set_'+id);
-    const isOn  = saved === null ? el.classList.contains('on') : saved === '1';
-    el.classList.toggle('on', isOn);
+    var saved = localStorage.getItem('ak_set_' + id);
+    var on = saved === null ? el.classList.contains('on') : saved === '1';
+    el.classList.toggle('on', on);
   });
 })();
 
-function toggleSwitch(el, label){
+function toggleSwitch(el, label) {
   el.classList.toggle('on');
-  if (el.id) localStorage.setItem('ak_set_'+el.id, el.classList.contains('on') ? '1' : '0');
-  showToast(el.classList.contains('on') ? `✅ ${label} diaktifkan` : `🔕 ${label} dinonaktifkan`);
+  if (el.id) localStorage.setItem('ak_set_' + el.id, el.classList.contains('on') ? '1' : '0');
+  showToast((el.classList.contains('on') ? label + ' diaktifkan' : label + ' dinonaktifkan'));
 }
 
-// ---- Language Modal ----
-function openLangModal(){
+/* ── Font size picker ── */
+var fontOpen = false;
+function toggleFontPicker() {
+  fontOpen = !fontOpen;
+  document.getElementById('fontPicker').classList.toggle('open', fontOpen);
+  var ch = document.getElementById('fontChevron').querySelector('svg');
+  ch.style.transform = fontOpen ? 'rotate(90deg)' : '';
+  ch.style.transition = 'transform .2s';
+}
+
+(function loadFont(){
+  var saved = localStorage.getItem('ak_fontSize');
+  if (!saved) return;
+  document.getElementById('fontSizeLabel').textContent = saved;
+  document.querySelectorAll('.font-opt').forEach(function(b){
+    b.classList.toggle('active', b.dataset.size === saved);
+  });
+})();
+
+function setFontSize(el) {
+  var size = el.dataset.size;
+  document.querySelectorAll('.font-opt').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('fontSizeLabel').textContent = size;
+  localStorage.setItem('ak_fontSize', size);
+  showToast('Ukuran font: ' + size);
+  var map = { Kecil: '13px', Normal: '15px', Besar: '17px', Ekstra: '19px' };
+  document.documentElement.style.fontSize = map[size] || '15px';
+}
+
+/* ── Language Modal ── */
+function openLangModal() {
   document.getElementById('langOverlay').classList.add('open');
 }
-function closeLangModal(e){
+function closeLangOnBg(e) {
   if (e.target === document.getElementById('langOverlay'))
     document.getElementById('langOverlay').classList.remove('open');
 }
-function selectLang(label, code){
-  document.querySelectorAll('.lang-option').forEach(o => o.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
-  document.getElementById('currentLang').textContent = label;
-  localStorage.setItem('ak_lang', code);
-  setTimeout(()=>{
-    document.getElementById('langOverlay').classList.remove('open');
-    showToast('✅ Bahasa diubah ke ' + label);
-  }, 300);
-}
-
-// ---- Font Size ----
-let fontPickerOpen = false;
-function toggleFontPicker(){
-  fontPickerOpen = !fontPickerOpen;
-  const picker  = document.getElementById('fontPicker');
-  const chevron = document.getElementById('fontChevron');
-  picker.classList.toggle('open', fontPickerOpen);
-  chevron.style.transform = fontPickerOpen ? 'rotate(90deg)' : '';
-  chevron.style.transition = 'transform 0.2s';
-}
-// Load saved font size
-(function(){
-  const saved = localStorage.getItem('ak_fontSize');
-  if (saved) {
-    document.getElementById('fontSizeSub').textContent = saved;
-    document.querySelectorAll('.font-opt').forEach(o => {
-      o.classList.toggle('active', o.dataset.size === saved);
-    });
-  }
+(function loadLang(){
+  var saved = localStorage.getItem('ak_lang');
+  if (!saved) return;
+  var labels = { id: 'Indonesia', en: 'English', ar: 'العربية' };
+  if (labels[saved]) document.getElementById('currentLangLabel').textContent = labels[saved];
+  document.querySelectorAll('.lang-opt').forEach(function(o){ o.classList.remove('selected'); });
+  var map = { id: 'langID', en: 'langEN', ar: 'langAR' };
+  var el = document.getElementById(map[saved]);
+  if (el) el.classList.add('selected');
 })();
-function setFontSize(size, el){
-  document.querySelectorAll('.font-opt').forEach(o => o.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('fontSizeSub').textContent = size;
-  localStorage.setItem('ak_fontSize', size);
-  showToast('🖋️ Ukuran font: ' + size);
-  // Apply font scale
-  const scale = {Kecil:0.875, Normal:1, Besar:1.125, 'Ekstra Besar':1.25};
-  document.documentElement.style.fontSize = (scale[size] || 1) * 16 + 'px';
+
+function selectLang(label, code) {
+  document.querySelectorAll('.lang-opt').forEach(function(o){ o.classList.remove('selected'); });
+  var map = { id: 'langID', en: 'langEN', ar: 'langAR' };
+  document.getElementById(map[code]).classList.add('selected');
+  document.getElementById('currentLangLabel').textContent = label;
+  localStorage.setItem('ak_lang', code);
+  setTimeout(function(){
+    document.getElementById('langOverlay').classList.remove('open');
+    showToast('Bahasa diubah ke ' + label);
+  }, 280);
 }
 
-// ---- Confirm Delete ----
-function openConfirm(){ document.getElementById('confirmOverlay').classList.add('open'); }
-function closeConfirm(){ document.getElementById('confirmOverlay').classList.remove('open'); }
-function doDeleteData(){
-  closeConfirm();
+/* ── Confirm delete ── */
+function openConfirmDelete() { document.getElementById('confirmOverlay').classList.add('open'); }
+function closeConfirmDelete() { document.getElementById('confirmOverlay').classList.remove('open'); }
+function doDeleteData() {
+  closeConfirmDelete();
   localStorage.clear();
-  showToast('🗑️ Semua data dihapus');
-  setTimeout(()=> window.location.href = 'login.html', 1800);
+  showToast('Semua data telah dihapus');
+  setTimeout(function(){ window.location.href = 'login.html'; }, 1600);
 }
 
-// ---- Logout ----
-function confirmLogout(){
-  if (confirm('Yakin ingin keluar dari akun?')) {
-    localStorage.removeItem('ak_token');
-    showToast('👋 Sampai jumpa!');
-    setTimeout(()=> window.location.href = 'login.html', 1500);
-  }
+/* ── Logout ── */
+function doLogout() {
+  if (!confirm('Keluar dari akun?')) return;
+  localStorage.removeItem('ak_token');
+  showToast('Sampai jumpa!');
+  setTimeout(function(){ window.location.href = 'login.html'; }, 1400);
 }
 </script>
 </body>
