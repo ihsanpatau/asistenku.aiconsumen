@@ -7,6 +7,99 @@
 <link rel="stylesheet" href="style.css">
 <script src="theme.js"></script>
 <script src="i18n.js"></script>
+<style>
+.help-hero {
+  margin: 16px 16px 0;
+  background: linear-gradient(135deg,#3B5BFF 0%,#6D5BFF 55%,#00C2FF 100%);
+  border-radius: 22px;
+  padding: 26px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(59,91,255,.25);
+}
+.help-hero::before { content:""; position:absolute; top:-40px; left:-30px; width:150px; height:150px; border-radius:50%; background:radial-gradient(circle,rgba(255,214,102,.45),transparent 70%); }
+.help-hero::after { content:""; position:absolute; bottom:-55px; right:-20px; width:170px; height:170px; border-radius:50%; background:radial-gradient(circle,rgba(255,255,255,.25),transparent 70%); }
+.help-hero-emoji { font-size:38px; margin-bottom:8px; position:relative; }
+.help-hero-title { font-size:19px; font-weight:800; color:#fff; position:relative; }
+.help-hero-sub { font-size:13px; color:rgba(255,255,255,.85); margin-top:4px; position:relative; }
+.help-search { margin-top:16px; position:relative; }
+.help-search input {
+  width:100%; padding:13px 16px 13px 42px; border:none; border-radius:14px;
+  font-family:inherit; font-size:14px; color:var(--gray-900); background:#fff;
+  outline:none; box-shadow:0 6px 18px rgba(0,0,0,.15);
+}
+.help-search svg { position:absolute; left:14px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:var(--gray-400); }
+.help-search-clear {
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  width:22px; height:22px; border-radius:50%; border:none; background:var(--gray-100);
+  color:var(--gray-500); display:none; align-items:center; justify-content:center; cursor:pointer;
+}
+
+.help-section-title { font-size:14px; font-weight:800; color:var(--gray-900); margin-bottom:10px; }
+
+.qa-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.qa-card {
+  background:var(--white); border:1px solid var(--gray-100); border-radius:16px;
+  padding:15px; text-align:center; text-decoration:none; cursor:pointer;
+  box-shadow:0 3px 12px rgba(20,30,80,.06); transition:transform .15s, box-shadow .15s;
+}
+.qa-card:active { transform:scale(.97); }
+.qa-icon {
+  width:44px; height:44px; border-radius:13px; margin:0 auto 8px;
+  display:flex; align-items:center; justify-content:center; color:#fff;
+}
+.qa-icon svg { width:21px; height:21px; }
+.qa-title { font-size:13px; font-weight:700; color:var(--gray-900); }
+.qa-desc { font-size:11px; color:var(--gray-400); margin-top:2px; }
+
+.topic-row {
+  display:flex; align-items:center; gap:12px; background:var(--white);
+  border:1px solid var(--gray-100); border-radius:16px; padding:14px;
+  cursor:pointer; box-shadow:0 3px 12px rgba(20,30,80,.05); transition:box-shadow .15s;
+  margin-bottom:10px;
+}
+.topic-row:hover { box-shadow:0 6px 18px rgba(20,30,80,.1); }
+.topic-icon { width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0; }
+.topic-icon svg { width:21px; height:21px; }
+.topic-body { flex:1; min-width:0; }
+.topic-title { font-size:13.5px; font-weight:700; color:var(--gray-900); }
+.topic-desc { font-size:11.5px; color:var(--gray-400); margin-top:2px; }
+
+.faq-item { border-bottom:1px solid var(--gray-100); }
+.faq-item:last-child { border-bottom:none; }
+.faq-q {
+  padding:13px 2px; cursor:pointer; font-size:13.5px; font-weight:600; color:var(--gray-900);
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+}
+.faq-q svg { flex-shrink:0; transition:transform .2s; color:var(--gray-400); }
+.faq-item.open .faq-q svg { transform:rotate(180deg); color:var(--brand-light); }
+.faq-a { display:none; font-size:13px; color:var(--gray-500); padding:0 2px 14px; line-height:1.55; }
+.faq-item.open .faq-a { display:block; }
+.faq-card { background:var(--white); border:1px solid var(--gray-100); border-radius:16px; padding:4px 14px; box-shadow:0 3px 12px rgba(20,30,80,.05); }
+
+.help-empty { text-align:center; padding:36px 10px; color:var(--gray-400); display:none; }
+.help-empty svg { width:40px; height:40px; margin-bottom:8px; color:var(--gray-300); }
+.help-empty-title { font-size:13px; font-weight:600; color:var(--gray-500); }
+.help-empty-sub { font-size:12px; margin-top:3px; }
+
+/* Detail modal */
+.detail-step {
+  display:flex; gap:12px; margin-bottom:14px;
+}
+.detail-step:last-child { margin-bottom:0; }
+.detail-step-num {
+  width:26px; height:26px; border-radius:50%; background:var(--brand-50); color:var(--brand-light);
+  font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.detail-step-text { font-size:13.5px; color:var(--gray-800); line-height:1.55; padding-top:2px; }
+.detail-step-text b { color:var(--gray-900); }
+.detail-tip {
+  margin-top:16px; background:var(--brand-50); border-radius:14px; padding:13px 14px;
+  font-size:12.5px; color:var(--brand-dark); line-height:1.5; display:flex; gap:9px;
+}
+.detail-tip svg { width:16px; height:16px; flex-shrink:0; margin-top:1px; }
+</style>
 </head>
 <body>
 <div class="app">
@@ -18,109 +111,65 @@
   </div>
   <div class="page-content">
     <!-- Hero -->
-    <div style="margin:16px 16px 0;background:linear-gradient(135deg,#EEF2FF,#C7D5FF);border-radius:20px;padding:20px;text-align:center;">
-      <div style="font-size:40px;margin-bottom:8px;">🎓</div>
-      <div style="font-size:18px;font-weight:800;color:var(--blue);">Ada yang bisa kami bantu?</div>
-      <p style="font-size:13px;color:var(--gray-500);margin-top:4px;">Cari solusi atau hubungi tim kami</p>
-      <div class="search-bar" style="margin:12px 0 0;">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" placeholder="Cari topik bantuan...">
+    <div class="help-hero">
+      <div class="help-hero-emoji">🎓</div>
+      <div class="help-hero-title">Ada yang bisa kami bantu?</div>
+      <div class="help-hero-sub">Cari solusi atau hubungi tim kami</div>
+      <div class="help-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="helpSearchInput" placeholder="Cari topik bantuan..." oninput="filterHelp(this.value)">
+        <button type="button" class="help-search-clear" id="helpSearchClear" onclick="clearHelpSearch()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
       </div>
     </div>
 
     <!-- Quick Actions -->
-    <div style="padding:16px 16px 0;">
-      <div style="font-size:14px;font-weight:700;color:var(--dark);margin-bottom:10px;">Aksi Cepat</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <a href="https://wa.me/6282194884927" target="_blank" style="background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:14px;cursor:pointer;text-align:center;text-decoration:none;display:block;">
-          <div style="font-size:24px;margin-bottom:6px;">💬</div>
-          <div style="font-size:13px;font-weight:700;color:var(--dark);">Live Chat</div>
-          <div style="font-size:11px;color:var(--gray-400);">Via WhatsApp Admin</div>
+    <div style="padding:18px 16px 0;">
+      <div class="help-section-title">Aksi Cepat</div>
+      <div class="qa-grid">
+        <a href="https://wa.me/6282194884927" target="_blank" rel="noopener" class="qa-card">
+          <div class="qa-icon" style="background:linear-gradient(135deg,#25D366,#128C4A);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div class="qa-title">Live Chat</div>
+          <div class="qa-desc">Via WhatsApp Admin</div>
         </a>
-        <a href="mailto:support@asistenku.pro" style="background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:14px;text-align:center;text-decoration:none;">
-          <div style="font-size:24px;margin-bottom:6px;">📧</div>
-          <div style="font-size:13px;font-weight:700;color:var(--dark);">Email Kami</div>
-          <div style="font-size:11px;color:var(--gray-400);">support@asistenku.pro</div>
+        <a href="mailto:support@asistenku.pro" class="qa-card">
+          <div class="qa-icon" style="background:linear-gradient(135deg,#3B5BFF,#1A3DC2);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6c0-1.1-.9-2-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2z"/><path d="m22 6-10 7L2 6"/></svg></div>
+          <div class="qa-title">Email Kami</div>
+          <div class="qa-desc">support@asistenku.pro</div>
         </a>
-        <a href="https://wa.me/6282194884927" target="_blank" style="background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:14px;text-align:center;text-decoration:none;">
-          <div style="font-size:24px;margin-bottom:6px;">📱</div>
-          <div style="font-size:13px;font-weight:700;color:var(--dark);">WhatsApp</div>
-          <div style="font-size:11px;color:var(--gray-400);">082-194-884-927</div>
+        <a href="https://wa.me/6282194884927" target="_blank" rel="noopener" class="qa-card">
+          <div class="qa-icon" style="background:linear-gradient(135deg,#F59E0B,#D97706);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+          <div class="qa-title">WhatsApp</div>
+          <div class="qa-desc">082-194-884-927</div>
         </a>
-        <div onclick="showToast('Panduan video segera hadir')" style="background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:14px;cursor:pointer;text-align:center;">
-          <div style="font-size:24px;margin-bottom:6px;">🎥</div>
-          <div style="font-size:13px;font-weight:700;color:var(--dark);">Video Tutorial</div>
-          <div style="font-size:11px;color:var(--gray-400);">Panduan penggunaan</div>
+        <div class="qa-card" onclick="openGuideModal()">
+          <div class="qa-icon" style="background:linear-gradient(135deg,#EC4899,#DB2777);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          <div class="qa-title">Video Tutorial</div>
+          <div class="qa-desc">Panduan penggunaan</div>
         </div>
       </div>
     </div>
 
     <!-- Topics -->
-    <div style="padding:16px 16px 0;">
-      <div style="font-size:14px;font-weight:700;color:var(--dark);margin-bottom:10px;">Topik Populer</div>
-      <div class="feature-list" style="padding:0;">
-        <div class="feature-row" onclick="showFaqDetail('Cara menggunakan fitur Skripsi')">
-          <div class="feature-row-icon" style="background:linear-gradient(135deg,#3B5BFF,#1A3DC2);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/></svg></div>
-          <div class="feature-row-body"><div class="feature-row-title">Cara menggunakan fitur Skripsi</div><div class="feature-row-desc">Panduan lengkap membuat skripsi dengan AI</div></div>
-          <svg class="feature-row-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-        </div>
-        <div class="feature-row" onclick="showFaqDetail('Cara upgrade paket')">
-          <div class="feature-row-icon" style="background:linear-gradient(135deg,#F59E0B,#D97706);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-          <div class="feature-row-body"><div class="feature-row-title">Cara upgrade paket</div><div class="feature-row-desc">Panduan pembelian dan upgrade paket langganan</div></div>
-          <svg class="feature-row-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-        </div>
-        <div class="feature-row" onclick="showFaqDetail('Masalah pembayaran')">
-          <div class="feature-row-icon" style="background:linear-gradient(135deg,#16A34A,#15803D);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
-          <div class="feature-row-body"><div class="feature-row-title">Masalah pembayaran</div><div class="feature-row-desc">Solusi jika pembayaran gagal atau belum diproses</div></div>
-          <svg class="feature-row-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-        </div>
-        <div class="feature-row" onclick="showFaqDetail('Reset kuota harian')">
-          <div class="feature-row-icon" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-          <div class="feature-row-body"><div class="feature-row-title">Reset kuota harian</div><div class="feature-row-desc">Informasi tentang kapan dan bagaimana kuota direset</div></div>
-          <svg class="feature-row-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-        </div>
-        <div class="feature-row" onclick="showFaqDetail('Kualitas hasil AI')">
-          <div class="feature-row-icon" style="background:linear-gradient(135deg,#EC4899,#DB2777);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
-          <div class="feature-row-body"><div class="feature-row-title">Kualitas hasil AI</div><div class="feature-row-desc">Tips mendapatkan hasil terbaik dari AI</div></div>
-          <svg class="feature-row-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-        </div>
-      </div>
+    <div id="topicsSection" style="padding:18px 16px 0;">
+      <div class="help-section-title">Topik Populer</div>
+      <div id="topicsList"></div>
     </div>
 
     <!-- FAQ -->
-    <div style="padding:16px;">
-      <div style="font-size:14px;font-weight:700;color:var(--dark);margin-bottom:10px;">FAQ</div>
-      <div style="display:flex;flex-direction:column;">
-        <div style="border-bottom:1px solid var(--gray-200);">
-          <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="padding:12px 0;cursor:pointer;font-size:13px;font-weight:600;color:var(--dark);display:flex;justify-content:space-between;align-items:center;">
-            Apakah hasil AI bebas plagiarisme?
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-          </div>
-          <div style="display:none;font-size:13px;color:var(--gray-500);padding-bottom:12px;line-height:1.5;">Ya, setiap dokumen yang dihasilkan AI asistenku.pro dibuat secara unik dan melalui pemeriksaan plagiarisme otomatis. Hasil kami memiliki keaslian rata-rata di atas 95%.</div>
-        </div>
-        <div style="border-bottom:1px solid var(--gray-200);">
-          <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="padding:12px 0;cursor:pointer;font-size:13px;font-weight:600;color:var(--dark);display:flex;justify-content:space-between;align-items:center;">
-            Apakah data saya aman?
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-          </div>
-          <div style="display:none;font-size:13px;color:var(--gray-500);padding-bottom:12px;line-height:1.5;">Keamanan data Anda adalah prioritas utama kami. Semua data dienkripsi menggunakan AES-256 dan tidak pernah dibagikan ke pihak ketiga.</div>
-        </div>
-        <div style="border-bottom:1px solid var(--gray-200);">
-          <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="padding:12px 0;cursor:pointer;font-size:13px;font-weight:600;color:var(--dark);display:flex;justify-content:space-between;align-items:center;">
-            Bisa minta refund?
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-          </div>
-          <div style="display:none;font-size:13px;color:var(--gray-500);padding-bottom:12px;line-height:1.5;">Kami menyediakan garansi uang kembali 7 hari untuk paket berbayar jika Anda tidak puas dengan layanan kami. Hubungi tim dukungan kami.</div>
-        </div>
-        <div>
-          <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="padding:12px 0;cursor:pointer;font-size:13px;font-weight:600;color:var(--dark);display:flex;justify-content:space-between;align-items:center;">
-            Berapa lama proses generate?
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-          </div>
-          <div style="display:none;font-size:13px;color:var(--gray-500);padding-bottom:12px;line-height:1.5;">Rata-rata 1–5 menit untuk dokumen standar, tergantung panjang dokumen dan paket yang digunakan. Paket PRO dan Lanjutan memiliki prioritas lebih tinggi sehingga lebih cepat.</div>
-        </div>
-      </div>
+    <div id="faqSection" style="padding:6px 16px 0;">
+      <div class="help-section-title">FAQ</div>
+      <div class="faq-card" id="faqList"></div>
     </div>
+
+    <!-- Empty state when search has no result -->
+    <div class="help-empty" id="helpEmpty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <div class="help-empty-title">Tidak ada hasil untuk pencarian ini</div>
+      <div class="help-empty-sub">Coba kata kunci lain, atau hubungi tim kami lewat WhatsApp</div>
+    </div>
+
     <div style="height:20px;"></div>
   </div>
     <nav class="bottom-nav">
@@ -131,11 +180,170 @@
     <a href="profil.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="nav-label" data-i18n="nav.profil">Profil</span></a>
   </nav>
 </div>
+
+<!-- Topic / Guide detail modal -->
+<div class="modal-overlay" id="helpDetailModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div class="topic-icon" id="detailIcon" style="width:44px;height:44px;"></div>
+      <div style="font-size:16px;font-weight:800;color:var(--gray-900);" id="detailTitle"></div>
+    </div>
+    <div id="detailBody"></div>
+    <button class="btn btn-outline" style="width:100%;margin-top:18px;" onclick="closeHelpDetail()">Tutup</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script>
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
-function showFaqDetail(topic){showToast('Membuka: '+topic);}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
+
+/* ── Data topik & FAQ (konten nyata, dipakai juga untuk pencarian) ── */
+const HELP_TOPICS = [
+  {
+    id:'skripsi', title:'Cara menggunakan fitur Skripsi', desc:'Panduan lengkap membuat skripsi dengan AI',
+    keywords:'skripsi bab 1 2 3 4 5 outline proposal',
+    grad:'linear-gradient(135deg,#3B5BFF,#1A3DC2)',
+    icon:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/>',
+    steps:[
+      'Buka menu <b>Skripsi</b> dari halaman Beranda.',
+      'Isi judul, topik, dan jurusan Anda, lalu atur cakupan tiap BAB (1–5) sesuai kebutuhan.',
+      'Klik <b>Buat Skripsi</b> dan tunggu AI menyusun naskah secara bertahap.',
+      'Tinjau hasil tiap BAB pada halaman hasil, edit bagian yang perlu disesuaikan.',
+      'Unduh naskah final dalam format Word atau PDF dari kartu unduhan.'
+    ],
+    tip:'Sistem kami membagi porsi tiap BAB secara adaptif sesuai kebutuhan isi \u2013 bukan persentase tetap \u2013 supaya hasil lebih proporsional dan tidak ada bagian yang terasa dipaksakan.'
+  },
+  {
+    id:'upgrade', title:'Cara upgrade paket', desc:'Panduan pembelian dan upgrade paket langganan',
+    keywords:'upgrade paket standar pro lanjutan langganan bayar',
+    grad:'linear-gradient(135deg,#F59E0B,#D97706)',
+    icon:'<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>',
+    steps:[
+      'Buka menu <b>Kuota Saya</b> di navigasi bawah, lalu pilih paket yang diinginkan.',
+      'Bandingkan kuota halaman dokumen dan pesan chat DoktrAI tiap paket.',
+      'Pilih metode pembayaran, lalu selesaikan pembayaran melalui halaman checkout.',
+      'Setelah pembayaran terkonfirmasi, paket aktif otomatis dan kuota langsung diperbarui.'
+    ],
+    tip:'Paket yang lebih tinggi juga mendapat prioritas antrean proses AI yang lebih cepat.'
+  },
+  {
+    id:'pembayaran', title:'Masalah pembayaran', desc:'Solusi jika pembayaran gagal atau belum diproses',
+    keywords:'pembayaran gagal transfer midtrans refund invoice',
+    grad:'linear-gradient(135deg,#16A34A,#15803D)',
+    icon:'<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
+    steps:[
+      'Cek status transaksi terakhir di <b>Profil → Metode Pembayaran</b>.',
+      'Jika status masih "Menunggu", tunggu hingga 10 menit \u2013 konfirmasi biasanya otomatis.',
+      'Jika sudah lewat 10 menit namun paket belum aktif, siapkan bukti transfer atau ID transaksi.',
+      'Hubungi tim kami lewat WhatsApp atau email dengan bukti tersebut agar segera dibantu.'
+    ],
+    tip:'Kami menyediakan garansi uang kembali 7 hari untuk paket berbayar jika Anda tidak puas dengan layanan.'
+  },
+  {
+    id:'kuota', title:'Reset kuota harian', desc:'Informasi tentang kapan dan bagaimana kuota direset',
+    keywords:'kuota reset harian halaman pesan limit batas',
+    grad:'linear-gradient(135deg,#7C3AED,#6D28D9)',
+    icon:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    steps:[
+      'Kuota halaman dokumen dan pesan chat DoktrAI direset otomatis setiap pukul <b>00:00</b> sesuai waktu perangkat Anda.',
+      'Sisa kuota yang tidak terpakai tidak terbawa ke hari berikutnya.',
+      'Besaran kuota berbeda tiap paket \u2013 semakin tinggi paket, semakin besar kuota harian.',
+      'Anda bisa memantau sisa kuota hari ini langsung dari halaman Profil atau Kuota Saya.'
+    ],
+    tip:'Kalau kuota hampir habis, Anda akan mendapat notifikasi otomatis agar bisa merencanakan upgrade.'
+  },
+  {
+    id:'kualitas', title:'Kualitas hasil AI', desc:'Tips mendapatkan hasil terbaik dari AI',
+    keywords:'kualitas hasil ai plagiarisme akurasi referensi',
+    grad:'linear-gradient(135deg,#EC4899,#DB2777)',
+    icon:'<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>',
+    steps:[
+      'Isi judul dan topik sedetail mungkin \u2013 semakin spesifik, semakin relevan hasilnya.',
+      'Gunakan pengaturan lanjutan (jika tersedia) untuk menentukan fokus tiap bagian/BAB.',
+      'Selalu tinjau dan sunting hasil AI sebelum diserahkan atau dikumpulkan.',
+      'Manfaatkan chat <b>DoktrAI</b> untuk bertanya lebih dalam atau meminta referensi tambahan.'
+    ],
+    tip:'Setiap dokumen melewati pemeriksaan plagiarisme otomatis dengan keaslian rata-rata di atas 95%.'
+  }
+];
+
+const HELP_FAQ = [
+  { q:'Apakah hasil AI bebas plagiarisme?', a:'Ya, setiap dokumen yang dihasilkan AI asistenku.pro dibuat secara unik dan melalui pemeriksaan plagiarisme otomatis. Hasil kami memiliki keaslian rata-rata di atas 95%.', keywords:'plagiarisme unik orisinal' },
+  { q:'Apakah data saya aman?', a:'Keamanan data Anda adalah prioritas utama kami. Semua data dienkripsi menggunakan AES-256 dan tidak pernah dibagikan ke pihak ketiga.', keywords:'aman keamanan enkripsi privasi data' },
+  { q:'Bisa minta refund?', a:'Kami menyediakan garansi uang kembali 7 hari untuk paket berbayar jika Anda tidak puas dengan layanan kami. Hubungi tim dukungan kami.', keywords:'refund uang kembali garansi batal' },
+  { q:'Berapa lama proses generate?', a:'Rata-rata 1–5 menit untuk dokumen standar, tergantung panjang dokumen dan paket yang digunakan. Paket PRO dan Lanjutan memiliki prioritas lebih tinggi sehingga lebih cepat.', keywords:'lama waktu proses generate durasi' }
+];
+
+const GUIDE_STEPS = [
+  { title:'Skripsi', desc:'Beranda → Skripsi → isi judul & topik → Buat Skripsi → unduh hasil per BAB.' },
+  { title:'Makalah & Tugas', desc:'Beranda → pilih Makalah/Tugas → isi detail tugas → generate → tinjau & unduh.' },
+  { title:'Chat DoktrAI', desc:'Buka DoktrAI untuk tanya jawab seputar tugas, referensi, atau penjelasan materi.' },
+  { title:'Kelola Dokumen', desc:'Semua hasil tersimpan otomatis di menu Dokumen, bisa difavoritkan atau diunduh ulang kapan saja.' }
+];
+
+function renderTopics(list){
+  document.getElementById('topicsList').innerHTML = list.map(t => `
+    <div class="topic-row" onclick="openTopicDetail('${t.id}')">
+      <div class="topic-icon" style="background:${t.grad};"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${t.icon}</svg></div>
+      <div class="topic-body"><div class="topic-title">${t.title}</div><div class="topic-desc">${t.desc}</div></div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+    </div>`).join('');
+}
+
+function renderFaq(list){
+  document.getElementById('faqList').innerHTML = list.map((f,i) => `
+    <div class="faq-item" id="faqItem${i}">
+      <div class="faq-q" onclick="toggleFaq(${i})">${f.q}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+      <div class="faq-a">${f.a}</div>
+    </div>`).join('');
+}
+function toggleFaq(i){ document.getElementById('faqItem'+i).classList.toggle('open'); }
+
+renderTopics(HELP_TOPICS);
+renderFaq(HELP_FAQ);
+
+function filterHelp(qRaw){
+  const q = qRaw.trim().toLowerCase();
+  document.getElementById('helpSearchClear').style.display = q ? 'flex' : 'none';
+  const topics = HELP_TOPICS.filter(t => !q || (t.title+' '+t.desc+' '+t.keywords).toLowerCase().includes(q));
+  const faqs = HELP_FAQ.filter(f => !q || (f.q+' '+f.a+' '+f.keywords).toLowerCase().includes(q));
+  renderTopics(topics);
+  renderFaq(faqs);
+  document.getElementById('topicsSection').style.display = topics.length ? '' : 'none';
+  document.getElementById('faqSection').style.display = faqs.length ? '' : 'none';
+  document.getElementById('helpEmpty').style.display = (topics.length===0 && faqs.length===0) ? 'block' : 'none';
+}
+function clearHelpSearch(){
+  document.getElementById('helpSearchInput').value='';
+  filterHelp('');
+}
+
+function openTopicDetail(id){
+  const t = HELP_TOPICS.find(x => x.id === id);
+  if(!t) return;
+  document.getElementById('detailIcon').style.background = t.grad;
+  document.getElementById('detailIcon').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${t.icon}</svg>`;
+  document.getElementById('detailTitle').textContent = t.title;
+  document.getElementById('detailBody').innerHTML =
+    t.steps.map((s,i) => `<div class="detail-step"><div class="detail-step-num">${i+1}</div><div class="detail-step-text">${s}</div></div>`).join('') +
+    (t.tip ? `<div class="detail-tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8 2 5 5 5 9c0 2.4 1.2 4 2.5 5.2.6.6 1 1.4 1 2.3v.5h7v-.5c0-.9.4-1.7 1-2.3C17.8 13 19 11.4 19 9c0-4-3-7-7-7z"/><path d="M9 21h6"/></svg><div>${t.tip}</div></div>` : '');
+  document.getElementById('helpDetailModal').classList.add('open');
+}
+
+function openGuideModal(){
+  document.getElementById('detailIcon').style.background = 'linear-gradient(135deg,#EC4899,#DB2777)';
+  document.getElementById('detailIcon').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+  document.getElementById('detailTitle').textContent = 'Panduan Penggunaan';
+  document.getElementById('detailBody').innerHTML =
+    '<div style="font-size:12.5px;color:var(--gray-500);margin-bottom:14px;line-height:1.5;">Video tutorial lengkap sedang kami siapkan. Sementara itu, berikut ringkasan cepat tiap fitur:</div>' +
+    GUIDE_STEPS.map((g,i) => `<div class="detail-step"><div class="detail-step-num">${i+1}</div><div class="detail-step-text"><b>${g.title}</b><br>${g.desc}</div></div>`).join('');
+  document.getElementById('helpDetailModal').classList.add('open');
+}
+
+function closeHelpDetail(){ document.getElementById('helpDetailModal').classList.remove('open'); }
+document.getElementById('helpDetailModal').addEventListener('click', function(e){ if(e.target===this) closeHelpDetail(); });
 </script>
 </body>
 </html>
