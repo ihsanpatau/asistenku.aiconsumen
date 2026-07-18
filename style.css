@@ -74,6 +74,47 @@ html { font-size: 15px; -webkit-text-size-adjust: 100%; }
   --slow: 360ms;
 }
 
+/* ── Dark theme (toggled via [data-theme="dark"] on <html>, set by theme.js) ── */
+html[data-theme="dark"] {
+  --bg:        #0B0F1A;
+  --white:     #151B2B;
+  --gray-50:   #1B2233;
+  --gray-100:  #212A3E;
+  --gray-200:  #2A3448;
+  --gray-300:  #3A4560;
+  --gray-400:  #7A85A3;
+  --gray-500:  #9BA5C0;
+  --gray-600:  #B7C0D6;
+  --gray-700:  #CDD4E6;
+  --gray-800:  #E4E8F3;
+  --gray-900:  #F5F7FC;
+
+  --brand-50:  #182352;
+  --brand-100: #223070;
+  --purple-50: #241D42;
+  --green-50:  #12291C;
+  --red-50:    #2E1620;
+
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.35);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.4);
+  --shadow:    0 4px 12px rgba(0,0,0,.4);
+  --shadow-md: 0 8px 24px rgba(0,0,0,.45);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,.5);
+}
+html[data-theme="dark"] body { background: var(--bg); }
+html[data-theme="dark"] .app { background: var(--white); }
+html[data-theme="dark"] .si-icon.gold { background: #3A2E10; }
+html[data-theme="dark"] .si-icon.gold svg { color: #FBBF24; }
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  background: var(--gray-50);
+  color: var(--gray-900);
+  border-color: var(--gray-200);
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder { color: var(--gray-400); }
+
 /* ── Base ── */
 body {
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;

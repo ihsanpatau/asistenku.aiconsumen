@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pengaturan – asistenku.pro</title>
 <link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="i18n.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="account.js"></script>
 <style>
@@ -27,6 +29,11 @@ body, .app { background: var(--bg) !important; }
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 1px 0 rgba(20,30,80,.06);
 }
+html[data-theme="dark"] .backnav {
+  background: rgba(21,27,43,0.92) !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,.3);
+}
+.lang-opt.lang-disabled:hover { background: transparent; }
 
 /* ── Setting sections ── */
 .setting-section { margin: 0 0 6px; }
@@ -195,8 +202,8 @@ body, .app { background: var(--bg) !important; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
       </button>
       <div>
-        <div class="backnav-title">Pengaturan</div>
-        <div class="backnav-sub">Sesuaikan preferensi aplikasi</div>
+        <div class="backnav-title" data-i18n="backnav.pengaturan.title">Pengaturan</div>
+        <div class="backnav-sub" data-i18n="backnav.pengaturan.sub">Sesuaikan preferensi aplikasi</div>
       </div>
     </div>
   </div>
@@ -206,7 +213,7 @@ body, .app { background: var(--bg) !important; }
 
     <!-- ════ BAHASA & WILAYAH ════ -->
     <div class="setting-section">
-      <div class="setting-section-label">Bahasa &amp; Wilayah</div>
+      <div class="setting-section-label" data-i18n="settings.section.lang">Bahasa &amp; Wilayah</div>
       <div class="setting-group">
 
         <div class="setting-item" onclick="openLangModal()">
@@ -215,24 +222,24 @@ body, .app { background: var(--bg) !important; }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title">Bahasa Aplikasi</div>
+              <div class="si-title" data-i18n="settings.appLang">Bahasa Aplikasi</div>
               <div class="si-sub" id="currentLangLabel">Indonesia</div>
             </div>
           </div>
           <div class="si-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
         </div>
 
-        <div class="setting-item" onclick="showToast('Zona waktu: WIB (UTC+7)')">
+        <div class="setting-item" onclick="showToast(t('settings.tz.toast'))">
           <div class="setting-left">
             <div class="si-icon purple">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title">Zona Waktu</div>
+              <div class="si-title" data-i18n="settings.tz">Zona Waktu</div>
               <div class="si-sub">WIB (UTC+7)</div>
             </div>
           </div>
-          <span class="si-pill blue">Auto</span>
+          <span class="si-pill blue" data-i18n="settings.auto">Auto</span>
         </div>
 
       </div>
@@ -240,7 +247,7 @@ body, .app { background: var(--bg) !important; }
 
     <!-- ════ NOTIFIKASI ════ -->
     <div class="setting-section">
-      <div class="setting-section-label">Notifikasi</div>
+      <div class="setting-section-label" data-i18n="settings.section.notif">Notifikasi</div>
       <div class="setting-group">
 
         <div class="setting-item">
@@ -249,11 +256,11 @@ body, .app { background: var(--bg) !important; }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title">Notifikasi Push</div>
-              <div class="si-sub">Terima notifikasi di perangkat</div>
+              <div class="si-title" data-i18n="settings.notifPush">Notifikasi Push</div>
+              <div class="si-sub" data-i18n="settings.notifPush.sub">Terima notifikasi di perangkat</div>
             </div>
           </div>
-          <button class="toggle on" id="notifPush" onclick="toggleSwitch(this,'Notifikasi Push')"><div class="toggle-knob"></div></button>
+          <button class="toggle on" id="notifPush" onclick="toggleSwitch(this,t('settings.notifPush'))"><div class="toggle-knob"></div></button>
         </div>
 
         <div class="setting-item">
@@ -262,11 +269,11 @@ body, .app { background: var(--bg) !important; }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title">Notifikasi Email</div>
-              <div class="si-sub">Update via email</div>
+              <div class="si-title" data-i18n="settings.notifEmail">Notifikasi Email</div>
+              <div class="si-sub" data-i18n="settings.notifEmail.sub">Update via email</div>
             </div>
           </div>
-          <button class="toggle" id="notifEmail" onclick="toggleSwitch(this,'Notifikasi Email')"><div class="toggle-knob"></div></button>
+          <button class="toggle" id="notifEmail" onclick="toggleSwitch(this,t('settings.notifEmail'))"><div class="toggle-knob"></div></button>
         </div>
 
         <div class="setting-item">
@@ -275,11 +282,11 @@ body, .app { background: var(--bg) !important; }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title">Promo &amp; Penawaran</div>
-              <div class="si-sub">Notifikasi diskon dan promo</div>
+              <div class="si-title" data-i18n="settings.notifPromo">Promo &amp; Penawaran</div>
+              <div class="si-sub" data-i18n="settings.notifPromo.sub">Notifikasi diskon dan promo</div>
             </div>
           </div>
-          <button class="toggle on" id="notifPromo" onclick="toggleSwitch(this,'Notifikasi Promo')"><div class="toggle-knob"></div></button>
+          <button class="toggle on" id="notifPromo" onclick="toggleSwitch(this,t('settings.notifPromo'))"><div class="toggle-knob"></div></button>
         </div>
 
         <div class="setting-item">
@@ -288,11 +295,11 @@ body, .app { background: var(--bg) !important; }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title">Tugas Selesai</div>
-              <div class="si-sub">Notifikasi saat dokumen siap</div>
+              <div class="si-title" data-i18n="settings.notifTugas">Tugas Selesai</div>
+              <div class="si-sub" data-i18n="settings.notifTugas.sub">Notifikasi saat dokumen siap</div>
             </div>
           </div>
-          <button class="toggle on" id="notifTugas" onclick="toggleSwitch(this,'Notifikasi Tugas Selesai')"><div class="toggle-knob"></div></button>
+          <button class="toggle on" id="notifTugas" onclick="toggleSwitch(this,t('settings.notifTugas'))"><div class="toggle-knob"></div></button>
         </div>
 
       </div>
@@ -300,20 +307,20 @@ body, .app { background: var(--bg) !important; }
 
     <!-- ════ TAMPILAN ════ -->
     <div class="setting-section">
-      <div class="setting-section-label">Tampilan</div>
+      <div class="setting-section-label" data-i18n="settings.section.display">Tampilan</div>
       <div class="setting-group">
 
-        <div class="setting-item" style="cursor:default;">
+        <div class="setting-item">
           <div class="setting-left">
             <div class="si-icon purple">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title">Mode Gelap</div>
-              <div class="si-sub">Segera tersedia</div>
+              <div class="si-title" data-i18n="settings.darkMode">Mode Gelap</div>
+              <div class="si-sub" id="darkModeSub" data-i18n="settings.darkMode.sub.off">Tampilan terang aktif</div>
             </div>
           </div>
-          <span class="si-pill soon">Segera</span>
+          <button class="toggle" id="darkModeToggle" onclick="toggleDarkMode(this)"><div class="toggle-knob"></div></button>
         </div>
 
         <div class="setting-item" onclick="toggleFontPicker()" id="fontRow">
@@ -322,17 +329,17 @@ body, .app { background: var(--bg) !important; }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title">Ukuran Font</div>
+              <div class="si-title" data-i18n="settings.fontSize">Ukuran Font</div>
               <div class="si-sub" id="fontSizeLabel">Normal</div>
             </div>
           </div>
           <div class="si-arrow" id="fontChevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
         </div>
         <div class="font-picker" id="fontPicker">
-          <button class="font-opt" style="font-size:12px;" data-size="Kecil" onclick="setFontSize(this)">Kecil</button>
-          <button class="font-opt active" style="font-size:14px;" data-size="Normal" onclick="setFontSize(this)">Normal</button>
-          <button class="font-opt" style="font-size:16px;" data-size="Besar" onclick="setFontSize(this)">Besar</button>
-          <button class="font-opt" style="font-size:18px;" data-size="Ekstra" onclick="setFontSize(this)">Ekstra</button>
+          <button class="font-opt" style="font-size:12px;" data-size="Kecil" onclick="setFontSize(this)" data-i18n="settings.font.small">Kecil</button>
+          <button class="font-opt active" style="font-size:14px;" data-size="Normal" onclick="setFontSize(this)" data-i18n="settings.font.normal">Normal</button>
+          <button class="font-opt" style="font-size:16px;" data-size="Besar" onclick="setFontSize(this)" data-i18n="settings.font.large">Besar</button>
+          <button class="font-opt" style="font-size:18px;" data-size="Ekstra" onclick="setFontSize(this)" data-i18n="settings.font.extra">Ekstra</button>
         </div>
 
       </div>
@@ -340,7 +347,7 @@ body, .app { background: var(--bg) !important; }
 
     <!-- ════ PRIVASI & DATA ════ -->
     <div class="setting-section">
-      <div class="setting-section-label">Privasi &amp; Data</div>
+      <div class="setting-section-label" data-i18n="settings.section.privacy">Privasi &amp; Data</div>
       <div class="setting-group">
 
         <div class="setting-item">
@@ -349,11 +356,11 @@ body, .app { background: var(--bg) !important; }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title">Simpan Riwayat Chat</div>
-              <div class="si-sub">Simpan percakapan DoktrAI</div>
+              <div class="si-title" data-i18n="settings.saveChat">Simpan Riwayat Chat</div>
+              <div class="si-sub" data-i18n="settings.saveChat.sub">Simpan percakapan DoktrAI</div>
             </div>
           </div>
-          <button class="toggle on" id="saveChat" onclick="toggleSwitch(this,'Simpan Riwayat Chat')"><div class="toggle-knob"></div></button>
+          <button class="toggle on" id="saveChat" onclick="toggleSwitch(this,t('settings.saveChat'))"><div class="toggle-knob"></div></button>
         </div>
 
         <div class="setting-item">
@@ -362,11 +369,11 @@ body, .app { background: var(--bg) !important; }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title">Bagikan Analitik</div>
-              <div class="si-sub">Bantu tingkatkan layanan kami</div>
+              <div class="si-title" data-i18n="settings.analytics">Bagikan Analitik</div>
+              <div class="si-sub" data-i18n="settings.analytics.sub">Bantu tingkatkan layanan kami</div>
             </div>
           </div>
-          <button class="toggle on" id="shareAnalytics" onclick="toggleSwitch(this,'Bagikan Analitik')"><div class="toggle-knob"></div></button>
+          <button class="toggle on" id="shareAnalytics" onclick="toggleSwitch(this,t('settings.analytics'))"><div class="toggle-knob"></div></button>
         </div>
 
         <div class="setting-item" onclick="openConfirmDelete()">
@@ -375,8 +382,8 @@ body, .app { background: var(--bg) !important; }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title red">Hapus Semua Data</div>
-              <div class="si-sub">Hapus riwayat dan cache</div>
+              <div class="si-title red" data-i18n="settings.deleteAll">Hapus Semua Data</div>
+              <div class="si-sub" data-i18n="settings.deleteAll.sub">Hapus riwayat dan cache</div>
             </div>
           </div>
           <div class="si-arrow red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
@@ -387,7 +394,7 @@ body, .app { background: var(--bg) !important; }
 
     <!-- ════ TENTANG ════ -->
     <div class="setting-section">
-      <div class="setting-section-label">Tentang</div>
+      <div class="setting-section-label" data-i18n="settings.section.about">Tentang</div>
       <div class="setting-group">
 
         <div class="setting-item" onclick="showToast('v1.0.0 – Build 2026.07.17')">
@@ -396,11 +403,11 @@ body, .app { background: var(--bg) !important; }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title">Versi Aplikasi</div>
+              <div class="si-title" data-i18n="settings.appVersion">Versi Aplikasi</div>
               <div class="si-sub">v1.0.0</div>
             </div>
           </div>
-          <span class="si-pill green">Terbaru</span>
+          <span class="si-pill green" data-i18n="settings.latest">Terbaru</span>
         </div>
 
         <div class="setting-item" onclick="window.open('https://asistenku.pro/syarat','_blank')">
@@ -409,7 +416,7 @@ body, .app { background: var(--bg) !important; }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title">Syarat &amp; Ketentuan</div>
+              <div class="si-title" data-i18n="settings.terms">Syarat &amp; Ketentuan</div>
             </div>
           </div>
           <div class="si-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
@@ -421,7 +428,7 @@ body, .app { background: var(--bg) !important; }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
             <div class="si-body">
-              <div class="si-title">Kebijakan Privasi</div>
+              <div class="si-title" data-i18n="settings.privacyPolicy">Kebijakan Privasi</div>
             </div>
           </div>
           <div class="si-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
@@ -436,7 +443,7 @@ body, .app { background: var(--bg) !important; }
       <div class="setting-group">
         <div class="setting-item" onclick="doLogout()" style="justify-content:center;gap:8px;">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          <span style="font-size:14px;font-weight:700;color:var(--red);">Keluar dari Akun</span>
+          <span style="font-size:14px;font-weight:700;color:var(--red);" data-i18n="settings.logout">Keluar dari Akun</span>
         </div>
       </div>
     </div>
@@ -448,23 +455,23 @@ body, .app { background: var(--bg) !important; }
   <nav class="bottom-nav">
     <a href="beranda.html" class="nav-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-      <span class="nav-label">Beranda</span>
+      <span class="nav-label" data-i18n="nav.beranda">Beranda</span>
     </a>
     <a href="riwayat.html" class="nav-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span class="nav-label">Riwayat</span>
+      <span class="nav-label" data-i18n="nav.riwayat">Riwayat</span>
     </a>
     <a href="dokumen.html" class="nav-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-      <span class="nav-label">Dokumen</span>
+      <span class="nav-label" data-i18n="nav.dokumen">Dokumen</span>
     </a>
     <a href="upgrade.html" class="nav-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-      <span class="nav-label">Kuota Saya</span>
+      <span class="nav-label" data-i18n="nav.kuota">Kuota Saya</span>
     </a>
     <a href="profil.html" class="nav-item active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span class="nav-label">Profil</span>
+      <span class="nav-label" data-i18n="nav.profil">Profil</span>
     </a>
   </nav>
 </div>
@@ -473,32 +480,32 @@ body, .app { background: var(--bg) !important; }
 <div class="modal-overlay" id="langOverlay" onclick="closeLangOnBg(event)">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div style="font-size:16px;font-weight:700;color:var(--gray-900);margin-bottom:14px;">Pilih Bahasa</div>
+    <div style="font-size:16px;font-weight:700;color:var(--gray-900);margin-bottom:14px;" data-i18n="settings.chooseLang">Pilih Bahasa</div>
 
-    <div class="lang-opt selected" id="langID" onclick="selectLang('Indonesia','id')">
+    <div class="lang-opt selected" id="langID" onclick="selectLang('id')">
       <div class="lang-left">
         <span class="lang-flag">🇮🇩</span>
         <span class="lang-name">Bahasa Indonesia</span>
       </div>
       <span class="lang-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
     </div>
-    <div class="lang-opt" id="langEN" onclick="selectLang('English','en')">
+    <div class="lang-opt" id="langEN" onclick="selectLang('en')">
       <div class="lang-left">
         <span class="lang-flag">🇬🇧</span>
         <span class="lang-name">English</span>
       </div>
       <span class="lang-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
     </div>
-    <div class="lang-opt" id="langAR" onclick="selectLang('العربية','ar')">
+    <div class="lang-opt lang-disabled" id="langAR" onclick="showToast(t('settings.lang.arSoon'))" style="opacity:.5;cursor:not-allowed;">
       <div class="lang-left">
         <span class="lang-flag">🇸🇦</span>
         <span class="lang-name">العربية</span>
       </div>
-      <span class="lang-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+      <span class="si-pill soon" data-i18n="settings.soon">Segera</span>
     </div>
 
     <div class="lang-coming">
-      <strong>Catatan:</strong> Saat ini hanya Bahasa Indonesia yang sepenuhnya didukung. Bahasa lain segera hadir.
+      <strong data-i18n="settings.lang.noteLabel">Catatan:</strong> <span data-i18n="settings.lang.note">Bahasa Arab sedang dalam pengembangan dan akan hadir di update berikutnya.</span>
     </div>
   </div>
 </div>
@@ -509,11 +516,11 @@ body, .app { background: var(--bg) !important; }
     <div class="confirm-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
     </div>
-    <div class="confirm-h">Hapus Semua Data?</div>
-    <div class="confirm-p">Semua riwayat dan data lokal akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.</div>
+    <div class="confirm-h" data-i18n="settings.confirmDelete.h">Hapus Semua Data?</div>
+    <div class="confirm-p" data-i18n="settings.confirmDelete.p">Semua riwayat dan data lokal akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.</div>
     <div class="confirm-btns">
-      <button class="btn-cancel" onclick="closeConfirmDelete()">Batal</button>
-      <button class="btn-del" onclick="doDeleteData()">Hapus</button>
+      <button class="btn-cancel" onclick="closeConfirmDelete()" data-i18n="settings.cancel">Batal</button>
+      <button class="btn-del" onclick="doDeleteData()" data-i18n="settings.delete">Hapus</button>
     </div>
   </div>
 </div>
@@ -537,6 +544,9 @@ function showToast(msg, d) {
   t._t = setTimeout(function(){ t.classList.remove('show'); }, d);
 }
 
+/* ── i18n shortcut ── */
+function t(key) { return (window.AkI18n && AkI18n.t(key)) || key; }
+
 /* ── Toggle switches – persist ke localStorage ── */
 var TOGGLES = ['notifPush','notifEmail','notifPromo','notifTugas','saveChat','shareAnalytics'];
 (function loadToggles(){
@@ -552,8 +562,22 @@ var TOGGLES = ['notifPush','notifEmail','notifPromo','notifTugas','saveChat','sh
 function toggleSwitch(el, label) {
   el.classList.toggle('on');
   if (el.id) localStorage.setItem('ak_set_' + el.id, el.classList.contains('on') ? '1' : '0');
-  showToast((el.classList.contains('on') ? label + ' diaktifkan' : label + ' dinonaktifkan'));
+  showToast(el.classList.contains('on') ? (label + ' ' + t('settings.enabled')) : (label + ' ' + t('settings.disabled')));
 }
+
+/* ── Mode Gelap – toggle beneran, langsung diterapkan ke seluruh app ── */
+function refreshDarkModeUI() {
+  var on = AkTheme.isDark();
+  document.getElementById('darkModeToggle').classList.toggle('on', on);
+  document.getElementById('darkModeSub').setAttribute('data-i18n', on ? 'settings.darkMode.sub.on' : 'settings.darkMode.sub.off');
+  if (window.AkI18n) AkI18n.apply();
+}
+function toggleDarkMode() {
+  var next = AkTheme.toggle();
+  refreshDarkModeUI();
+  showToast(next === 'dark' ? t('settings.darkMode.toast.on') : t('settings.darkMode.toast.off'));
+}
+refreshDarkModeUI();
 
 /* ── Font size picker ── */
 var fontOpen = false;
@@ -565,27 +589,32 @@ function toggleFontPicker() {
   ch.style.transition = 'transform .2s';
 }
 
+var FONT_KEY = { Kecil: 'settings.font.small', Normal: 'settings.font.normal', Besar: 'settings.font.large', Ekstra: 'settings.font.extra' };
+var FONT_PX  = { Kecil: '13px', Normal: '15px', Besar: '17px', Ekstra: '19px' };
+
+function refreshFontLabel() {
+  var saved = localStorage.getItem('ak_fontSize') || 'Normal';
+  document.getElementById('fontSizeLabel').textContent = t(FONT_KEY[saved] || FONT_KEY.Normal);
+}
 (function loadFont(){
-  var saved = localStorage.getItem('ak_fontSize');
-  if (!saved) return;
-  document.getElementById('fontSizeLabel').textContent = saved;
+  var saved = localStorage.getItem('ak_fontSize') || 'Normal';
   document.querySelectorAll('.font-opt').forEach(function(b){
     b.classList.toggle('active', b.dataset.size === saved);
   });
+  document.documentElement.style.fontSize = FONT_PX[saved] || '15px';
 })();
 
 function setFontSize(el) {
   var size = el.dataset.size;
   document.querySelectorAll('.font-opt').forEach(function(b){ b.classList.remove('active'); });
   el.classList.add('active');
-  document.getElementById('fontSizeLabel').textContent = size;
   localStorage.setItem('ak_fontSize', size);
-  showToast('Ukuran font: ' + size);
-  var map = { Kecil: '13px', Normal: '15px', Besar: '17px', Ekstra: '19px' };
-  document.documentElement.style.fontSize = map[size] || '15px';
+  refreshFontLabel();
+  showToast(t('settings.fontSize') + ': ' + t(FONT_KEY[size] || FONT_KEY.Normal));
+  document.documentElement.style.fontSize = FONT_PX[size] || '15px';
 }
 
-/* ── Language Modal ── */
+/* ── Language Modal – benar-benar mengganti bahasa seluruh app ── */
 function openLangModal() {
   document.getElementById('langOverlay').classList.add('open');
 }
@@ -593,26 +622,25 @@ function closeLangOnBg(e) {
   if (e.target === document.getElementById('langOverlay'))
     document.getElementById('langOverlay').classList.remove('open');
 }
-(function loadLang(){
-  var saved = localStorage.getItem('ak_lang');
-  if (!saved) return;
-  var labels = { id: 'Indonesia', en: 'English', ar: 'العربية' };
-  if (labels[saved]) document.getElementById('currentLangLabel').textContent = labels[saved];
+function refreshLangUI() {
+  var saved = (window.AkI18n && AkI18n.getLang()) || 'id';
+  var labels = { id: 'Indonesia', en: 'English' };
+  document.getElementById('currentLangLabel').textContent = labels[saved] || 'Indonesia';
   document.querySelectorAll('.lang-opt').forEach(function(o){ o.classList.remove('selected'); });
-  var map = { id: 'langID', en: 'langEN', ar: 'langAR' };
+  var map = { id: 'langID', en: 'langEN' };
   var el = document.getElementById(map[saved]);
   if (el) el.classList.add('selected');
-})();
+  refreshFontLabel();
+}
+refreshLangUI();
 
-function selectLang(label, code) {
-  document.querySelectorAll('.lang-opt').forEach(function(o){ o.classList.remove('selected'); });
-  var map = { id: 'langID', en: 'langEN', ar: 'langAR' };
-  document.getElementById(map[code]).classList.add('selected');
-  document.getElementById('currentLangLabel').textContent = label;
-  localStorage.setItem('ak_lang', code);
+function selectLang(code) {
+  var labels = { id: 'Indonesia', en: 'English' };
+  AkI18n.setLang(code); // langsung menerjemahkan seluruh halaman saat ini
+  refreshLangUI();
   setTimeout(function(){
     document.getElementById('langOverlay').classList.remove('open');
-    showToast('Bahasa diubah ke ' + label);
+    showToast(t('settings.lang.changed') + ' ' + labels[code]);
   }, 280);
 }
 
@@ -621,18 +649,24 @@ function openConfirmDelete() { document.getElementById('confirmOverlay').classLi
 function closeConfirmDelete() { document.getElementById('confirmOverlay').classList.remove('open'); }
 function doDeleteData() {
   closeConfirmDelete();
+  var lang = localStorage.getItem('ak_lang');
+  var theme = localStorage.getItem('ak_theme');
   localStorage.clear();
-  showToast('Semua data telah dihapus');
+  if (lang) localStorage.setItem('ak_lang', lang);
+  if (theme) localStorage.setItem('ak_theme', theme);
+  showToast(t('settings.deleteAll.toast'));
   setTimeout(function(){ window.location.href = 'login.html'; }, 1600);
 }
 
 /* ── Logout ── */
 function doLogout() {
-  if (!confirm('Keluar dari akun?')) return;
+  if (!confirm(t('settings.logout.confirm'))) return;
   localStorage.removeItem('ak_token');
-  showToast('Sampai jumpa!');
+  showToast(t('settings.logout.toast'));
   setTimeout(function(){ window.location.href = 'login.html'; }, 1400);
 }
+
+document.addEventListener('ak-i18n-changed', function(){ refreshLangUI(); refreshDarkModeUI(); });
 </script>
 </body>
 </html>

@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="i18n.js"></script>
 <!-- Supabase JS client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
@@ -111,13 +113,13 @@
 
   <!-- Body -->
   <div class="auth-body">
-    <h1 class="auth-title">Selamat datang kembali!</h1>
-    <p class="auth-sub">Masuk untuk melanjutkan</p>
+    <h1 class="auth-title" data-i18n="auth.login.title">Selamat datang kembali!</h1>
+    <p class="auth-sub" data-i18n="auth.login.sub">Masuk untuk melanjutkan</p>
 
     <!-- Error -->
     <div class="error-msg" id="errMsg">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-      <span id="errText">Email atau kata sandi salah</span>
+      <span id="errText" data-i18n="auth.login.error">Email atau kata sandi salah</span>
     </div>
 
     <button class="oauth-btn" id="googleBtn" onclick="handleGoogle()">
@@ -127,22 +129,22 @@
         <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
         <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
       </svg>
-      Masuk dengan Google
+      <span data-i18n="auth.google">Masuk dengan Google</span>
     </button>
 
-    <div class="divider">atau</div>
+    <div class="divider" data-i18n="auth.or">atau</div>
 
     <!-- Email -->
     <div class="form-group">
       <div class="input-wrap">
         <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
-        <input type="email" class="form-input has-icon" id="email" placeholder="Email atau nomor HP" autocomplete="email">
+        <input type="email" class="form-input has-icon" id="email" placeholder="Email atau nomor HP" autocomplete="email" data-i18n-placeholder="auth.emailPlaceholder">
       </div>
     </div>
     <div class="form-group">
       <div class="input-wrap">
         <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-        <input type="password" class="form-input has-icon has-action" id="password" placeholder="Kata sandi" autocomplete="current-password">
+        <input type="password" class="form-input has-icon has-action" id="password" placeholder="Kata sandi" autocomplete="current-password" data-i18n-placeholder="auth.passwordPlaceholder">
         <button class="input-action" type="button" onclick="togglePass('password',this)" aria-label="Tampilkan kata sandi">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
@@ -150,13 +152,13 @@
     </div>
 
     <div class="check-row">
-      <label class="check-label"><input type="checkbox" id="remember" checked> Ingat saya</label>
-      <a href="lupa-sandi.html" class="link">Lupa kata sandi?</a>
+      <label class="check-label"><input type="checkbox" id="remember" checked> <span data-i18n="auth.rememberMe">Ingat saya</span></label>
+      <a href="lupa-sandi.html" class="link" data-i18n="auth.forgotPassword">Lupa kata sandi?</a>
     </div>
 
-    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Masuk</button>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()" data-i18n="auth.loginBtn">Masuk</button>
 
-    <p class="auth-switch">Belum punya akun? <a href="register.html" class="link">Daftar di sini</a></p>
+    <p class="auth-switch"><span data-i18n="auth.noAccount">Belum punya akun?</span> <a href="register.html" class="link" data-i18n="auth.registerHere">Daftar di sini</a></p>
   </div>
 
   <!-- Bottom features -->
