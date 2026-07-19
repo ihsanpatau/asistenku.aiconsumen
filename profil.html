@@ -453,7 +453,11 @@ if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
 
 const SB_URL='https://dkpztybbcvvzatgwhano.supabase.co';
 const SB_KEY='sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm';
-const _sb=window.supabase.createClient(SB_URL,SB_KEY);
+// PENTING: sertakan token agar RLS Supabase mengizinkan SELECT profil sendiri
+const _sbToken = localStorage.getItem('ak_token') || '';
+const _sb=window.supabase.createClient(SB_URL,SB_KEY,{
+  global:{ headers:{ Authorization: 'Bearer '+_sbToken } }
+});
 
 const user=AkAccount.getUser();
 const email=user.email||'pengguna@email.com';

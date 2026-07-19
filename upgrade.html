@@ -441,11 +441,33 @@ function selectPay(btn){document.querySelectorAll('.pay-method').forEach(b=>{b.s
 function prosesPayment(){
   showToast('Memproses pembayaran... Integrasi Midtrans segera hadir!');
   const planKey=document.getElementById('payModal').dataset.planKey||'standar';
-  setTimeout(()=>{
-    // NOTE: pembayaran sungguhan belum terintegrasi (Midtrans). Untuk sekarang paket langsung aktif secara lokal.
+  setTimeout(async ()=>{
+    // Simpan ke localStorage
     localStorage.setItem('user_plan', planKey);
     const expiry=new Date(); expiry.setDate(expiry.getDate()+37); // 30 hari + bonus 7 hari
     localStorage.setItem('user_plan_expiry', expiry.toISOString());
+
+    // PENTING: simpan juga ke Supabase agar sinkron dengan admin panel
+    try {
+      const token = localStorage.getItem('ak_token');
+      if (token) {
+        const payload = JSON.parse(decodeURIComponent(escape(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));
+        const userId = payload.sub;
+        if (userId) {
+          const SB_URL = 'https://dkpztybbcvvzatgwhano.supabase.co';
+          const SB_KEY = 'sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm';
+          const _sbUp = window.supabase.createClient(SB_URL, SB_KEY, {
+            global: { headers: { Authorization: 'Bearer ' + token } }
+          });
+          await _sbUp.from('profiles').update({
+            plan: planKey,
+            plan_expiry: expiry.toISOString(),
+            updated_at: new Date().toISOString()
+          }).eq('id', userId);
+        }
+      }
+    } catch(e) { console.warn('Sync plan ke Supabase gagal:', e); }
+
     if(voucherCode){ localStorage.removeItem('ak_voucher_applied'); }
     document.getElementById('payModal').classList.remove('open');
     showToast('Paket '+planKey.charAt(0).toUpperCase()+planKey.slice(1)+' aktif!');

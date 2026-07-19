@@ -231,6 +231,20 @@ async function bridgeSupabaseSession() {
   if (data && data.session) {
     localStorage.setItem('ak_token', data.session.access_token);
     localStorage.setItem('ak_user',  JSON.stringify(data.session.user));
+    // Load plan dari Supabase setelah Google login
+    try {
+      const uid = data.session.user?.id;
+      if (uid) {
+        const sbAuth = window.supabase.createClient(SB_URL, SB_KEY, {
+          global: { headers: { Authorization: 'Bearer ' + data.session.access_token } }
+        });
+        const { data: prof } = await sbAuth.from('profiles').select('plan,plan_expiry').eq('id', uid).single();
+        if (prof && prof.plan) {
+          localStorage.setItem('user_plan', prof.plan.toLowerCase());
+          if (prof.plan_expiry) localStorage.setItem('user_plan_expiry', prof.plan_expiry);
+        }
+      }
+    } catch(e) { console.warn('Load plan Google login gagal:', e); }
     location.href = 'beranda.html';
     return true;
   }
@@ -259,6 +273,20 @@ async function doLogin() {
     if (data.access_token) {
       localStorage.setItem('ak_token', data.access_token);
       localStorage.setItem('ak_user',  JSON.stringify(data.user));
+      // Load plan dari Supabase agar langsung sinkron setelah login
+      try {
+        const uid = data.user?.id;
+        if (uid) {
+          const sbAuth = window.supabase.createClient(SB_URL, SB_KEY, {
+            global: { headers: { Authorization: 'Bearer ' + data.access_token } }
+          });
+          const { data: prof } = await sbAuth.from('profiles').select('plan,plan_expiry').eq('id', uid).single();
+          if (prof && prof.plan) {
+            localStorage.setItem('user_plan', prof.plan.toLowerCase());
+            if (prof.plan_expiry) localStorage.setItem('user_plan_expiry', prof.plan_expiry);
+          }
+        }
+      } catch(e) { console.warn('Load plan saat login gagal:', e); }
       location.href = 'beranda.html';
     } else {
       showErr(data.error_description || 'Email atau kata sandi salah');
