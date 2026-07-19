@@ -7,6 +7,10 @@
 const AkNotif = (function () {
   const READ_KEY = 'ak_notif_read_ids';
   const DISMISS_KEY = 'ak_notif_dismissed_ids';
+  const SB_URL = 'https://dkpztybbcvvzatgwhano.supabase.co';
+  const SB_KEY = 'sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm';
+  let adminCache = null;
+  let adminCacheTime = 0;
 
   function getIds(key) {
     try { const a = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(a) ? a : []; }
@@ -17,6 +21,41 @@ const AkNotif = (function () {
   function relatif(iso) {
     if (window.RiwayatStore) return RiwayatStore.waktuRelatif(iso);
     return new Date(iso).toLocaleDateString('id-ID');
+  }
+
+  // Ambil pemberitahuan yang dikirim ADMIN lewat panel admin (tabel 'notifications').
+  // Di-cache 1 menit supaya tidak query berkali-kali tiap buka panel.
+  async function fetchAdminNotifs() {
+    try {
+      if (adminCache && (Date.now() - adminCacheTime) < 60000) return adminCache;
+      if (typeof window.supabase === 'undefined') return adminCache || [];
+
+      const planKey = window.AkAccount ? AkAccount.getPlanKey() : 'gratis';
+      const sb = window.supabase.createClient(SB_URL, SB_KEY);
+      const { data, error } = await sb
+        .from('notifications')
+        .select('*')
+        .eq('active', true)
+        .order('created_at', { ascending: false })
+        .limit(30);
+      if (error || !data) return adminCache || [];
+
+      adminCache = data
+        .filter(n => n.target === 'all' || n.target === planKey)
+        .map(n => ({
+          id: 'admin_' + n.id,
+          icon: 'info',
+          title: n.title,
+          desc: n.message,
+          waktu: n.created_at,
+          link: n.link || null
+        }));
+      adminCacheTime = Date.now();
+      return adminCache;
+    } catch (e) {
+      console.warn('fetchAdminNotifs gagal:', e);
+      return adminCache || [];
+    }
   }
 
   // Bangun daftar notifikasi terkini dari kondisi akun yang sebenarnya.
@@ -102,13 +141,24 @@ const AkNotif = (function () {
     return filtered;
   }
 
-  function unreadCount() {
-    const read = getIds(READ_KEY);
-    return build().filter(n => !read.includes(n.id)).length;
+  // Gabungan notifikasi otomatis (lokal) + notifikasi dari admin (Supabase)
+  async function buildAll() {
+    const local = build();
+    const admin = await fetchAdminNotifs();
+    const dismissed = getIds(DISMISS_KEY);
+    const merged = local.concat(admin.filter(n => !dismissed.includes(n.id)));
+    merged.sort((a, b) => new Date(b.waktu) - new Date(a.waktu));
+    return merged;
   }
 
-  function updateBadges() {
-    const n = unreadCount();
+  async function unreadCount() {
+    const read = getIds(READ_KEY);
+    const list = await buildAll();
+    return list.filter(n => !read.includes(n.id)).length;
+  }
+
+  async function updateBadges() {
+    const n = await unreadCount();
     document.querySelectorAll('.notif-badge').forEach(b => { b.style.display = n > 0 ? '' : 'none'; });
   }
 
@@ -139,8 +189,8 @@ const AkNotif = (function () {
     wrap.addEventListener('click', function (e) { if (e.target === wrap) closePanel(); });
   }
 
-  function render() {
-    const list = build();
+  async function render() {
+    const list = await buildAll();
     const read = getIds(READ_KEY);
     const body = document.getElementById('akNotifBody');
     if (!body) return;
@@ -169,35 +219,37 @@ const AkNotif = (function () {
     }).join('');
   }
 
-  function openPanel() {
+  async function openPanel() {
     injectPanel();
-    render();
     document.getElementById('akNotifOverlay').classList.add('open');
+    const body = document.getElementById('akNotifBody');
+    if (body) body.innerHTML = '<div style="text-align:center;padding:30px 10px;color:var(--gray-400);font-size:13px;">Memuat...</div>';
+    await render();
   }
   function closePanel() {
     const el = document.getElementById('akNotifOverlay');
     if (el) el.classList.remove('open');
   }
-  function toggle() {
+  async function toggle() {
     const el = document.getElementById('akNotifOverlay');
     if (el && el.classList.contains('open')) { closePanel(); }
-    else { openPanel(); }
+    else { await openPanel(); }
   }
 
-  function open(id, link) {
+  async function open(id, link) {
     const read = getIds(READ_KEY);
     if (!read.includes(id)) { read.push(id); setIds(READ_KEY, read); }
-    updateBadges();
-    render();
+    await updateBadges();
+    await render();
     if (link) window.location.href = link;
   }
 
-  function markAllRead() {
-    const all = build().map(function (n) { return n.id; });
+  async function markAllRead() {
+    const all = (await buildAll()).map(function (n) { return n.id; });
     const read = getIds(READ_KEY);
     setIds(READ_KEY, Array.from(new Set(read.concat(all))));
-    updateBadges();
-    render();
+    await updateBadges();
+    await render();
     if (window.showToast) showToast('Semua notifikasi ditandai dibaca');
   }
 
