@@ -271,9 +271,9 @@ async function muatHargaTerbaru() {
   pkgs.forEach(p => {
     const priceEl = document.getElementById('price_' + p.key);
     if (priceEl) {
-      const coret = p.strike_price ? `<span style="text-decoration:line-through;opacity:.55;font-size:13px;margin-right:4px;">Rp${Number(p.strike_price).toLocaleString('id-ID')}</span>` : '';
+      const coret = p.strike_price ? `<div style="font-size:12px;font-weight:600;text-decoration:line-through;opacity:.5;line-height:1.2;">Rp${Number(p.strike_price).toLocaleString('id-ID')}</div>` : '';
       const sub = p.key === 'gratis' ? '' : '<span>/bulan</span>';
-      priceEl.innerHTML = coret + 'Rp' + Number(p.display_price).toLocaleString('id-ID') + sub;
+      priceEl.innerHTML = coret + '<div>Rp' + Number(p.display_price).toLocaleString('id-ID') + sub + '</div>';
     }
     const halEl = document.getElementById('hal_' + p.key); if (halEl) halEl.textContent = p.halaman_limit;
     const pesanEl = document.getElementById('pesan_' + p.key); if (pesanEl) pesanEl.textContent = p.pesan_limit >= 99999 ? 'Unlimited' : p.pesan_limit;
