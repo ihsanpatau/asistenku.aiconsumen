@@ -136,6 +136,53 @@ const AkAccount = (function () {
     if (user.id) localStorage.setItem('ak_avatar_' + user.id, dataUrl);
   }
 
+  // --- Sync Plan dari Supabase (dipanggil saat halaman load) ---
+  // Fungsi ini membaca kolom 'plan' dari tabel 'profiles' di Supabase
+  // dan menyimpannya ke localStorage, sehingga perubahan yang dilakukan
+  // admin di panel admin langsung berpengaruh ke konsumen.
+  async function syncPlanFromSupabase() {
+    try {
+      // Pastikan Supabase SDK sudah dimuat di halaman ini
+      if (typeof window.supabase === 'undefined') return;
+
+      const token = localStorage.getItem('ak_token');
+      if (!token) return;
+
+      // Decode user ID dari JWT token
+      let userId = null;
+      try {
+        const payload = JSON.parse(decodeURIComponent(escape(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));
+        userId = payload.sub;
+      } catch(e) { return; }
+
+      if (!userId) return;
+
+      // Koneksi ke Supabase (URL & key sama dengan shared-config.js)
+      const SUPABASE_URL = 'https://dkpztybbcvvzatgwhano.supabase.co';
+      const SUPABASE_ANON_KEY = 'sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm';
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: { headers: { Authorization: 'Bearer ' + token } }
+      });
+
+      const { data, error } = await sb
+        .from('profiles')
+        .select('plan, plan_expiry')
+        .eq('id', userId)
+        .single();
+
+      if (error || !data) return;
+
+      // Update localStorage dengan nilai terbaru dari Supabase
+      const planBaru = (data.plan || 'gratis').toLowerCase();
+      localStorage.setItem('user_plan', planBaru);
+      if (data.plan_expiry) {
+        localStorage.setItem('user_plan_expiry', data.plan_expiry);
+      }
+    } catch(e) {
+      console.warn('syncPlanFromSupabase gagal:', e);
+    }
+  }
+
   // --- Favorit ---
   function getFavoritIds() {
     try { return JSON.parse(localStorage.getItem('ak_favorit_ids') || '[]'); }
@@ -154,6 +201,7 @@ const AkAccount = (function () {
     PLAN_LIMITS, getUser, getPlanKey, getPlan, getKuota,
     catatHalaman, catatPesan, getDokumenStats, getJoinDate,
     getDisplayName, setDisplayName, getAvatarUrl, setAvatarUrl,
-    getFavoritIds, isFavorit, toggleFavorit
+    getFavoritIds, isFavorit, toggleFavorit,
+    syncPlanFromSupabase
   };
 })();
