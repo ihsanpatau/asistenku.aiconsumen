@@ -979,6 +979,174 @@ body {
 .ak-notif-time { font-size: 10.5px; color: var(--gray-400); margin-top: 4px; }
 .ak-notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-light); flex-shrink: 0; margin-top: 6px; }
 
+/* ── Notification bell button (shared across all pages) ── */
+.notif-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: none; cursor: pointer; position: relative;
+  background: var(--gray-100); color: var(--gray-600);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s, transform .15s;
+}
+.notif-btn:hover { background: var(--gray-200); transform: translateY(-1px); }
+.notif-btn svg { width: 16px; height: 16px; }
+.notif-badge {
+  position: absolute; top: 7px; right: 8px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: linear-gradient(135deg,#FFC93C,var(--gold));
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 0 rgba(245,158,11,.55);
+  animation: akBadgePulse 2s infinite;
+}
+@keyframes akBadgePulse {
+  0%   { box-shadow: 0 0 0 0 rgba(245,158,11,.55); }
+  70%  { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+  100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+}
+
+/* ══════════════ Elegant notification panel (scoped to #akNotifOverlay, applies on every page) ══════════════ */
+#akNotifOverlay { background: rgba(10,16,48,.55); backdrop-filter: blur(3px); }
+#akNotifOverlay .modal-sheet {
+  padding: 14px 16px 28px;
+  border-radius: 26px 26px 0 0;
+  box-shadow: 0 -14px 40px rgba(15,31,92,.22);
+}
+#akNotifOverlay .modal-handle {
+  background: var(--gray-300);
+  width: 44px;
+}
+
+/* Gradient banner header with mascot */
+#akNotifOverlay .ak-notif-header {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f1f5c 0%, #1a3dc2 55%, #3b5bff 100%);
+  border-radius: 20px;
+  padding: 18px 88px 18px 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 10px 24px rgba(26,61,194,.3);
+}
+#akNotifOverlay .ak-notif-header::before {
+  content: '';
+  position: absolute; width: 150px; height: 150px;
+  background: radial-gradient(circle, rgba(255,183,3,.28), transparent 70%);
+  top: -60px; right: -10px; border-radius: 50%; pointer-events: none;
+}
+#akNotifOverlay .ak-notif-header::after {
+  content: '';
+  position: absolute;
+  width: 78px; height: 78px;
+  right: 4px; bottom: -10px;
+  background-image: url('mascot-logo.png');
+  background-size: contain; background-repeat: no-repeat; background-position: bottom;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,.3));
+  pointer-events: none;
+}
+#akNotifOverlay .ak-notif-header-title {
+  color: #fff; font-size: 18px; font-weight: 800; letter-spacing: -.2px;
+  display: flex; align-items: center; gap: 8px;
+}
+#akNotifOverlay .ak-notif-header-title::before {
+  content: '';
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,255,255,.18);
+  display: inline-block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'/%3E%3Cpath d='M13.73 21a2 2 0 0 1-3.46 0'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: center; background-size: 16px;
+}
+#akNotifOverlay .ak-notif-mark-read {
+  position: relative; z-index: 1;
+  color: #fff; background: rgba(255,255,255,.16);
+  border: 1px solid rgba(255,255,255,.3);
+  padding: 6px 13px; border-radius: 999px;
+  font-size: 11.5px; backdrop-filter: blur(4px);
+  transition: background .2s, transform .15s;
+}
+#akNotifOverlay .ak-notif-mark-read:hover { background: rgba(255,255,255,.3); transform: translateY(-1px); }
+
+/* List */
+#akNotifOverlay .ak-notif-list { gap: 9px; margin-top: 2px; padding: 2px 1px 4px; }
+#akNotifOverlay .ak-notif-item {
+  background: #fff;
+  border: 1px solid var(--gray-100);
+  border-radius: 16px;
+  padding: 12px 12px 12px 15px;
+  box-shadow: 0 2px 8px rgba(17,24,39,.05);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+#akNotifOverlay .ak-notif-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(26,61,194,.14);
+}
+#akNotifOverlay .ak-notif-item::before {
+  content: '';
+  position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: transparent;
+}
+#akNotifOverlay .ak-notif-item.unread {
+  background: linear-gradient(135deg, var(--brand-50) 0%, #fff 65%);
+  border-color: var(--brand-100);
+  box-shadow: 0 4px 14px rgba(59,91,255,.14);
+}
+#akNotifOverlay .ak-notif-item.unread::before {
+  background: linear-gradient(180deg, var(--brand-light), var(--brand));
+}
+#akNotifOverlay .ak-notif-icon {
+  width: 44px; height: 44px; border-radius: 14px;
+  box-shadow: 0 5px 12px rgba(17,24,39,.18);
+}
+#akNotifOverlay .ak-notif-icon svg { width: 19px; height: 19px; }
+#akNotifOverlay .ak-notif-icon.doc   { box-shadow: 0 5px 14px rgba(22,163,74,.4); }
+#akNotifOverlay .ak-notif-icon.warn  { box-shadow: 0 5px 14px rgba(245,158,11,.4); }
+#akNotifOverlay .ak-notif-icon.clock { box-shadow: 0 5px 14px rgba(239,68,68,.4); }
+#akNotifOverlay .ak-notif-icon.star  { box-shadow: 0 5px 14px rgba(124,58,237,.4); }
+#akNotifOverlay .ak-notif-icon.info  { box-shadow: 0 5px 14px rgba(59,91,255,.4); }
+#akNotifOverlay .ak-notif-title { font-size: 13.5px; font-weight: 750; }
+#akNotifOverlay .ak-notif-time {
+  display: inline-block; margin-top: 7px;
+  font-size: 10px; font-weight: 700; letter-spacing: .2px;
+  color: var(--brand); background: var(--brand-50);
+  padding: 2px 9px; border-radius: 999px;
+}
+#akNotifOverlay .ak-notif-dot {
+  width: 9px; height: 9px; margin-top: 7px;
+  background: linear-gradient(135deg, var(--brand-light), var(--brand));
+  animation: akDotPulse 1.8s infinite;
+}
+@keyframes akDotPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(59,91,255,.5); }
+  70%  { box-shadow: 0 0 0 6px rgba(59,91,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(59,91,255,0); }
+}
+
+/* Empty state gets the mascot instead of a plain emoji */
+#akNotifOverlay #akNotifBody > div[style*="text-align:center"] {
+  padding: 20px 10px 6px !important;
+}
+#akNotifOverlay #akNotifBody > div[style*="text-align:center"]::before {
+  content: '';
+  display: block; margin: 0 auto 10px;
+  width: 92px; height: 92px;
+  background-image: url('cat-vip.png');
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+#akNotifOverlay #akNotifBody > div[style*="text-align:center"] div:first-of-type { display: none; }
+
+/* Footer close button */
+#akNotifOverlay .btn.btn-outline {
+  border: 1.5px solid var(--brand-100);
+  color: var(--brand);
+  border-radius: 14px;
+  font-weight: 700;
+  background: #fff;
+  transition: background .2s, border-color .2s;
+}
+#akNotifOverlay .btn.btn-outline:hover {
+  background: var(--brand-50);
+  border-color: var(--brand-light);
+}
+
+
 /* ── Misc utilities ── */
 .mt-4  { margin-top: 4px; }
 .mt-8  { margin-top: 8px; }
