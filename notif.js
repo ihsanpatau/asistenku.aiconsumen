@@ -206,7 +206,7 @@ const AkNotif = (function () {
     body.innerHTML = list.map(function (n) {
       const isRead = read.includes(n.id);
       return (
-        '<div class="ak-notif-item' + (isRead ? '' : ' unread') + '" onclick="AkNotif.open(\'' + n.id + '\',\'' + n.link + '\')">' +
+        '<div class="ak-notif-item' + (isRead ? '' : ' unread') + '" onclick="AkNotif.open(\'' + n.id + '\',\'' + (n.link || '') + '\')">' +
           '<div class="ak-notif-icon ' + n.icon + '">' + (ICONS[n.icon] || ICONS.info) + '</div>' +
           '<div class="ak-notif-body">' +
             '<div class="ak-notif-title">' + n.title + '</div>' +
@@ -241,7 +241,7 @@ const AkNotif = (function () {
     if (!read.includes(id)) { read.push(id); setIds(READ_KEY, read); }
     await updateBadges();
     await render();
-    if (link) window.location.href = link;
+    if (link && link !== 'null' && link !== 'undefined') window.location.href = link;
   }
 
   async function markAllRead() {
