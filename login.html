@@ -230,6 +230,7 @@ async function bridgeSupabaseSession() {
   const { data } = await _sb.auth.getSession();
   if (data && data.session) {
     localStorage.setItem('ak_token', data.session.access_token);
+    if (data.session.refresh_token) localStorage.setItem('ak_refresh_token', data.session.refresh_token);
     localStorage.setItem('ak_user',  JSON.stringify(data.session.user));
     // Load plan dari Supabase setelah Google login
     try {
@@ -272,6 +273,7 @@ async function doLogin() {
 
     if (data.access_token) {
       localStorage.setItem('ak_token', data.access_token);
+      if (data.refresh_token) localStorage.setItem('ak_refresh_token', data.refresh_token);
       localStorage.setItem('ak_user',  JSON.stringify(data.user));
       // Load plan dari Supabase agar langsung sinkron setelah login
       try {

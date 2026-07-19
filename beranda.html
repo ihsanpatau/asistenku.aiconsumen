@@ -393,8 +393,9 @@ function renderKuotaBeranda(){
 renderKuotaBeranda();
 (async function syncPlanBeranda(){
   try {
-    const token = localStorage.getItem('ak_token');
-    if (!token || typeof window.supabase === 'undefined') return;
+    if (typeof window.supabase === 'undefined' || typeof AkAccount === 'undefined') return;
+    const token = await AkAccount.getValidToken();
+    if (!token) return;
     let userId = null;
     try {
       const payload = JSON.parse(decodeURIComponent(escape(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));

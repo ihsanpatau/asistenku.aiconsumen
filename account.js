@@ -136,6 +136,40 @@ const AkAccount = (function () {
     if (user.id) localStorage.setItem('ak_avatar_' + user.id, dataUrl);
   }
 
+  // --- Ambil token yang masih berlaku, refresh otomatis kalau sudah kedaluwarsa ---
+  // Supaya user TIDAK perlu logout/login manual tiap kali sesi lamanya habis (biasanya ±1 jam).
+  async function getValidToken() {
+    const SUPABASE_URL = 'https://dkpztybbcvvzatgwhano.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm';
+    let token = localStorage.getItem('ak_token');
+    const refreshToken = localStorage.getItem('ak_refresh_token');
+    if (!token) return null;
+
+    let expired = true;
+    try {
+      const payload = JSON.parse(decodeURIComponent(escape(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));
+      expired = !payload.exp || (payload.exp * 1000) < (Date.now() + 30000);
+    } catch (e) { expired = true; }
+
+    if (!expired) return token;
+    if (!refreshToken) return token; // tidak ada refresh token tersimpan, coba pakai yang lama (mungkin tetap gagal)
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+        body: JSON.stringify({ refresh_token: refreshToken })
+      });
+      const data = await res.json();
+      if (data.access_token) {
+        localStorage.setItem('ak_token', data.access_token);
+        if (data.refresh_token) localStorage.setItem('ak_refresh_token', data.refresh_token);
+        return data.access_token;
+      }
+    } catch (e) { console.warn('Refresh token gagal:', e); }
+    return token;
+  }
+
   // --- Sync Plan dari Supabase (dipanggil saat halaman load) ---
   // Fungsi ini membaca kolom 'plan' dari tabel 'profiles' di Supabase
   // dan menyimpannya ke localStorage, sehingga perubahan yang dilakukan
@@ -145,7 +179,7 @@ const AkAccount = (function () {
       // Pastikan Supabase SDK sudah dimuat di halaman ini
       if (typeof window.supabase === 'undefined') return;
 
-      const token = localStorage.getItem('ak_token');
+      const token = await getValidToken();
       if (!token) return;
 
       // Decode user ID dari JWT token
@@ -202,6 +236,6 @@ const AkAccount = (function () {
     catatHalaman, catatPesan, getDokumenStats, getJoinDate,
     getDisplayName, setDisplayName, getAvatarUrl, setAvatarUrl,
     getFavoritIds, isFavorit, toggleFavorit,
-    syncPlanFromSupabase
+    syncPlanFromSupabase, getValidToken
   };
 })();
