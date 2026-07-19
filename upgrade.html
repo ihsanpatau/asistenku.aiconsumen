@@ -279,7 +279,16 @@ async function muatHargaTerbaru() {
     const pesanEl = document.getElementById('pesan_' + p.key); if (pesanEl) pesanEl.textContent = p.pesan_limit >= 99999 ? 'Unlimited' : p.pesan_limit;
     const btn = document.getElementById('btn_' + p.key);
     if (btn) btn.setAttribute('onclick', `beliPaket('${p.label}','${p.real_price}')`);
+
+    // Tabel perbandingan paket — supaya angkanya ikut sesuai data admin
+    const cmpHal = document.getElementById('cmp_hal_' + p.key); if (cmpHal) cmpHal.textContent = p.halaman_limit;
+    const cmpPesan = document.getElementById('cmp_pesan_' + p.key); if (cmpPesan) cmpPesan.textContent = p.pesan_limit >= 99999 ? 'Unlimited' : p.pesan_limit;
   });
+
+  // Tombol promo (selalu paket Pro) — pakai harga Pro yang sebenarnya, bukan angka tetap
+  const pro = pkgs.find(p => p.key === 'pro');
+  const promoBtn = document.getElementById('btn_promo_pro');
+  if (pro && promoBtn) promoBtn.setAttribute('onclick', `beliPaket('Pro','${pro.real_price}')`);
 }
 document.addEventListener('DOMContentLoaded', muatHargaTerbaru);
 </script>
@@ -299,8 +308,8 @@ document.addEventListener('DOMContentLoaded', muatHargaTerbaru);
             </tr>
           </thead>
           <tbody>
-            <tr><td>📄 Halaman / hari</td><td>5</td><td>10</td><td>35</td><td>60</td></tr>
-            <tr><td>💬 Chat DoktrAI</td><td>5</td><td>20</td><td>50</td><td>Unlimited</td></tr>
+            <tr><td>📄 Halaman / hari</td><td id="cmp_hal_gratis">5</td><td id="cmp_hal_standar">10</td><td id="cmp_hal_pro">35</td><td id="cmp_hal_lanjutan">60</td></tr>
+            <tr><td>💬 Chat DoktrAI</td><td id="cmp_pesan_gratis">5</td><td id="cmp_pesan_standar">20</td><td id="cmp_pesan_pro">50</td><td id="cmp_pesan_lanjutan">Unlimited</td></tr>
             <tr>
               <td>⚡ Prioritas</td>
               <td><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></td>
@@ -325,7 +334,7 @@ document.addEventListener('DOMContentLoaded', muatHargaTerbaru);
         <div style="font-size:14px;font-weight:800;color:#fff;">Promo Hari Ini!</div>
         <div style="font-size:12px;color:rgba(255,255,255,0.85);margin-top:2px;">Upgrade sekarang dan dapat bonus <strong>7 hari akses PRO.</strong></div>
       </div>
-      <button class="plan-btn gold" style="white-space:nowrap;font-size:12px;padding:10px 14px;" onclick="beliPaket('Pro','59000')">
+      <button class="plan-btn gold" id="btn_promo_pro" style="white-space:nowrap;font-size:12px;padding:10px 14px;" onclick="beliPaket('Pro','59000')">
         Beli Paket →
       </button>
     </div>
@@ -449,7 +458,7 @@ function prosesPayment(){
 
     // PENTING: simpan juga ke Supabase agar sinkron dengan admin panel
     try {
-      const token = localStorage.getItem('ak_token');
+      const token = (typeof AkAccount !== 'undefined') ? await AkAccount.getValidToken() : localStorage.getItem('ak_token');
       if (token) {
         const payload = JSON.parse(decodeURIComponent(escape(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));
         const userId = payload.sub;
