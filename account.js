@@ -4,14 +4,25 @@
    akun pengguna yang sebenarnya — bukan angka contoh/template. */
 const AkAccount = (function () {
 
-  // Batas kuota per paket. Kunci HARUS sama persis dengan yang dipakai upgrade.html
-  // (localStorage 'user_plan': 'gratis' | 'standar' | 'pro' | 'lanjutan').
-  const PLAN_LIMITS = {
+  // Batas kuota BAWAAN (fallback) — dipakai kalau data admin belum sempat
+  // diambil (mis. offline / belum pernah sync). Begitu syncPlanLimits() berhasil
+  // mengambil data dari tabel 'packages' (yang diatur admin di Admin Panel),
+  // nilai di bawah ini DITIMPA supaya kuota yang tampil ke user selalu sesuai
+  // pengaturan admin — bukan angka bawaan yang sudah kedaluwarsa.
+  const DEFAULT_LIMITS = {
     gratis:   { halaman: 5,  pesan: 5,    label: 'Gratis'   },
     standar:  { halaman: 10, pesan: 20,   label: 'Standar'  },
     pro:      { halaman: 35, pesan: 50,   label: 'Pro'      },
     lanjutan: { halaman: 60, pesan: 99999, label: 'Lanjutan' }
   };
+  const PLAN_LIMITS = DEFAULT_LIMITS; // nama lama dipertahankan untuk kompatibilitas
+  const LIMITS_CACHE_KEY = 'ak_plan_limits_cache';
+
+  // Baca override kuota terakhir yang berhasil disinkron dari tabel 'packages'.
+  function getLimitsOverride() {
+    try { return JSON.parse(localStorage.getItem(LIMITS_CACHE_KEY) || '{}'); }
+    catch (e) { return {}; }
+  }
 
   function getUser() {
     try { return JSON.parse(localStorage.getItem('ak_user') || '{}'); }
@@ -22,7 +33,18 @@ const AkAccount = (function () {
     return (localStorage.getItem('user_plan') || 'gratis').toLowerCase();
   }
   function getPlan() {
-    return PLAN_LIMITS[getPlanKey()] || PLAN_LIMITS.gratis;
+    const key = getPlanKey();
+    const base = DEFAULT_LIMITS[key] || DEFAULT_LIMITS.gratis;
+    const override = getLimitsOverride()[key];
+    // Gabungkan: pakai angka dari admin kalau ada & valid, sisanya (mis. label) dari default.
+    if (override) {
+      return {
+        halaman: (typeof override.halaman === 'number' && override.halaman >= 0) ? override.halaman : base.halaman,
+        pesan:   (typeof override.pesan === 'number' && override.pesan >= 0) ? override.pesan : base.pesan,
+        label:   override.label || base.label
+      };
+    }
+    return base;
   }
 
   function todayKey() {
@@ -170,6 +192,42 @@ const AkAccount = (function () {
     return token;
   }
 
+  // --- Sync BATAS KUOTA dari tabel 'packages' (diatur admin di Admin Panel) ---
+  // Ini yang membuat "Jatah Halaman/Hari" & "Jatah Pesan DoktrAI/Hari" yang
+  // diubah admin langsung terpakai di dashboard konsumen, tanpa perlu update kode.
+  // Tabel ini publik dibaca (dipakai juga oleh upgrade.html lewat admin-sync.js),
+  // jadi tidak perlu token login.
+  async function syncPlanLimits() {
+    try {
+      if (typeof window.supabase === 'undefined') return false;
+      const SUPABASE_URL = 'https://dkpztybbcvvzatgwhano.supabase.co';
+      const SUPABASE_ANON_KEY = 'sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm';
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const { data, error } = await sb
+        .from('packages')
+        .select('key, label, halaman_limit, pesan_limit')
+        .eq('active', true);
+
+      if (error || !Array.isArray(data) || data.length === 0) return false;
+
+      const override = {};
+      data.forEach(p => {
+        if (!p.key) return;
+        override[p.key.toLowerCase()] = {
+          halaman: Number(p.halaman_limit),
+          pesan: Number(p.pesan_limit),
+          label: p.label || undefined
+        };
+      });
+      localStorage.setItem(LIMITS_CACHE_KEY, JSON.stringify(override));
+      return true;
+    } catch (e) {
+      console.warn('syncPlanLimits gagal:', e);
+      return false;
+    }
+  }
+
   // --- Sync Plan dari Supabase (dipanggil saat halaman load) ---
   // Fungsi ini membaca kolom 'plan' dari tabel 'profiles' di Supabase
   // dan menyimpannya ke localStorage, sehingga perubahan yang dilakukan
@@ -236,6 +294,6 @@ const AkAccount = (function () {
     catatHalaman, catatPesan, getDokumenStats, getJoinDate,
     getDisplayName, setDisplayName, getAvatarUrl, setAvatarUrl,
     getFavoritIds, isFavorit, toggleFavorit,
-    syncPlanFromSupabase, getValidToken
+    syncPlanFromSupabase, syncPlanLimits, getValidToken
   };
 })();

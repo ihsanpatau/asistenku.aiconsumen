@@ -22,6 +22,7 @@
   async function doSync() {
     if (typeof AkAccount === 'undefined') return;
     await AkAccount.syncPlanFromSupabase();
+    if (AkAccount.syncPlanLimits) await AkAccount.syncPlanLimits();
 
     // Setelah sync, perbarui tampilan badge plan jika ada di halaman ini
     const badge = document.getElementById('planBadge');

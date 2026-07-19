@@ -523,6 +523,10 @@ renderProfile();
       }
     }
   } catch(e) { console.warn('Sync plan gagal:', e); }
+  // Sinkron batas kuota (jatah halaman/pesan per hari) dari pengaturan admin,
+  // supaya kalau admin ubah di Admin Panel, halaman profil langsung ikut berubah.
+  try { if (window.AkAccount && AkAccount.syncPlanLimits) await AkAccount.syncPlanLimits(); }
+  catch(e) { console.warn('Sync limit gagal:', e); }
   renderKuota(); // render SETELAH sync selesai
 })();
 

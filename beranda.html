@@ -417,6 +417,13 @@ renderKuotaBeranda();
     }
   } catch(e) { console.warn('Sync plan beranda gagal:', e); }
 })();
+// Sinkron batas kuota (jatah halaman/pesan per hari) dari pengaturan admin,
+// supaya kalau admin ubah di Admin Panel, dashboard ini langsung ikut berubah.
+(async function syncLimitsBeranda(){
+  if (typeof AkAccount === 'undefined' || !AkAccount.syncPlanLimits) return;
+  const berubah = await AkAccount.syncPlanLimits();
+  if (berubah) renderKuotaBeranda();
+})();
 </script>
 </body>
 </html>
