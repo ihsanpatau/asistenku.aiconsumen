@@ -417,13 +417,7 @@ document.addEventListener('DOMContentLoaded', muatHargaTerbaru);
     <div style="background:var(--blue-pale);border-radius:12px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--blue);">
       🎁 Bonus 7 hari akses PRO jika beli sekarang!
     </div>
-    <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:8px;">Pilih Metode Pembayaran:</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-      <button onclick="selectPay(this)" class="pay-method active" style="padding:10px;border:2px solid var(--blue-light);border-radius:10px;background:var(--blue-pale);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--blue);">QRIS</button>
-      <button onclick="selectPay(this)" class="pay-method" style="padding:10px;border:2px solid var(--gray-200);border-radius:10px;background:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--dark);">Transfer Bank</button>
-      <button onclick="selectPay(this)" class="pay-method" style="padding:10px;border:2px solid var(--gray-200);border-radius:10px;background:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--dark);">GoPay</button>
-      <button onclick="selectPay(this)" class="pay-method" style="padding:10px;border:2px solid var(--gray-200);border-radius:10px;background:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--dark);">DANA</button>
-    </div>
+    <div style="font-size:13px;color:var(--gray-500);margin-bottom:16px;">💳 Pilih metode pembayaran (QRIS, transfer bank, e-wallet, kartu, dll) di halaman berikutnya.</div>
     <button class="btn btn-primary" onclick="prosesPayment()">Bayar Sekarang →</button>
     <button onclick="document.getElementById('payModal').classList.remove('open')" style="width:100%;padding:12px;background:none;border:none;font-family:inherit;font-size:13px;color:var(--gray-500);cursor:pointer;margin-top:8px;">Batal</button>
   </div>
@@ -452,7 +446,6 @@ function beliPaket(name,harga){
   const bonusNote=document.querySelector('#payModal [style*="Bonus"]');
   if(voucherCode && bonusNote){ bonusNote.textContent = `🎟️ Voucher ${voucherCode} diterapkan: diskon ${voucherDiscount}%!`; }
 }
-function selectPay(btn){document.querySelectorAll('.pay-method').forEach(b=>{b.style.borderColor='var(--gray-200)';b.style.background='#fff';b.style.color='var(--dark)';});btn.style.borderColor='var(--blue-light)';btn.style.background='var(--blue-pale)';btn.style.color='var(--blue)';}
 
 async function prosesPayment(){
   const planKey = document.getElementById('payModal').dataset.planKey || 'standar';
