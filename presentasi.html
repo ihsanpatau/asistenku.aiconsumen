@@ -7,6 +7,10 @@
 <link rel="stylesheet" href="style.css">
 <script src="theme.js"></script>
 <script src="i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="shared-config.js"></script>
+<script src="account.js"></script>
+<script src="sync-plan.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
@@ -287,6 +291,14 @@ async function generateAll(){
     return;
   }
 
+  // --- GERBANG KUOTA: perkirakan halaman-setara dari jumlah slide (±3 slide = 1 halaman) ---
+  const estimasiSlide = parseInt(jumlah, 10) || 15;
+  if (typeof AkAccount !== 'undefined') {
+    const cek = AkAccount.cekKuotaHalaman(Math.max(1, Math.round(estimasiSlide / 3)));
+    if (!cek.ok) { showToast(cek.pesan); return; }
+    if (cek.partial) showToast(cek.pesan, 4000);
+  }
+
   const btn = document.getElementById('btnGeneratePPT');
   const btnLabel = document.getElementById('btnGeneratePPTLabel');
   btn.disabled = true;
@@ -415,6 +427,9 @@ BALAS HANYA JSON (tanpa teks lain):
     renderDesignPreview(currentDesign);
     renderSlides(slides);
     showToast('✓ Konten + desain unik berhasil dibuat!');
+    if (typeof AkAccount !== 'undefined') {
+      AkAccount.catatHalaman('ppt_'+Date.now(), Math.max(1, Math.round((slides.length||estimasiSlide) / 3)));
+    }
 
   }catch(e){
     showToast('Gagal: '+e.message);

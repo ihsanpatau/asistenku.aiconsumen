@@ -7,6 +7,10 @@
 <link rel="stylesheet" href="style.css">
 <script src="theme.js"></script>
 <script src="i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="shared-config.js"></script>
+<script src="account.js"></script>
+<script src="sync-plan.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 /* === TABS === */
@@ -394,6 +398,10 @@ const style=()=>document.querySelectorAll('.type-pills')[1]?.querySelector('.typ
 async function doParafrase(){
   const text=document.getElementById('inputText').value.trim();
   if(!text){showToast('Masukkan teks yang ingin diparafrase');return;}
+  if (typeof AkAccount !== 'undefined') {
+    const cek = AkAccount.cekKuotaHalaman();
+    if (!cek.ok) { showToast(cek.pesan); return; }
+  }
   showToast('Memparafrase teks...');
   try{
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:`Parafrasekan teks berikut dalam Bahasa Indonesia dengan tingkat perubahan ${level()} dan gaya bahasa ${style()}. Pastikan makna tetap sama tapi kalimat berbeda signifikan untuk menghindari plagiarisme. Langsung tulis hasil parafrase tanpa penjelasan:\n\n${text}`}]})});
@@ -407,6 +415,7 @@ async function doParafrase(){
     document.getElementById('resultArea').style.display='block';
     document.getElementById('resultArea').scrollIntoView({behavior:'smooth'});
     showToast('Parafrase selesai! ✓');
+    if (typeof AkAccount !== 'undefined') AkAccount.catatHalaman('parafrase_'+Date.now(), 0.5);
   }catch(e){showToast('Gagal. Coba lagi.');}
 }
 function copyResult(){navigator.clipboard.writeText(document.getElementById('resultText').innerText).then(()=>showToast('Disalin!'));}

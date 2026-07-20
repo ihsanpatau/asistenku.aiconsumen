@@ -7,6 +7,10 @@
 <link rel="stylesheet" href="style.css">
 <script src="theme.js"></script>
 <script src="i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="shared-config.js"></script>
+<script src="account.js"></script>
+<script src="sync-plan.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
@@ -113,6 +117,37 @@ async function extractFileTextMakalah(file){
   throw new Error('Format file tidak didukung.');
 }
 
+// Batasi pilihan Target Halaman sesuai maks paket aktif (LIVE dari admin)
+function capMakalahPills(){
+  if (typeof AkAccount === 'undefined') return;
+  const plan = AkAccount.getPlan();
+  const maks = plan.halaman >= 99999 ? 999 : plan.halaman;
+  const pills = document.querySelectorAll('#halamanMakalahPills .type-pill');
+  let lastEnabled = null;
+  pills.forEach(btn => {
+    const nilai = parseInt(btn.textContent, 10) || 0;
+    if (nilai > maks) {
+      btn.disabled = true;
+      btn.style.opacity = '0.4';
+      btn.style.cursor = 'not-allowed';
+      btn.title = `Perlu upgrade paket — maks. ${maks} halaman untuk paket ${plan.label}`;
+      btn.classList.remove('active');
+    } else {
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.style.cursor = '';
+      btn.title = '';
+      lastEnabled = btn;
+    }
+  });
+  // Kalau pill yang lagi aktif ternyata sekarang terkunci, pindahkan ke pill tertinggi yang masih diizinkan
+  if (!document.querySelector('#halamanMakalahPills .type-pill.active') && lastEnabled) {
+    lastEnabled.classList.add('active');
+  }
+}
+document.addEventListener('DOMContentLoaded', capMakalahPills);
+window.addEventListener('ak:synced', capMakalahPills);
+
 async function generate(){
   const judul=document.getElementById('judulMakalah').value.trim();
   if(!judul){showToast('Isi judul makalah terlebih dahulu');return;}
@@ -121,6 +156,14 @@ async function generate(){
   const halaman=document.querySelector('#halamanMakalahPills .type-pill.active')?.textContent||'10 hal';
   const catatan=document.getElementById('catatanMakalah').value.trim();
   const penulis=document.getElementById('namaPenulisMakalah').value.trim()||'Nama Mahasiswa';
+
+  // --- GERBANG KUOTA: pakai batas atas perkiraan dari pilihan halaman (mis. "25+ hal" -> 25) ---
+  if (typeof AkAccount !== 'undefined') {
+    const estimasiHalaman = parseInt(halaman, 10) || 10;
+    const cek = AkAccount.cekKuotaHalaman(estimasiHalaman);
+    if (!cek.ok) { showToast(cek.pesan); return; }
+    if (cek.partial) showToast(cek.pesan, 4000);
+  }
 
   const jumlahSubBab = halaman.includes('20') || halaman.includes('25') ? 4 : (halaman.includes('15') ? 3 : 2);
 

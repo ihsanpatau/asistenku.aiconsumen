@@ -11,6 +11,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script src="theme.js"></script>
 <script src="i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="shared-config.js"></script>
+<script src="account.js"></script>
+<script src="sync-plan.js"></script>
 <style>
 :root {
   --blue: #1A3DC2;
@@ -529,6 +533,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
           <!-- Diisi dinamis oleh JS sesuai paket aktif -->
         </select>
         <div id="halamanLockNote" style="display:none;font-size:11px;color:#B45309;margin-top:4px;"></div>
+        <div id="kuotaMasaAktifInfo" style="font-size:11px;color:var(--gray-500);margin-top:6px;"></div>
       </div>
     </div>
 
@@ -676,6 +681,7 @@ if (!localStorage.getItem('ak_token')) {
 
 // Init dropdown halaman sesuai paket saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => { initHalamanDropdown(); });
+window.addEventListener('ak:synced', () => { initHalamanDropdown(); });
 
 function showToast(msg, d=2500) {
   const t = document.getElementById('toast');
@@ -749,79 +755,89 @@ Jangan ada teks lain, hanya JSON.`
 }
 
 // =====================================================================
-// SISTEM PAKET — sesuai blueprint asistenku.pro
-// Gratis: 5 hal/hari | Standar: 10 | Pro: 35 | Lanjutan: 60
+// SISTEM PAKET — SEKARANG SINKRON PENUH DENGAN ADMIN PANEL
+// Limit halaman, kata/halaman, dan masa aktif dibaca langsung dari
+// AkAccount (account.js), yang sudah di-sync dari tabel 'packages' &
+// 'promo_settings' di Supabase oleh sync-plan.js saat halaman dimuat.
+// TIDAK ADA lagi angka yang di-hardcode di sini.
 // =====================================================================
-const PAKET_CONFIG = {
-  gratis:   { label: '⭐ Gratis',         maks: 5,  harga: 'Gratis',        color: '#6B7280', opsi: [
-    { v: 5,  t: '5 halaman (maks paket Gratis)' }
-  ]},
-  standar:  { label: '🔵 Standar',        maks: 10, harga: 'Rp 20.000/bln', color: '#2563EB', opsi: [
-    { v: 5,  t: '5 halaman' },
-    { v: 10, t: '10 halaman (maks paket Standar)' }
-  ]},
-  pro:      { label: '🟡 Pro',            maks: 35, harga: 'Rp 59.000/bln', color: '#D97706', opsi: [
-    { v: 5,  t: '5 halaman' },
-    { v: 10, t: '10 halaman' },
-    { v: 15, t: '15 halaman' },
-    { v: 20, t: '20 halaman' },
-    { v: 25, t: '25 halaman' },
-    { v: 35, t: '35 halaman (maks paket Pro)' }
-  ]},
-  lanjutan: { label: '🔴 Lanjutan',       maks: 60, harga: 'Rp 99.000/bln', color: '#DC2626', opsi: [
-    { v: 5,  t: '5 halaman' },
-    { v: 10, t: '10 halaman' },
-    { v: 15, t: '15 halaman' },
-    { v: 20, t: '20 halaman' },
-    { v: 25, t: '25 halaman' },
-    { v: 30, t: '30 halaman' },
-    { v: 35, t: '35 halaman' },
-    { v: 40, t: '40 halaman' },
-    { v: 50, t: '50 halaman' },
-    { v: 60, t: '60 halaman (maks paket Lanjutan)' }
-  ]}
-};
+const HALAMAN_TANGGA = [5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 75, 90, 100]; // pilihan bertingkat, dipotong sesuai maks paket
 const PLAN_LABEL = { gratis: 'Gratis', standar: 'Standar', pro: 'Pro', lanjutan: 'Lanjutan' };
-function getUserPlan(){ return localStorage.getItem('user_plan') || 'gratis'; }
+function getUserPlan(){ return (typeof AkAccount!=='undefined') ? AkAccount.getPlanKey() : (localStorage.getItem('user_plan') || 'gratis'); }
 
-// Isi dropdown Target Halaman sesuai paket aktif
+// Ambil konfigurasi paket AKTIF (sudah termasuk override admin & promo jika sedang berjalan)
+function getPaketAktif(){
+  if (typeof AkAccount === 'undefined') {
+    return { label: 'Gratis', maks: 5, isPromo: false };
+  }
+  const plan = AkAccount.getPlan();
+  const maks = plan.halaman >= 99999 ? 100 : plan.halaman; // dropdown dibatasi tampilan sampai 100 walau unlimited
+  return { label: plan.label, maks, isPromo: !!plan.isPromo, unlimited: plan.halaman >= 99999 };
+}
+
+// Isi dropdown Target Halaman sesuai paket aktif (LIVE dari admin)
 function initHalamanDropdown(){
-  const plan = getUserPlan();
-  const cfg = PAKET_CONFIG[plan] || PAKET_CONFIG.gratis;
+  const cfg = getPaketAktif();
   // Update badge info
-  document.getElementById('paketBadge').textContent = cfg.label;
-  document.getElementById('paketMaksHal').textContent = cfg.maks;
-  // Isi select
+  const badgeEl = document.getElementById('paketBadge');
+  const maksEl = document.getElementById('paketMaksHal');
+  if (badgeEl) badgeEl.textContent = cfg.label;
+  if (maksEl) maksEl.textContent = cfg.unlimited ? 'Unlimited' : cfg.maks;
+
+  // Bangun opsi bertingkat, dipotong sampai batas maks paket saat ini
+  const opsi = HALAMAN_TANGGA.filter(v => v <= cfg.maks);
+  if (opsi.length === 0 || opsi[opsi.length - 1] !== cfg.maks) opsi.push(cfg.maks);
+
   const sel = document.getElementById('targetHalaman');
   sel.innerHTML = '';
-  cfg.opsi.forEach((o, i) => {
+  opsi.forEach((v, i) => {
     const opt = document.createElement('option');
-    opt.value = o.v;
-    opt.textContent = o.t;
-    if (i === cfg.opsi.length - 1) opt.selected = true; // default ke maksimum paket
+    opt.value = v;
+    opt.textContent = (i === opsi.length - 1) ? `${v} halaman (maks paket ${cfg.label.replace(/^[^\w]+/,'').trim()})` : `${v} halaman`;
+    if (i === opsi.length - 1) opt.selected = true; // default ke maksimum paket
     sel.appendChild(opt);
   });
-  // Jika hanya 1 pilihan (gratis), informasikan
+
   const note = document.getElementById('halamanLockNote');
-  if (plan === 'gratis') {
+  const plan = getUserPlan();
+  if (cfg.isPromo) {
+    note.style.display = 'block';
+    note.style.color = '#16A34A';
+    note.innerHTML = `🎁 ${cfg.label} sedang aktif — nikmati kuota ekstra selama promo berlangsung!`;
+  } else if (plan === 'gratis') {
     note.style.display = 'block';
     note.style.color = '#B45309';
-    note.innerHTML = `ℹ️ Paket Gratis hanya 5 halaman. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade ke Standar</a> untuk lebih banyak halaman.`;
+    note.innerHTML = `ℹ️ Paket Gratis hanya ${cfg.maks} halaman/hari. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade</a> untuk lebih banyak halaman.`;
   } else {
     note.style.display = 'none';
   }
+
+  // Tampilkan sisa kuota hari ini + masa aktif, kalau ada tempatnya di halaman
+  renderKuotaDanMasaAktif();
+}
+
+function renderKuotaDanMasaAktif(){
+  if (typeof AkAccount === 'undefined') return;
+  const infoEl = document.getElementById('kuotaMasaAktifInfo');
+  if (!infoEl) return; // elemen opsional, aman kalau belum ada di HTML
+  const k = AkAccount.getKuota();
+  const masa = AkAccount.getMasaAktifInfo();
+  let teks = `Sisa kuota hari ini: <b>${Math.max(0, k.halamanLimit - k.halamanUsed)}${k.halamanLimit>=99999?'':' / '+k.halamanLimit}</b> halaman`;
+  if (masa.planKey !== 'gratis' && masa.expiryLabel !== '-') {
+    teks += masa.isExpired
+      ? ` · <span style="color:#DC2626;">Masa aktif sudah habis</span>`
+      : ` · Masa aktif s.d. <b>${masa.expiryLabel}</b> (${masa.daysLeft} hari lagi)`;
+  }
+  infoEl.innerHTML = teks;
 }
 
 function cekBatasHalaman(select){
   const val = parseInt(select.value, 10);
-  const plan = getUserPlan();
-  const cfg = PAKET_CONFIG[plan] || PAKET_CONFIG.gratis;
+  const cfg = getPaketAktif();
   const note = document.getElementById('halamanLockNote');
-  // Semua pilihan sudah dibatasi sesuai paket, tapi tetap validasi
-  if (val > cfg.maks) {
+  if (!cfg.unlimited && val > cfg.maks) {
     note.style.display = 'block';
     note.style.color = '#B45309';
-    // Cari paket minimum yang bisa
     let upgrade = 'Lanjutan';
     if (val <= 10) upgrade = 'Standar';
     else if (val <= 35) upgrade = 'Pro';
@@ -983,6 +999,18 @@ async function generateSkripsi() {
     return;
   }
 
+  // --- GERBANG KUOTA: cek batas halaman harian sebelum generate ---
+  if (typeof AkAccount !== 'undefined') {
+    const cekKuota = AkAccount.cekKuotaHalaman(parseInt(halaman, 10));
+    if (!cekKuota.ok) {
+      showToast(cekKuota.pesan);
+      return;
+    }
+    if (cekKuota.partial) {
+      showToast(cekKuota.pesan, 4000);
+    }
+  }
+
   // Tampilkan area hasil dengan loading
   const hasilArea = document.getElementById('hasilArea');
   hasilArea.classList.add('show');
@@ -1109,11 +1137,10 @@ Buat 12-15 entri referensi yang relevan dengan topik di atas (kombinasi buku, ju
       const jumlahTabel = tabelWajibBab4 ? 'minimal 2-3 tabel data pendukung (misalnya distribusi responden, statistik deskriptif, atau ringkasan hasil uji)' : 'minimal 1 tabel data pendukung yang relevan dengan isi bagian ini';
       tabelInstruksi = `\nWAJIB sertakan ${jumlahTabel}, menggunakan format PERSIS berikut (jangan pakai format tabel lain, jangan pakai markdown pipe biasa):\n[TABEL]\nJudul Tabel\nSumber: keterangan sumber data (misal "Data primer diolah oleh peneliti, ${new Date().getFullYear()}" jika data hasil olahan sendiri, atau "Badan Pusat Statistik (${new Date().getFullYear()})" / nama instansi-tahun jika mengutip data sekunder)\nKolom1 | Kolom2 | Kolom3\nBaris1 | Angka | Angka\nBaris2 | Angka | Angka\n[/TABEL]\nBaris "Sumber:" WAJIB selalu ada di setiap tabel, ini standar penulisan ilmiah — jangan sampai tabel tanpa keterangan sumber. Isi data dengan angka/perkiraan yang masuk akal dan konsisten dengan narasi (bukan data kosong), agar tabel benar-benar terisi DAN bisa otomatis digambarkan sebagai chart (kolom pertama = label kategori, kolom berikutnya = nilai numerik).\n`;
     }
-    const kataPerHalaman = 300;
+    const kataPerHalaman = (typeof AkAccount!=='undefined') ? AkAccount.getPlan().wordsPerPage : 300;
     const targetKata = parseInt(halaman, 10) * kataPerHalaman;
-    const plan = getUserPlan();
-    const cfg = PAKET_CONFIG[plan] || PAKET_CONFIG.gratis;
-    const isMaksimum = parseInt(halaman, 10) >= cfg.maks;
+    const cfg = getPaketAktif();
+    const isMaksimum = cfg.unlimited || parseInt(halaman, 10) >= cfg.maks;
 
     const info = babInfo[jenisDokumen];
     const daftarUtama = info.utama.map(p => `- ${p.nama}: ${p.catatan}`).join('\n');

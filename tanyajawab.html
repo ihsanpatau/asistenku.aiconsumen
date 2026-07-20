@@ -261,6 +261,10 @@ async function triggerRevisi(){
   if(!revisiFiles.length){showToast('Unggah minimal satu file/gambar revisi terlebih dahulu');return;}
   const instruction=document.getElementById('revisiInstruction').value.trim();
   if(!instruction){showToast('Tulis instruksi/catatan revisinya terlebih dahulu');return;}
+  if (typeof AkAccount !== 'undefined') {
+    const cek = AkAccount.cekKuotaPesan(1);
+    if (!cek.ok) { showToast(cek.pesan); return; }
+  }
 
   const genBtn=document.getElementById('revisiGenerateBtn');
   genBtn.disabled=true;
@@ -428,6 +432,10 @@ function removeBelajarFile(){
 }
 async function doBelajar(instruction, btn){
   if(!belajarFileText){showToast('Unggah file terlebih dahulu');return;}
+  if (typeof AkAccount !== 'undefined') {
+    const cek = AkAccount.cekKuotaPesan(1);
+    if (!cek.ok) { showToast(cek.pesan); return; }
+  }
   document.querySelectorAll('#genreGrid .genre-chip').forEach(c=>c.disabled=true);
   const genBtn=document.getElementById('belajarGenerateBtn');
   genBtn.disabled=true;

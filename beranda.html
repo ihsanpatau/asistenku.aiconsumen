@@ -379,7 +379,8 @@ function renderKuotaBeranda(){
     document.getElementById('pChat').style.width='100%';
   } else {
     const pesanPct=Math.min(100, Math.round((k.pesanUsed/k.pesanLimit)*100));
-    document.getElementById('qChat').textContent=`${k.pesanUsed} / ${k.pesanLimit} pesan`;
+    const resetTeks = k.pesanIntervalHari===1 ? 'reset harian' : `reset tiap ${k.pesanIntervalHari} hari`;
+    document.getElementById('qChat').textContent=`${k.pesanUsed} / ${k.pesanLimit} pesan (${resetTeks})`;
     document.getElementById('pChat').style.width=pesanPct+'%';
   }
 

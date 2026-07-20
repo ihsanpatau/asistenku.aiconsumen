@@ -239,6 +239,13 @@ async function sendMessage(){
 const inp=document.getElementById('chatInput');
 const msg=inp.value.trim();
 if(!msg)return;
+
+// --- GERBANG KUOTA PESAN ---
+if (typeof AkAccount !== 'undefined') {
+  const cek = AkAccount.cekKuotaPesan(1);
+  if (!cek.ok) { showToast(cek.pesan); return; }
+}
+
 inp.value='';inp.style.height='auto';
 document.getElementById('quickReplies').style.display='none';
 addMsg('user',msg.replace(/\n/g,'<br>'),msg);

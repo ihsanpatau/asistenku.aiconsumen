@@ -7,6 +7,10 @@
 <link rel="stylesheet" href="style.css">
 <script src="theme.js"></script>
 <script src="i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="shared-config.js"></script>
+<script src="account.js"></script>
+<script src="sync-plan.js"></script>
 <script src="riwayat-store.js"></script>
 <style>
 .input-action-row { display:flex; gap:8px; margin-top:8px; align-items:center; }
@@ -156,6 +160,13 @@ function promptLink(){
 async function kirimTugas(){
   const task=document.getElementById('taskInput').value.trim();
   if(!task){showToast('Tulis perintah terlebih dahulu');return;}
+
+  // --- GERBANG KUOTA: cek apakah kuota halaman harian sudah habis ---
+  if (typeof AkAccount !== 'undefined') {
+    const cek = AkAccount.cekKuotaHalaman();
+    if (!cek.ok) { showToast(cek.pesan); return; }
+  }
+
   showToast('Memproses tugas...');
   // Redirect to hasil
   localStorage.removeItem('task_result');
