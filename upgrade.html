@@ -356,6 +356,35 @@ function beliFlashPromo(label, harga, durasi) {
 document.addEventListener('DOMContentLoaded', muatFlashPromo);
 </script>
 
+    <!-- Promo Kilat Banner (muncul hanya jika diaktifkan admin) -->
+    <div id="flashPromoBanner" style="display:none;margin:0 16px 14px;">
+      <div style="background:linear-gradient(135deg,#FF6B00 0%,#FFB800 50%,#FF6B00 100%);border-radius:18px;padding:0;box-shadow:0 8px 24px rgba(255,107,0,.40);position:relative;overflow:hidden;">
+        <!-- Stripe pattern overlay -->
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,0.04) 0px,rgba(255,255,255,0.04) 10px,transparent 10px,transparent 20px);pointer-events:none;"></div>
+        <!-- Badge TERBATAS -->
+        <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.25);color:#fff;font-size:9px;font-weight:900;padding:3px 8px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;">TERBATAS</div>
+        <div style="padding:14px 14px 12px;display:flex;align-items:center;gap:10px;">
+          <!-- Icon kilat -->
+          <div style="width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">⚡</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:900;color:#fff;line-height:1.2;" id="flashPromoLabel">Promo Kilat!</div>
+            <div style="font-size:11.5px;color:rgba(255,255,255,0.92);margin-top:3px;line-height:1.4;" id="flashPromoDeskripsi">Akses unlimited 1 hari penuh!</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.75);margin-top:2px;" id="flashPromoDurasi"></div>
+          </div>
+          <div style="flex-shrink:0;text-align:center;">
+            <button id="flashPromoBtn" style="background:#fff;color:#D97706;border:none;border-radius:12px;padding:10px 12px;font-size:11px;font-weight:900;cursor:pointer;display:block;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,0.15);">
+              Rp<span id="flashPromoHarga">20.000</span><br><span style="font-size:9px;font-weight:600;color:#999;">Beli Sekarang</span>
+            </button>
+          </div>
+        </div>
+        <!-- Countdown bar -->
+        <div style="background:rgba(0,0,0,0.2);padding:6px 14px;display:flex;align-items:center;gap:6px;border-top:1px solid rgba(255,255,255,0.1);">
+          <span style="font-size:10px;color:rgba(255,255,255,0.7);">🕐</span>
+          <span style="font-size:10px;color:rgba(255,255,255,0.85);font-weight:600;" id="flashCountdown">Penawaran hari ini saja</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Comparison Table -->
     <div style="padding:0 16px;margin-bottom:16px;">
       <div style="font-size:15px;font-weight:800;color:var(--dark);margin-bottom:12px;">📊 Perbandingan Paket</div>
@@ -387,35 +416,6 @@ document.addEventListener('DOMContentLoaded', muatFlashPromo);
             </tr>
           </tbody>
         </table>
-      </div>
-    </div>
-
-    <!-- Promo Kilat Banner (muncul hanya jika diaktifkan admin) -->
-    <div id="flashPromoBanner" style="display:none;margin:0 16px 14px;">
-      <div style="background:linear-gradient(135deg,#FF6B00 0%,#FFB800 50%,#FF6B00 100%);border-radius:18px;padding:0;box-shadow:0 8px 24px rgba(255,107,0,.40);position:relative;overflow:hidden;">
-        <!-- Stripe pattern overlay -->
-        <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,0.04) 0px,rgba(255,255,255,0.04) 10px,transparent 10px,transparent 20px);pointer-events:none;"></div>
-        <!-- Badge TERBATAS -->
-        <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.25);color:#fff;font-size:9px;font-weight:900;padding:3px 8px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;">TERBATAS</div>
-        <div style="padding:14px 14px 12px;display:flex;align-items:center;gap:10px;">
-          <!-- Icon kilat -->
-          <div style="width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">⚡</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:14px;font-weight:900;color:#fff;line-height:1.2;" id="flashPromoLabel">Promo Kilat!</div>
-            <div style="font-size:11.5px;color:rgba(255,255,255,0.92);margin-top:3px;line-height:1.4;" id="flashPromoDeskripsi">Akses unlimited 1 hari penuh!</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.75);margin-top:2px;" id="flashPromoDurasi"></div>
-          </div>
-          <div style="flex-shrink:0;text-align:center;">
-            <button id="flashPromoBtn" style="background:#fff;color:#D97706;border:none;border-radius:12px;padding:10px 12px;font-size:11px;font-weight:900;cursor:pointer;display:block;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,0.15);">
-              Rp<span id="flashPromoHarga">20.000</span><br><span style="font-size:9px;font-weight:600;color:#999;">Beli Sekarang</span>
-            </button>
-          </div>
-        </div>
-        <!-- Countdown bar -->
-        <div style="background:rgba(0,0,0,0.2);padding:6px 14px;display:flex;align-items:center;gap:6px;border-top:1px solid rgba(255,255,255,0.1);">
-          <span style="font-size:10px;color:rgba(255,255,255,0.7);">🕐</span>
-          <span style="font-size:10px;color:rgba(255,255,255,0.85);font-weight:600;" id="flashCountdown">Penawaran hari ini saja</span>
-        </div>
       </div>
     </div>
 
