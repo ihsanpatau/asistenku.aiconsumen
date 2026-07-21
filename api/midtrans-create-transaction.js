@@ -91,7 +91,7 @@ module.exports = async (req, res) => {
       order_id: orderId,
       user_id,
       user_email,
-      package_key,
+      package_type: package_key,
       amount,
       status: "pending",
       ...(package_key === "flash" && flash_durasi
