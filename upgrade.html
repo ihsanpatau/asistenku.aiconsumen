@@ -557,8 +557,8 @@ async function prosesPayment(){
     // 2) Minta Snap Token ke server kita (backend yang hubungi Midtrans, bukan browser)
     const resp = await fetch('/api/midtrans-create-transaction', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify((() => { const b = { package_key: planKey, user_id: userId, user_email: userEmail, user_name: userName }; if (planKey === 'flash' && flashDurasi) b.flash_durasi = Number(flashDurasi); return b; })())
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (await AkAccount.getValidToken()) },
+      body: JSON.stringify((() => { const b = { package_key: planKey, user_name: userName }; if (planKey === 'flash' && flashDurasi) b.flash_durasi = Number(flashDurasi); return b; })())
     });
     const data = await resp.json();
 
