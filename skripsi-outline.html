@@ -161,7 +161,7 @@ async function regenerateOutline(){
   if(!data.judul){showToast('Data judul tidak ditemukan');return;}
   document.getElementById('outlineList').innerHTML='<div style="text-align:center;padding:30px;color:var(--gray-400);">⏳ Membuat outline dengan AI...</div>';
   try{
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:`Buatkan outline skripsi untuk judul: "${data.judul}", jenis: ${data.jenis||'Kuantitatif'}. Buat 5 BAB dengan masing-masing 4 sub-bab. Format JSON array: [{num:"BAB I", title:"...", subs:["...","...","...","..."]}]. Hanya JSON.`}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({messages:[{role:'user',content:`Buatkan outline skripsi untuk judul: "${data.judul}", jenis: ${data.jenis||'Kuantitatif'}. Buat 5 BAB dengan masing-masing 4 sub-bab. Format JSON array: [{num:"BAB I", title:"...", subs:["...","...","...","..."]}]. Hanya JSON.`}]})});
     const d2=await res.json();
     if(!res.ok) throw new Error(d2.error||'Gagal terhubung ke server');
     const txt=d2.text||'[]';

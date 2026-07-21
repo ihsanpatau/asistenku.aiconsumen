@@ -164,7 +164,7 @@ ABSTRACT_ENG:
 Keywords: [keywords separated by commas]`;
 
   try{
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:prompt}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     if(!res.ok){ throw new Error(data.error || `Server error (${res.status})`); }
     const result=(data.text||'').trim();

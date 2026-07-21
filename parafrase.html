@@ -404,7 +404,7 @@ async function doParafrase(){
   }
   showToast('Memparafrase teks...');
   try{
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:`Parafrasekan teks berikut dalam Bahasa Indonesia dengan tingkat perubahan ${level()} dan gaya bahasa ${style()}. Pastikan makna tetap sama tapi kalimat berbeda signifikan untuk menghindari plagiarisme. Langsung tulis hasil parafrase tanpa penjelasan:\n\n${text}`}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({messages:[{role:'user',content:`Parafrasekan teks berikut dalam Bahasa Indonesia dengan tingkat perubahan ${level()} dan gaya bahasa ${style()}. Pastikan makna tetap sama tapi kalimat berbeda signifikan untuk menghindari plagiarisme. Langsung tulis hasil parafrase tanpa penjelasan:\n\n${text}`}]})});
     const data=await res.json();
     if(!res.ok){throw new Error(data.error||'Gagal terhubung ke server');}
     const result=data.text||'';
@@ -469,7 +469,7 @@ async function doCekPlagiasi(mode){
 Jika tidak ada temuan berarti, kembalikan array temuan kosong. Risiko hanya: Tinggi / Sedang / Rendah.`;
 
   try{
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:`Analisis teks berikut:\n\n${text}`}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({system:system,messages:[{role:'user',content:`Analisis teks berikut:\n\n${text}`}]})});
     const data=await res.json().catch(()=>({}));
     btn.disabled=false;
     if(!res.ok){
@@ -553,7 +553,7 @@ async function doCekFile(){
 Berikan estimasi realistis untuk dokumen akademik. Temuan maksimal 5. Risiko: Tinggi/Sedang/Rendah.`;
 
   try{
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:`Judul dokumen: "${docTitle}"\nKonten/metadata: ${fileContent}`}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({system:system,messages:[{role:'user',content:`Judul dokumen: "${docTitle}"\nKonten/metadata: ${fileContent}`}]})});
     const data=await res.json().catch(()=>({}));
     btn.disabled=false;
     btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analisis File';

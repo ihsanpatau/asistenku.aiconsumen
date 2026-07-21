@@ -137,7 +137,7 @@ function updateProgress(i){
 }
 
 async function generateBab(babLabel, babDesc){
-  const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+  const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({
     system:'Kamu adalah asisten akademik profesional dari asistenku.pro. Tulis dalam Bahasa Indonesia formal dan akademis. JANGAN gunakan tanda pagar (#) atau format markdown.',
     messages:[{role:'user',content:`Tulis ${babDesc} untuk skripsi berjudul: "${data.judul||'Penelitian'}". Jenis penelitian: ${data.jenis||'Kuantitatif'}. Tulis lengkap dan substantif.`}]
   })});

@@ -299,7 +299,7 @@ async function triggerRevisi(){
 Jika tidak ada revisi yang bisa diidentifikasi, kembalikan poin sebagai array kosong dan jelaskan alasannya di ringkasan.`;
 
   try{
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:contentBlocks}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({system:system,messages:[{role:'user',content:contentBlocks}]})});
     const data=await res.json().catch(()=>({}));
     genBtn.disabled=false;
     if(!res.ok){
@@ -452,7 +452,7 @@ async function doBelajar(instruction, btn){
 
   const system=`Kamu adalah asisten belajar AI dari asistenku.pro. Pengguna mengunggah file bernama "${belajarFileName}" untuk dipelajari. Berikut isi filenya:\n\n${belajarFileText}\n\nGunakan isi file di atas sebagai satu-satunya sumber utama untuk menjawab permintaan pengguna, jawab dalam Bahasa Indonesia yang jelas dan mudah dipahami.`;
   try{
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:instruction}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({system:system,messages:[{role:'user',content:instruction}]})});
     const data=await res.json().catch(()=>({}));
     document.querySelectorAll('#genreGrid .genre-chip').forEach(c=>c.disabled=false);
     genBtn.disabled=false;

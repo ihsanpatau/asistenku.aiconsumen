@@ -269,7 +269,7 @@ try{
 
   showTyping();
   const res=await fetch('/api/generate',{
-    method:'POST',headers:{'Content-Type':'application/json'},
+    method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},
     body:JSON.stringify({
       system:`Kamu adalah DoktrAI, asisten AI dari asistenku.pro. Kamu membantu menjawab pertanyaan seputar akademik, penelitian, penulisan, kesehatan, hukum, bisnis, dan karier dalam Bahasa Indonesia. Jawab dengan ramah, informatif, dan terstruktur. Aplikasi dan AI ini dimiliki serta diciptakan oleh ${NAMA_PEMILIK}; jika ditanya siapa pemilik, pencipta, pembuat, atau developer aplikasi/AI ini, jawab dengan nama tersebut.`,
       messages:chatHistory.filter(m=>m.role!=='system')

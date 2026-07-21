@@ -716,7 +716,7 @@ async function getJudul() {
   try {
     const res = await fetch('/api/generate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+(await AkAccount.getValidToken()) },
       body: JSON.stringify({
         messages: [{
           role: 'user',
@@ -1179,7 +1179,7 @@ Tulis dalam Bahasa Indonesia formal dan akademis. Jangan gunakan format markdown
   try {
     const res = await fetch('/api/generate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+(await AkAccount.getValidToken()) },
       body: JSON.stringify({
         system: `Kamu adalah asisten akademik profesional dari asistenku.pro. Kamu membantu mahasiswa Indonesia menulis karya ilmiah berkualitas.
 

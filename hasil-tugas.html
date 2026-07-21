@@ -11,6 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script src="riwayat-store.js"></script>
 <script src="account.js"></script>
+<script src="sync-plan.js"></script>
 </head>
 <body>
 <div class="app">
@@ -548,7 +549,7 @@ async function generateContent(){
   const basePrompt = fullPromptOverride || `Kerjakan tugas berikut dalam Bahasa Indonesia. Tulis lengkap: seluruh isi/hasil tugasnya (bukan ringkasan), lalu di baris paling akhir tambahkan satu baris ringkasan diawali dengan tanda '---RINGKASAN---'. Tugas: "${p}". Mulai langsung dengan konten, tanpa preamble.`;
 
   async function callAI(promptText){
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:promptText}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({messages:[{role:'user',content:promptText}]})});
     const data=await res.json();
     if(!res.ok){ throw new Error(data.error || `Server error (${res.status})`); }
     const full=(data.text||'').trim();
@@ -557,7 +558,7 @@ async function generateContent(){
   }
 
   async function callAI(promptText){
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:promptText}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({messages:[{role:'user',content:promptText}]})});
     const data=await res.json();
     if(!res.ok){
       const e = new Error(data.error || `Server error (${res.status})`);

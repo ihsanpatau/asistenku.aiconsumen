@@ -399,10 +399,11 @@ BALAS HANYA JSON (tanpa teks lain):
     btnLabel.textContent = '⏳ Sedang diproses...';
 
     // Jalankan keduanya paralel
+    const authTok = 'Bearer '+(await AkAccount.getValidToken());
     const [resKonten, resDesain] = await Promise.all([
-      fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},
+      fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':authTok},
         body:JSON.stringify({messages:[{role:'user',content:promptKonten}]})}),
-      fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},
+      fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':authTok},
         body:JSON.stringify({messages:[{role:'user',content:promptDesain}]})})
     ]);
 
