@@ -17,18 +17,51 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { package_key, user_id, user_email, user_name, flash_durasi } =
-      req.body || {};
+    const { package_key, user_name, flash_durasi } = req.body || {};
 
-    if (!package_key || !user_id || !user_email) {
+    if (!package_key) {
+      return res.status(400).json({ error: "package_key wajib diisi" });
+    }
+
+    // --- Wajib login: identitas user_id & user_email TIDAK dipercaya dari
+    // body (bisa dipalsukan siapa saja), tapi diambil dari token login yang
+    // sudah diverifikasi ke Supabase. Ini mencegah orang membuat transaksi
+    // atas nama akun orang lain. ---
+    const authHeader = req.headers.authorization || "";
+    const bodyToken = authHeader.startsWith("Bearer ")
+      ? authHeader.slice(7)
+      : null;
+    if (!bodyToken) {
       return res
-        .status(400)
-        .json({ error: "package_key, user_id, dan user_email wajib diisi" });
+        .status(401)
+        .json({ error: "Wajib login untuk membeli paket." });
     }
 
     const serverKey = process.env.MIDTRANS_SERVER_KEY;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const isProduction = process.env.MIDTRANS_ENV === "production";
+
+    if (!serviceRoleKey) {
+      return res.status(500).json({
+        error:
+          "SUPABASE_SERVICE_ROLE_KEY belum diset di Environment Variables Vercel",
+      });
+    }
+    const sbAdmin = createClient(SUPABASE_URL, serviceRoleKey);
+
+    const { data: authData, error: authErr } = await sbAdmin.auth.getUser(
+      bodyToken
+    );
+    if (authErr || !authData || !authData.user) {
+      return res
+        .status(401)
+        .json({
+          error:
+            "Sesi login tidak valid atau sudah kedaluwarsa. Silakan login ulang.",
+        });
+    }
+    const user_id = authData.user.id;
+    const user_email = authData.user.email;
 
     if (!serverKey) {
       return res.status(500).json({
@@ -36,14 +69,6 @@ module.exports = async (req, res) => {
           "MIDTRANS_SERVER_KEY belum diset di Environment Variables Vercel",
       });
     }
-    if (!serviceRoleKey) {
-      return res.status(500).json({
-        error:
-          "SUPABASE_SERVICE_ROLE_KEY belum diset di Environment Variables Vercel",
-      });
-    }
-
-    const sbAdmin = createClient(SUPABASE_URL, serviceRoleKey);
 
     // 1) Ambil harga ASLI paket dari database (JANGAN PERNAH percaya harga dari browser,
     // supaya orang tidak bisa mengubah harga lewat DevTools/console).
