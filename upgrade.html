@@ -298,46 +298,53 @@ async function muatHargaTerbaru() {
 }
 document.addEventListener('DOMContentLoaded', muatHargaTerbaru);
 
-// ===== PROMO KILAT BANNER =====
+// ===== PROMO KILAT BANNER — langsung fetch Supabase, tidak bergantung account.js =====
 async function muatFlashPromo() {
-  // Sync dulu dari Supabase kalau account.js tersedia
-  if (typeof AkAccount !== 'undefined' && AkAccount.syncFlashPromo) {
-    await AkAccount.syncFlashPromo();
-  }
-  const fp = (typeof AkAccount !== 'undefined' && AkAccount.getActiveFlashPromo)
-    ? AkAccount.getActiveFlashPromo()
-    : null;
-
   const banner = document.getElementById('flashPromoBanner');
   if (!banner) return;
+  try {
+    if (typeof window.supabase === 'undefined') return;
+    const sbFlash = window.supabase.createClient(
+      'https://dkpztybbcvvzatgwhano.supabase.co',
+      'sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm'
+    );
+    const { data: fp, error } = await sbFlash.from('flash_promo_settings').select('*').eq('id', 1).maybeSingle();
+    if (error || !fp || !fp.active) { banner.style.display = 'none'; return; }
 
-  if (!fp || !fp.active) {
-    banner.style.display = 'none';
-    return;
-  }
+    const label   = fp.label    || 'Promo Kilat!';
+    const deskripsi = fp.deskripsi || 'Akses unlimited dengan harga spesial.';
+    const harga   = Number(fp.harga    || 20000);
+    const durasi  = Number(fp.durasi_hari || 1);
 
-  // Isi konten banner
-  const label = fp.label || 'Promo Kilat!';
-  const deskripsi = fp.deskripsi || 'Akses unlimited dengan harga spesial.';
-  const harga = Number(fp.harga || 20000);
-  const durasi = Number(fp.durasi_hari || 1);
-
-  document.getElementById('flashPromoLabel').textContent = label;
-  document.getElementById('flashPromoDeskripsi').textContent = deskripsi;
-  document.getElementById('flashPromoDurasi').textContent =
-    durasi === 1 ? '🕐 Akses selama 1 hari penuh' : `🕐 Akses selama ${durasi} hari`;
-  document.getElementById('flashPromoHarga').textContent = harga.toLocaleString('id-ID');
-
-  // Set onclick tombol dengan harga & durasi flash promo
-  document.getElementById('flashPromoBtn').setAttribute(
-    'onclick', `beliFlashPromo('${label}','${harga}','${durasi}')`
-  );
-
-  banner.style.display = 'block';
+    document.getElementById('flashPromoLabel').textContent = label;
+    document.getElementById('flashPromoDeskripsi').textContent = deskripsi;
+    document.getElementById('flashPromoDurasi').textContent =
+      durasi === 1 ? '⏱️ Akses 1 hari penuh' : `⏱️ Akses ${durasi} hari`;
+    document.getElementById('flashPromoHarga').textContent = harga.toLocaleString('id-ID');
+    document.getElementById('flashPromoBtn').setAttribute(
+      'onclick', `beliFlashPromo('${label.replace(/'/g,"\\'")}','${harga}','${durasi}')`
+    );
+    // Animasi countdown sederhana jika 1 hari
+    const countdownEl = document.getElementById('flashCountdown');
+    if (countdownEl && durasi === 1) {
+      const now = new Date();
+      const midnight = new Date(); midnight.setHours(24,0,0,0);
+      function updateCountdown() {
+        const diff = midnight - new Date();
+        if (diff <= 0) { countdownEl.textContent = 'Expired'; return; }
+        const h = String(Math.floor(diff/3600000)).padStart(2,'0');
+        const m = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+        const s = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+        countdownEl.textContent = `Berakhir dalam ${h}:${m}:${s}`;
+      }
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    }
+    banner.style.display = 'block';
+  } catch(e) { console.warn('muatFlashPromo gagal:', e); }
 }
 
 function beliFlashPromo(label, harga, durasi) {
-  // Pakai modal beliPaket dengan key khusus 'flash'
   const finalHarga = voucherDiscount ? Math.round(parseInt(harga) * (1 - voucherDiscount/100)) : parseInt(harga);
   document.getElementById('payPaket').textContent = label;
   document.getElementById('payHarga').textContent = 'Rp' + finalHarga.toLocaleString('id-ID');
@@ -384,18 +391,31 @@ document.addEventListener('DOMContentLoaded', muatFlashPromo);
     </div>
 
     <!-- Promo Kilat Banner (muncul hanya jika diaktifkan admin) -->
-    <div id="flashPromoBanner" style="display:none;margin:0 16px 12px;">
-      <div style="background:linear-gradient(120deg,#F59E0B 0%,#EF4444 100%);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 20px rgba(245,158,11,.35);position:relative;overflow:hidden;">
-        <div style="position:absolute;top:-10px;right:-10px;font-size:60px;opacity:0.15;pointer-events:none;">⚡</div>
-        <div style="font-size:28px;flex-shrink:0;">⚡</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.5px;" id="flashPromoLabel">Promo Kilat!</div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.9);margin-top:3px;line-height:1.4;" id="flashPromoDeskripsi">Akses unlimited hari ini dengan harga spesial.</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;" id="flashPromoDurasi"></div>
+    <div id="flashPromoBanner" style="display:none;margin:0 16px 14px;">
+      <div style="background:linear-gradient(135deg,#FF6B00 0%,#FFB800 50%,#FF6B00 100%);border-radius:18px;padding:0;box-shadow:0 8px 24px rgba(255,107,0,.40);position:relative;overflow:hidden;">
+        <!-- Stripe pattern overlay -->
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,0.04) 0px,rgba(255,255,255,0.04) 10px,transparent 10px,transparent 20px);pointer-events:none;"></div>
+        <!-- Badge TERBATAS -->
+        <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.25);color:#fff;font-size:9px;font-weight:900;padding:3px 8px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;">TERBATAS</div>
+        <div style="padding:14px 14px 12px;display:flex;align-items:center;gap:10px;">
+          <!-- Icon kilat -->
+          <div style="width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">⚡</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:900;color:#fff;line-height:1.2;" id="flashPromoLabel">Promo Kilat!</div>
+            <div style="font-size:11.5px;color:rgba(255,255,255,0.92);margin-top:3px;line-height:1.4;" id="flashPromoDeskripsi">Akses unlimited 1 hari penuh!</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.75);margin-top:2px;" id="flashPromoDurasi"></div>
+          </div>
+          <div style="flex-shrink:0;text-align:center;">
+            <button id="flashPromoBtn" style="background:#fff;color:#D97706;border:none;border-radius:12px;padding:10px 12px;font-size:11px;font-weight:900;cursor:pointer;display:block;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,0.15);">
+              Rp<span id="flashPromoHarga">20.000</span><br><span style="font-size:9px;font-weight:600;color:#999;">Beli Sekarang</span>
+            </button>
+          </div>
         </div>
-        <button id="flashPromoBtn" onclick="beliPaket('Flash','20000')" style="background:#fff;color:#D97706;border:none;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer;flex-shrink:0;">
-          Rp<span id="flashPromoHarga">20.000</span> →
-        </button>
+        <!-- Countdown bar -->
+        <div style="background:rgba(0,0,0,0.2);padding:6px 14px;display:flex;align-items:center;gap:6px;border-top:1px solid rgba(255,255,255,0.1);">
+          <span style="font-size:10px;color:rgba(255,255,255,0.7);">🕐</span>
+          <span style="font-size:10px;color:rgba(255,255,255,0.85);font-weight:600;" id="flashCountdown">Penawaran hari ini saja</span>
+        </div>
       </div>
     </div>
 
