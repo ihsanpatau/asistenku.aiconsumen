@@ -98,7 +98,7 @@ module.exports = async (req, res) => {
     if (finalStatus === "success") {
       let durasiHari = DEFAULT_DURASI_HARI;
 
-      if (trx.package_key === "flash") {
+      if (trx.package_type === "flash") {
         // Promo Kilat: durasi dari kolom flash_durasi_hari di transactions,
         // atau fallback dari flash_promo_settings
         if (trx.flash_durasi_hari && Number(trx.flash_durasi_hari) > 0) {
@@ -118,7 +118,7 @@ module.exports = async (req, res) => {
         const { data: pkg } = await sbAdmin
           .from("packages")
           .select("durasi_hari")
-          .eq("key", trx.package_key)
+          .eq("key", trx.package_type)
           .maybeSingle();
         if (pkg && Number(pkg.durasi_hari) > 0) {
           durasiHari = Number(pkg.durasi_hari);
@@ -132,14 +132,14 @@ module.exports = async (req, res) => {
       // dan sementara limit mengikuti flash_promo_settings (dibaca client-side via account.js).
       // Untuk paket biasa, update plan + plan_expiry.
       let profileUpdate;
-      if (trx.package_key === "flash") {
+      if (trx.package_type === "flash") {
         profileUpdate = {
           flash_plan_expiry: expiry.toISOString(),
           updated_at: new Date().toISOString(),
         };
       } else {
         profileUpdate = {
-          plan: trx.package_key,
+          plan: trx.package_type,
           plan_expiry: expiry.toISOString(),
           updated_at: new Date().toISOString(),
         };
@@ -154,7 +154,7 @@ module.exports = async (req, res) => {
         console.error("Gagal update plan user:", profileError.message);
       } else {
         console.log(
-          `Paket ${trx.package_key} diaktifkan untuk user ${ trx.user_id }, durasi ${durasiHari} hari, expiry ${expiry.toISOString()}`
+          `Paket ${trx.package_type} diaktifkan untuk user ${ trx.user_id }, durasi ${durasiHari} hari, expiry ${expiry.toISOString()}`
         );
       }
     }
