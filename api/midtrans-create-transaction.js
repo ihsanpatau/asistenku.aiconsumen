@@ -136,7 +136,7 @@ module.exports = async (req, res) => {
       ? "https://app.midtrans.com"
       : "https://app.sandbox.midtrans.com";
 
-    const authHeader =
+    const midtransAuthHeader =
       "Basic " + Buffer.from(serverKey + ":").toString("base64");
 
     const nameParts = (user_name || "Pengguna AsistenKu").trim().split(" ");
@@ -146,7 +146,7 @@ module.exports = async (req, res) => {
     const midtransRes = await fetch(baseUrl + "/snap/v1/transactions", {
       method: "POST",
       headers: {
-        Authorization: authHeader,
+        Authorization: midtransAuthHeader,
         "Content-Type": "application/json",
         Accept: "application/json",
       },
