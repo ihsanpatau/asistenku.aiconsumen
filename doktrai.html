@@ -12,6 +12,7 @@
 <script src="riwayat-store.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
+<script src="quota-popup.js"></script>
 <style>
 .doktrai-intro {
 background: linear-gradient(135deg, #F5F3FF, #DDD6FE);
@@ -246,7 +247,7 @@ if(!msg)return;
 // --- GERBANG KUOTA PESAN ---
 if (typeof AkAccount !== 'undefined') {
   const cek = AkAccount.cekKuotaPesan(1);
-  if (!cek.ok) { showToast(cek.pesan); return; }
+  if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
 }
 
 inp.value='';inp.style.height='auto';

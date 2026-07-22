@@ -11,6 +11,7 @@
 <script src="shared-config.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
+<script src="quota-popup.js"></script>
 <script src="riwayat-store.js"></script>
 <style>
 .input-action-row { display:flex; gap:8px; margin-top:8px; align-items:center; }
@@ -164,7 +165,7 @@ async function kirimTugas(){
   // --- GERBANG KUOTA: cek apakah kuota halaman harian sudah habis ---
   if (typeof AkAccount !== 'undefined') {
     const cek = AkAccount.cekKuotaHalaman();
-    if (!cek.ok) { showToast(cek.pesan); return; }
+    if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
   }
 
   showToast('Memproses tugas...');

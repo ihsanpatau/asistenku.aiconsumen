@@ -13,6 +13,7 @@
 <script src="shared-config.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
+<script src="quota-popup.js"></script>
 <style>
 :root{--blue:#1A3DC2;--blue-light:#3B5BFF;--blue-pale:#EEF2FF;--dark:#111827;}
 .app{display:flex;flex-direction:column;height:100vh;}
@@ -266,7 +267,7 @@ async function triggerRevisi(){
   if(!instruction){showToast('Tulis instruksi/catatan revisinya terlebih dahulu');return;}
   if (typeof AkAccount !== 'undefined') {
     const cek = AkAccount.cekKuotaPesan(1);
-    if (!cek.ok) { showToast(cek.pesan); return; }
+    if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
   }
 
   const genBtn=document.getElementById('revisiGenerateBtn');
@@ -437,7 +438,7 @@ async function doBelajar(instruction, btn){
   if(!belajarFileText){showToast('Unggah file terlebih dahulu');return;}
   if (typeof AkAccount !== 'undefined') {
     const cek = AkAccount.cekKuotaPesan(1);
-    if (!cek.ok) { showToast(cek.pesan); return; }
+    if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
   }
   document.querySelectorAll('#genreGrid .genre-chip').forEach(c=>c.disabled=true);
   const genBtn=document.getElementById('belajarGenerateBtn');

@@ -11,6 +11,7 @@
 <script src="shared-config.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
+<script src="quota-popup.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
@@ -200,7 +201,7 @@ async function generate(){
   // --- GERBANG KUOTA: jurnal standar diperkirakan ±12 halaman ---
   if (typeof AkAccount !== 'undefined') {
     const cek = AkAccount.cekKuotaHalaman(12);
-    if (!cek.ok) { showToast(cek.pesan); return; }
+    if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
     if (cek.partial) showToast(cek.pesan, 4000);
   }
 

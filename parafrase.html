@@ -11,6 +11,7 @@
 <script src="shared-config.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
+<script src="quota-popup.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 /* === TABS === */
@@ -400,7 +401,7 @@ async function doParafrase(){
   if(!text){showToast('Masukkan teks yang ingin diparafrase');return;}
   if (typeof AkAccount !== 'undefined') {
     const cek = AkAccount.cekKuotaHalaman();
-    if (!cek.ok) { showToast(cek.pesan); return; }
+    if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
   }
   showToast('Memparafrase teks...');
   try{

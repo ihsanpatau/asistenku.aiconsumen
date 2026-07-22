@@ -11,6 +11,7 @@
 <script src="shared-config.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
+<script src="quota-popup.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
@@ -161,7 +162,7 @@ async function generate(){
   if (typeof AkAccount !== 'undefined') {
     const estimasiHalaman = parseInt(halaman, 10) || 10;
     const cek = AkAccount.cekKuotaHalaman(estimasiHalaman);
-    if (!cek.ok) { showToast(cek.pesan); return; }
+    if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
     if (cek.partial) showToast(cek.pesan, 4000);
   }
 

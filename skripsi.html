@@ -15,6 +15,7 @@
 <script src="shared-config.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
+<script src="quota-popup.js"></script>
 <style>
 :root {
   --blue: #1A3DC2;
@@ -1003,7 +1004,7 @@ async function generateSkripsi() {
   if (typeof AkAccount !== 'undefined') {
     const cekKuota = AkAccount.cekKuotaHalaman(parseInt(halaman, 10));
     if (!cekKuota.ok) {
-      showToast(cekKuota.pesan);
+      AkQuotaPopup.show(cekKuota.pesan);
       return;
     }
     if (cekKuota.partial) {
