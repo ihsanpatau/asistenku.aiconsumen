@@ -619,28 +619,16 @@ function highlightCurrentPlan(){
 // bukan cache lama di HP pengguna.
 highlightCurrentPlan();
 (async function syncActivePlanUpgrade(){
+  // PENTING: pakai AkAccount.syncPlanFromSupabase() (lewat /api/sync-plan) yang
+  // MENEGAKKAN masa aktif (turunkan ke 'gratis' kalau sudah lewat expiry).
+  // Sebelumnya di sini query langsung ke tabel 'profiles' pakai anon key, yang
+  // cuma menyalin plan/plan_expiry APA ADANYA tanpa cek expiry — jadi kartu
+  // "Paket Aktif" bisa tetap menandai paket berbayar walau masa aktifnya
+  // sudah habis.
   try {
-    if (typeof window.supabase === 'undefined' || typeof AkAccount === 'undefined') return;
-    const token = await AkAccount.getValidToken();
-    if (!token) return;
-    let userId = null;
-    try {
-      const payload = JSON.parse(decodeURIComponent(escape(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));
-      userId = payload.sub;
-    } catch(e) { return; }
-    if (!userId) return;
-    const _sbUpg = window.supabase.createClient(
-      'https://dkpztybbcvvzatgwhano.supabase.co',
-      'sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm',
-      { global: { headers: { Authorization: 'Bearer ' + token } } }
-    );
-    const { data, error } = await _sbUpg.from('profiles').select('plan, plan_expiry').eq('id', userId).single();
-    if (error) { console.warn('Sync paket upgrade.html gagal:', error.message || error); return; }
-    if (data) {
-      localStorage.setItem('user_plan', (data.plan || 'gratis').toLowerCase());
-      if (data.plan_expiry) localStorage.setItem('user_plan_expiry', data.plan_expiry);
-      highlightCurrentPlan(); // render ulang dengan paket terbaru dari admin
-    }
+    if (typeof AkAccount === 'undefined') return;
+    await AkAccount.syncPlanFromSupabase();
+    highlightCurrentPlan(); // render ulang dengan paket terbaru (sudah ditegakkan)
   } catch(e) { console.warn('Sync paket upgrade.html gagal:', e); }
 })();
 document.getElementById('payModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});

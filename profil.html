@@ -506,32 +506,16 @@ renderProfile();
 // Sync plan dari Supabase dulu, baru render kuota
 // Ini memastikan paket yang tampil selalu sesuai dengan yang diset admin
 (async function() {
+  // PENTING: pakai AkAccount.syncPlanFromSupabase() (lewat /api/sync-plan),
+  // BUKAN query langsung ke tabel 'profiles' pakai anon key. Endpoint itu
+  // yang menegakkan masa aktif — kalau plan sudah lewat expiry, di situ
+  // langsung diturunkan ke 'gratis' (di server DAN di localStorage).
+  // Sebelumnya di sini ada query langsung ke Supabase yang cuma menyalin
+  // apa adanya kolom plan/plan_expiry TANPA cek expiry, sehingga bisa
+  // menimpa hasil penurunan otomatis ke 'gratis' dengan data lama yang
+  // masih 'lanjutan/pro' walau masa aktifnya sudah habis.
   try {
-    // PENTING: pakai getValidToken() (auto-refresh) bukan token mentah dari
-    // localStorage, supaya kalau sesi login sudah lama (token kedaluwarsa),
-    // query ke Supabase tetap berhasil dan tidak diam-diam gagal lalu
-    // menampilkan paket lama yang ter-cache.
-    const token = (typeof AkAccount !== 'undefined') ? await AkAccount.getValidToken() : localStorage.getItem('ak_token');
-    if (token) {
-      let userId = null;
-      try {
-        const payload = JSON.parse(decodeURIComponent(escape(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));
-        userId = payload.sub;
-      } catch(e) {}
-
-      if (userId) {
-        const _sbProfil = window.supabase.createClient(SB_URL, SB_KEY, {
-          global: { headers: { Authorization: 'Bearer ' + token } }
-        });
-        const { data, error } = await _sbProfil.from('profiles').select('plan, plan_expiry').eq('id', userId).single();
-        if (error) console.warn('Sync plan gagal:', error.message || error);
-        if (!error && data) {
-          const planBaru = (data.plan || 'gratis').toLowerCase();
-          localStorage.setItem('user_plan', planBaru);
-          if (data.plan_expiry) localStorage.setItem('user_plan_expiry', data.plan_expiry);
-        }
-      }
-    }
+    if (typeof AkAccount !== 'undefined') await AkAccount.syncPlanFromSupabase();
   } catch(e) { console.warn('Sync plan gagal:', e); }
   // Sinkron batas kuota (jatah halaman/pesan per hari) dari pengaturan admin,
   // supaya kalau admin ubah di Admin Panel, halaman profil langsung ikut berubah.

@@ -396,28 +396,15 @@ function renderKuotaBeranda(){
 // Render awal dari localStorage (cepat), lalu sync dari Supabase dan render ulang
 renderKuotaBeranda();
 (async function syncPlanBeranda(){
+  // PENTING: pakai AkAccount.syncPlanFromSupabase() (lewat /api/sync-plan) yang
+  // MENEGAKKAN masa aktif (turunkan ke 'gratis' kalau sudah lewat expiry).
+  // Sebelumnya di sini query langsung ke tabel 'profiles' pakai anon key, yang
+  // cuma menyalin plan/plan_expiry APA ADANYA tanpa cek expiry — jadi badge
+  // paket bisa tetap tampil 'lanjutan/pro' walau masa aktifnya sudah habis.
   try {
-    if (typeof window.supabase === 'undefined' || typeof AkAccount === 'undefined') return;
-    const token = await AkAccount.getValidToken();
-    if (!token) return;
-    let userId = null;
-    try {
-      const payload = JSON.parse(decodeURIComponent(escape(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));
-      userId = payload.sub;
-    } catch(e) { return; }
-    if (!userId) return;
-    const _sb2 = window.supabase.createClient(
-      'https://dkpztybbcvvzatgwhano.supabase.co',
-      'sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm',
-      { global: { headers: { Authorization: 'Bearer ' + token } } }
-    );
-    const { data, error } = await _sb2.from('profiles').select('plan, plan_expiry').eq('id', userId).single();
-    if (error) console.warn('Sync plan beranda gagal:', error.message || error);
-    if (!error && data) {
-      localStorage.setItem('user_plan', (data.plan || 'gratis').toLowerCase());
-      if (data.plan_expiry) localStorage.setItem('user_plan_expiry', data.plan_expiry);
-      renderKuotaBeranda(); // render ulang dengan data terbaru
-    }
+    if (typeof AkAccount === 'undefined') return;
+    await AkAccount.syncPlanFromSupabase();
+    renderKuotaBeranda(); // render ulang dengan data terbaru (sudah ditegakkan)
   } catch(e) { console.warn('Sync plan beranda gagal:', e); }
 })();
 // Sinkron batas kuota (jatah halaman/pesan per hari) dari pengaturan admin,
