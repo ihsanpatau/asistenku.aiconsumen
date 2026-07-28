@@ -95,6 +95,17 @@
       </div>
 
       <div class="form-group" style="margin-top:4px;">
+        <label class="form-label">Target Panjang Jurnal</label>
+        <div class="type-pills" id="pillsHalamanJurnal">
+          <button class="type-pill" onclick="selectPillHalamanJurnal(this)">5 hal</button>
+          <button class="type-pill" onclick="selectPillHalamanJurnal(this)">8 hal</button>
+          <button class="type-pill active" onclick="selectPillHalamanJurnal(this)">10 hal</button>
+          <button class="type-pill" onclick="selectPillHalamanJurnal(this)">15 hal</button>
+          <button class="type-pill" onclick="selectPillHalamanJurnal(this)">20 hal</button>
+        </div>
+        <div id="halamanJurnalLockNote" style="display:none;font-size:11px;color:#B45309;margin-top:4px;"></div>
+      </div>
+      <div class="form-group" style="margin-top:4px;">
         <label class="form-label">Format Hasil Akhir</label>
         <div class="type-pills" id="formatJurnalPills">
           <button class="type-pill active" onclick="pilihFormatJurnal(this,'word')" data-format="word">📄 Word</button>
@@ -125,6 +136,51 @@ if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudf
 
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function selectPill(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active');}
+function selectPillHalamanJurnal(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active');}
+
+// Batasi pilihan Target Halaman Jurnal sesuai jatah halaman/hari paket aktif (LIVE dari admin),
+// sama seperti fitur Skripsi & Makalah.
+function capHalamanJurnalPills(){
+  if (typeof AkAccount === 'undefined') return;
+  const plan = AkAccount.getPlan();
+  const maks = plan.halaman >= 99999 ? 999 : plan.halaman;
+  const pills = document.querySelectorAll('#pillsHalamanJurnal .type-pill');
+  let lastEnabled = null;
+  pills.forEach(btn => {
+    const nilai = parseInt(btn.textContent, 10) || 0;
+    if (nilai > maks) {
+      btn.disabled = true;
+      btn.style.opacity = '0.4';
+      btn.style.cursor = 'not-allowed';
+      btn.title = `Perlu upgrade paket — maks. ${maks} halaman untuk paket ${plan.label}`;
+      btn.classList.remove('active');
+    } else {
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.style.cursor = '';
+      btn.title = '';
+      lastEnabled = btn;
+    }
+  });
+  if (!document.querySelector('#pillsHalamanJurnal .type-pill.active') && lastEnabled) {
+    lastEnabled.classList.add('active');
+  }
+  const note = document.getElementById('halamanJurnalLockNote');
+  if (note) {
+    if (plan.halaman < 99999 && maks < 20) {
+      note.style.display = 'block';
+      note.innerHTML = `ℹ️ Paket ${plan.label} maks. ${maks} halaman/hari. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade</a> untuk target jurnal lebih panjang.`;
+    } else {
+      note.style.display = 'none';
+    }
+  }
+}
+document.addEventListener('DOMContentLoaded', capHalamanJurnalPills);
+window.addEventListener('ak:synced', capHalamanJurnalPills);
+function getHalamanJurnalTerpilih(){
+  const el = document.querySelector('#pillsHalamanJurnal .type-pill.active');
+  return parseInt(el ? el.textContent : '10', 10) || 10;
+}
 let formatJurnalTerpilih='word';
 function pilihFormatJurnal(btn,format){
   document.querySelectorAll('#formatJurnalPills .type-pill').forEach(p=>p.classList.remove('active'));
@@ -198,12 +254,17 @@ async function generate(){
   const btn=document.getElementById('btnGenerate');
   const btnLabel=document.getElementById('btnGenerateLabel');
 
-  // --- GERBANG KUOTA: jurnal standar diperkirakan ±12 halaman ---
+  // --- GERBANG KUOTA: pakai target halaman yang dipilih user (bukan angka tetap lagi) ---
+  const halamanJurnal = getHalamanJurnalTerpilih();
   if (typeof AkAccount !== 'undefined') {
-    const cek = AkAccount.cekKuotaHalaman(12);
+    const cek = AkAccount.cekKuotaHalaman(halamanJurnal);
     if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
     if (cek.partial) showToast(cek.pesan, 4000);
   }
+  // Target kata mengikuti "Kata per Halaman" yang diatur admin (sama seperti Skripsi & Makalah)
+  const kataPerHalamanJurnal = (typeof AkAccount!=='undefined') ? AkAccount.getPlan().wordsPerPage : 300;
+  const targetKataJurnal = halamanJurnal * kataPerHalamanJurnal;
+  const TARGET_PANJANG_JURNAL_TEXT = `\nTARGET PANJANG TOTAL: ±${targetKataJurnal.toLocaleString('id-ID')} kata (±${halamanJurnal} halaman, spasi 1.5 TNR 12pt), sudah termasuk Daftar Pustaka. Kembangkan/ringkas tiap bagian secukupnya supaya totalnya mendekati target ini — jangan jauh lebih pendek maupun lebih panjang.\n`;
 
   if(isKonversi){
     if(!filesState.skripsi){ showToast('Upload file skripsi/naskah terlebih dahulu'); return; }
@@ -235,7 +296,7 @@ INSTRUKSI:
 2. Sertakan Judul, Abstrak (Bahasa Indonesia & Inggris), Kata Kunci, Pendahuluan, Metode Penelitian, Hasil dan Pembahasan, Kesimpulan, dan Daftar Pustaka.
 3. Tulis dalam Bahasa Indonesia akademik formal.
 ${catatanTambahan? `4. CATATAN TAMBAHAN DARI PENGGUNA (WAJIB diikuti selama tidak bertentangan dengan instruksi lain di atas, misal soal jumlah halaman, gaya penulisan, fokus bagian tertentu, atau jurnal tujuan): ${catatanTambahan}` : ''}
-${CHART_TABLE_INSTRUCTION}`;
+${TARGET_PANJANG_JURNAL_TEXT}${CHART_TABLE_INSTRUCTION}`;
 
     localStorage.removeItem('task_result');
     localStorage.removeItem('task_result_structured');
@@ -256,7 +317,7 @@ ${CHART_TABLE_INSTRUCTION}`;
 
     const prompt=`Buatkan jurnal akademik lengkap dengan format ${gaya} untuk bidang ilmu ${bidang}. Judul: "${judul}". ${abstrakInput?('Ringkasan penelitian: '+abstrakInput):''}
 Sertakan: Judul, Abstrak (Bahasa Indonesia & Inggris), Kata Kunci, Pendahuluan, Metode Penelitian, Hasil dan Pembahasan, Kesimpulan, dan Daftar Pustaka. Tulis dalam Bahasa Indonesia yang formal dan akademis.
-${CHART_TABLE_INSTRUCTION}`;
+${TARGET_PANJANG_JURNAL_TEXT}${CHART_TABLE_INSTRUCTION}`;
 
     localStorage.removeItem('task_result');
     localStorage.removeItem('task_result_structured');

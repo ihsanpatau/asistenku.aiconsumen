@@ -108,7 +108,7 @@
         <textarea class="form-textarea" id="inputText" placeholder="Tempel teks yang ingin diparafrase di sini..." rows="6" oninput="countWords()"></textarea>
         <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray-400);margin-top:4px;">
           <span id="wordCount">0 kata</span>
-          <span>Maks. 2000 kata per proses</span>
+          <span id="maksKataLabelParafrase">Maks. 2000 kata per proses</span>
         </div>
       </div>
       <div class="form-group">
@@ -180,7 +180,7 @@
           <textarea class="form-textarea" id="cekInputText" placeholder="Tempel teks skripsi/jurnal/tugas yang ingin dicek di sini..." rows="7" oninput="countWordsCek()"></textarea>
           <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray-400);margin-top:4px;">
             <span id="cekWordCount">0 kata</span>
-            <span>Maks. 2000 kata per proses</span>
+            <span id="maksKataLabelCek">Maks. 2000 kata per proses</span>
           </div>
         </div>
         <button class="btn btn-primary" style="background:#A21CAF;" id="cekBtnTeks" onclick="doCekPlagiasi('teks')">
@@ -292,6 +292,20 @@
    ================================================ */
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function selectPill(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active');}
+
+// Ambil batas kata maks per proses dari paket aktif (diatur admin di kolom 'parafrase_maks_kata').
+function getMaksKataParafrase(){
+  if (typeof AkAccount === 'undefined') return 2000;
+  return AkAccount.getPlan().parafraseMaksKata || 2000;
+}
+function syncMaksKataLabel(){
+  const maks = getMaksKataParafrase();
+  const teks = `Maks. ${maks.toLocaleString('id-ID')} kata per proses`;
+  const l1 = document.getElementById('maksKataLabelParafrase'); if (l1) l1.textContent = teks;
+  const l2 = document.getElementById('maksKataLabelCek'); if (l2) l2.textContent = teks;
+}
+document.addEventListener('DOMContentLoaded', syncMaksKataLabel);
+window.addEventListener('ak:synced', syncMaksKataLabel);
 function countWords(){const words=document.getElementById('inputText').value.trim().split(/\s+/).filter(w=>w);document.getElementById('wordCount').textContent=words.length+' kata';}
 function countWordsCek(){const words=document.getElementById('cekInputText').value.trim().split(/\s+/).filter(w=>w);document.getElementById('cekWordCount').textContent=words.length+' kata';}
 function escapeHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -399,6 +413,12 @@ const style=()=>document.querySelectorAll('.type-pills')[1]?.querySelector('.typ
 async function doParafrase(){
   const text=document.getElementById('inputText').value.trim();
   if(!text){showToast('Masukkan teks yang ingin diparafrase');return;}
+  const maksKataParafrase = getMaksKataParafrase();
+  const wordsParafrase = text.split(/\s+/).filter(w=>w);
+  if (wordsParafrase.length > maksKataParafrase) {
+    showToast(`Maksimal ${maksKataParafrase.toLocaleString('id-ID')} kata per proses untuk paket kamu saat ini.`, 4000);
+    return;
+  }
   if (typeof AkAccount !== 'undefined') {
     const cek = AkAccount.cekKuotaHalaman();
     if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
@@ -453,7 +473,8 @@ async function doCekPlagiasi(mode){
   const text=document.getElementById('cekInputText').value.trim();
   if(!text){showToast('Masukkan teks yang ingin dicek');return;}
   const words=text.split(/\s+/).filter(w=>w);
-  if(words.length>2000){showToast('Maksimal 2000 kata per proses');return;}
+  const maksKataCek = getMaksKataParafrase();
+  if(words.length>maksKataCek){showToast(`Maksimal ${maksKataCek.toLocaleString('id-ID')} kata per proses untuk paket kamu saat ini.`);return;}
 
   const btn=document.getElementById('cekBtnTeks');
   btn.disabled=true;

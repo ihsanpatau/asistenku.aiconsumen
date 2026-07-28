@@ -90,8 +90,10 @@
           <button class="type-pill" onclick="selectPill(this)">10 slide</button>
           <button class="type-pill active" onclick="selectPill(this)">15 slide</button>
           <button class="type-pill" onclick="selectPill(this)">20 slide</button>
-          <button class="type-pill" onclick="selectPill(this)">25+ slide</button>
+          <button class="type-pill" onclick="selectPill(this)">25 slide</button>
+          <button class="type-pill" onclick="selectPill(this)">30+ slide</button>
         </div>
+        <div id="pptSlideLockNote" style="display:none;font-size:11px;color:#B45309;margin-top:4px;"></div>
       </div>
 
       <div class="form-group">
@@ -218,6 +220,45 @@
 // ============================================================
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function selectPill(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active');}
+
+// Batasi pilihan Jumlah Slide sesuai "Maks Slide PPT" yang diatur admin per paket (LIVE dari admin).
+function capPptSlidePills(){
+  if (typeof AkAccount === 'undefined') return;
+  const plan = AkAccount.getPlan();
+  const maks = plan.pptMaksSlide || 999;
+  const pills = document.querySelectorAll('#pillsJumlah .type-pill');
+  let lastEnabled = null;
+  pills.forEach(btn => {
+    const nilai = parseInt(btn.textContent, 10) || 0;
+    if (nilai > maks) {
+      btn.disabled = true;
+      btn.style.opacity = '0.4';
+      btn.style.cursor = 'not-allowed';
+      btn.title = `Perlu upgrade paket — maks. ${maks} slide untuk paket ${plan.label}`;
+      btn.classList.remove('active');
+    } else {
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.style.cursor = '';
+      btn.title = '';
+      lastEnabled = btn;
+    }
+  });
+  if (!document.querySelector('#pillsJumlah .type-pill.active') && lastEnabled) {
+    lastEnabled.classList.add('active');
+  }
+  const note = document.getElementById('pptSlideLockNote');
+  if (note) {
+    if (maks < 999) {
+      note.style.display = 'block';
+      note.innerHTML = `ℹ️ Paket ${plan.label} maks. ${maks} slide per presentasi. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade</a> untuk slide lebih banyak.`;
+    } else {
+      note.style.display = 'none';
+    }
+  }
+}
+document.addEventListener('DOMContentLoaded', capPptSlidePills);
+window.addEventListener('ak:synced', capPptSlidePills);
 function selectStylePill(btn,group){
   // only deactivate pills in same group
   btn.closest('.style-pill-row').querySelectorAll('.style-pill').forEach(p=>p.classList.remove('active'));
@@ -293,8 +334,15 @@ async function generateAll(){
   }
 
   // --- GERBANG KUOTA: perkirakan halaman-setara dari jumlah slide (±3 slide = 1 halaman) ---
-  const estimasiSlide = parseInt(jumlah, 10) || 15;
+  let estimasiSlide = parseInt(jumlah, 10) || 15;
   if (typeof AkAccount !== 'undefined') {
+    // Jaring pengaman kedua: pastikan jumlah slide tidak melebihi batas admin,
+    // walau pill di UI seharusnya sudah mengunci pilihan di atas batas ini.
+    const maksSlide = AkAccount.getPlan().pptMaksSlide || 999;
+    if (estimasiSlide > maksSlide) {
+      showToast(`Jumlah slide dibatasi maks. ${maksSlide} untuk paket kamu saat ini.`, 4000);
+      estimasiSlide = maksSlide;
+    }
     const cek = AkAccount.cekKuotaHalaman(Math.max(1, Math.round(estimasiSlide / 3)));
     if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
     if (cek.partial) showToast(cek.pesan, 4000);
