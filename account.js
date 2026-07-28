@@ -133,6 +133,8 @@ const AkAccount = (function () {
         isPromo: true,
         promoEndsAt: promo.endsAt,
         wordsPerPage: 300,
+        parafraseMaksKata: 2000,
+        pptMaksSlide: 999,
       };
     }
     const key = getPlanKey();
@@ -151,9 +153,16 @@ const AkAccount = (function () {
             : base.pesan,
         label: override.label || base.label,
         wordsPerPage: override.wordsPerPage || 300,
+        parafraseMaksKata: override.parafraseMaksKata || 2000,
+        pptMaksSlide: override.pptMaksSlide || 999,
       };
     }
-    return { ...base, wordsPerPage: 300 };
+    return {
+      ...base,
+      wordsPerPage: 300,
+      parafraseMaksKata: 2000,
+      pptMaksSlide: 999,
+    };
   }
 
   function todayKey() {
@@ -508,7 +517,7 @@ const AkAccount = (function () {
       const { data, error } = await sb
         .from("packages")
         .select(
-          "key, label, halaman_limit, pesan_limit, durasi_hari, words_per_page, pesan_interval_hari"
+          "key, label, halaman_limit, pesan_limit, durasi_hari, words_per_page, pesan_interval_hari, parafrase_maks_kata, ppt_maks_slide"
         )
         .eq("active", true);
 
@@ -526,6 +535,17 @@ const AkAccount = (function () {
           label: p.label || undefined,
           wordsPerPage:
             Number(p.words_per_page) > 0 ? Number(p.words_per_page) : 300,
+          // Batas kata maksimum per proses Parafrase/Cek Plagiasi — diatur admin
+          // di kolom 'parafrase_maks_kata'. Fallback 2000 kalau belum diisi admin.
+          parafraseMaksKata:
+            Number(p.parafrase_maks_kata) > 0
+              ? Number(p.parafrase_maks_kata)
+              : 2000,
+          // Batas jumlah slide maksimum untuk fitur PPT — diatur admin di kolom
+          // 'ppt_maks_slide'. Fallback 999 (dianggap tanpa batas praktis) kalau
+          // admin belum mengisi, supaya perilaku lama tidak berubah tiba-tiba.
+          pptMaksSlide:
+            Number(p.ppt_maks_slide) > 0 ? Number(p.ppt_maks_slide) : 999,
         };
         // Masa aktif (hari) per paket — diatur admin. Fallback 30 hari kalau kolom belum diisi.
         durasi[k] =
