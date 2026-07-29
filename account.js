@@ -6,12 +6,17 @@ const AkAccount = (function () {
   // nilai di bawah ini DITIMPA supaya kuota yang tampil ke user selalu sesuai
   // pengaturan admin — bukan angka bawaan yang sudah kedaluwarsa.
   const DEFAULT_LIMITS = {
-    gratis: { halaman: 5, pesan: 5, label: "Gratis" },
-    standar: { halaman: 10, pesan: 20, label: "Standar" },
+    gratis: { halaman: 10, pesan: 5, label: "Gratis" },
+    standar: { halaman: 20, pesan: 20, label: "Standar" },
     pro: { halaman: 35, pesan: 50, label: "Pro" },
     lanjutan: { halaman: 60, pesan: 99999, label: "Lanjutan" },
   };
   const PLAN_LIMITS = DEFAULT_LIMITS; // nama lama dipertahankan untuk kompatibilitas
+  // Batas BAWAAN "Maks Slide PPT" per paket — dipakai kalau admin belum mengisi
+  // kolom 'ppt_maks_slide' di Admin Panel untuk paket tsb. Paket Gratis dikunci
+  // di 10 slide (setara 10 halaman Makalah) supaya konsisten dengan batas
+  // Makalah: mau lebih banyak, harus upgrade minimal ke paket Standar.
+  const PPT_SLIDE_DEFAULT = { gratis: 10, standar: 20, pro: 30, lanjutan: 999 };
   const LIMITS_CACHE_KEY = "ak_plan_limits_cache";
   const DURASI_CACHE_KEY = "ak_plan_durasi_cache"; // { gratis:0, standar:30, pro:30, lanjutan:30, ... } — hari, diatur admin
   const PROMO_CACHE_KEY = "ak_promo_cache";
@@ -154,14 +159,14 @@ const AkAccount = (function () {
         label: override.label || base.label,
         wordsPerPage: override.wordsPerPage || 300,
         parafraseMaksKata: override.parafraseMaksKata || 2000,
-        pptMaksSlide: override.pptMaksSlide || 999,
+        pptMaksSlide: override.pptMaksSlide || PPT_SLIDE_DEFAULT[key] || 999,
       };
     }
     return {
       ...base,
       wordsPerPage: 300,
       parafraseMaksKata: 2000,
-      pptMaksSlide: 999,
+      pptMaksSlide: PPT_SLIDE_DEFAULT[key] || 999,
     };
   }
 
@@ -542,10 +547,13 @@ const AkAccount = (function () {
               ? Number(p.parafrase_maks_kata)
               : 2000,
           // Batas jumlah slide maksimum untuk fitur PPT — diatur admin di kolom
-          // 'ppt_maks_slide'. Fallback 999 (dianggap tanpa batas praktis) kalau
-          // admin belum mengisi, supaya perilaku lama tidak berubah tiba-tiba.
+          // 'ppt_maks_slide'. Fallback pakai PPT_SLIDE_DEFAULT per paket (mis.
+          // Gratis=10 slide) kalau admin belum mengisi, supaya paket Gratis
+          // tetap dibatasi walau admin belum sempat set nilainya di panel.
           pptMaksSlide:
-            Number(p.ppt_maks_slide) > 0 ? Number(p.ppt_maks_slide) : 999,
+            Number(p.ppt_maks_slide) > 0
+              ? Number(p.ppt_maks_slide)
+              : PPT_SLIDE_DEFAULT[k] || 999,
         };
         // Masa aktif (hari) per paket — diatur admin. Fallback 30 hari kalau kolom belum diisi.
         durasi[k] =
