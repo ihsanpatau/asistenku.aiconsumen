@@ -46,6 +46,7 @@
           <button class="type-pill" onclick="selectPill(this)">20 hal</button>
           <button class="type-pill" onclick="selectPill(this)">25+ hal</button>
         </div>
+        <div id="halamanMakalahLockNote" style="display:none;font-size:11px;color:#B45309;margin-top:4px;"></div>
       </div>
       <div class="form-group"><label class="form-label">Upload Referensi (Opsional)</label>
         <div class="upload-area" id="uploadAreaMakalah" onclick="document.getElementById('makalahFile').click()">
@@ -144,6 +145,15 @@ function capMakalahPills(){
   // Kalau pill yang lagi aktif ternyata sekarang terkunci, pindahkan ke pill tertinggi yang masih diizinkan
   if (!document.querySelector('#halamanMakalahPills .type-pill.active') && lastEnabled) {
     lastEnabled.classList.add('active');
+  }
+  const note = document.getElementById('halamanMakalahLockNote');
+  if (note) {
+    if (plan.halaman < 99999 && maks < 25) {
+      note.style.display = 'block';
+      note.innerHTML = `ℹ️ Paket ${plan.label} maks. ${maks} halaman/makalah. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade</a> untuk halaman lebih banyak.`;
+    } else {
+      note.style.display = 'none';
+    }
   }
 }
 document.addEventListener('DOMContentLoaded', capMakalahPills);
