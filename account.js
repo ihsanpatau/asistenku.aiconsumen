@@ -17,6 +17,19 @@ const AkAccount = (function () {
   // di 10 slide (setara 10 halaman Makalah) supaya konsisten dengan batas
   // Makalah: mau lebih banyak, harus upgrade minimal ke paket Standar.
   const PPT_SLIDE_DEFAULT = { gratis: 10, standar: 20, pro: 30, lanjutan: 999 };
+  // Batas BAWAAN "Maks Halaman per Dokumen" untuk fitur dokumen teks (Makalah, dst).
+  // SENGAJA dipisah dari 'halaman' (yang itu jatah KUOTA HARIAN, bisa dipakai untuk
+  // banyak dokumen sekaligus). Kalau keduanya disamakan, begitu admin menaikkan jatah
+  // harian (mis. jadi 50 halaman/hari supaya user bisa bikin beberapa dokumen pendek),
+  // paket Gratis jadi ikut bisa bikin 1 dokumen SEPANJANG 50 halaman sekaligus — padahal
+  // niatnya cuma boleh 10 halaman per dokumen. Field ini menjaga batas per-dokumen tetap
+  // 10 utk Gratis apapun angka kuota harian yang diset admin — sama seperti PPT_SLIDE_DEFAULT.
+  const DOKUMEN_MAKS_HALAMAN_DEFAULT = {
+    gratis: 10,
+    standar: 20,
+    pro: 35,
+    lanjutan: 60,
+  };
   const LIMITS_CACHE_KEY = "ak_plan_limits_cache";
   const DURASI_CACHE_KEY = "ak_plan_durasi_cache"; // { gratis:0, standar:30, pro:30, lanjutan:30, ... } — hari, diatur admin
   const PROMO_CACHE_KEY = "ak_promo_cache";
@@ -140,6 +153,7 @@ const AkAccount = (function () {
         wordsPerPage: 300,
         parafraseMaksKata: 2000,
         pptMaksSlide: 999,
+        dokumenMaksHalaman: 999,
       };
     }
     const key = getPlanKey();
@@ -160,6 +174,9 @@ const AkAccount = (function () {
         wordsPerPage: override.wordsPerPage || 300,
         parafraseMaksKata: override.parafraseMaksKata || 2000,
         pptMaksSlide: override.pptMaksSlide || PPT_SLIDE_DEFAULT[key] || 999,
+        // Sengaja TIDAK ikut 'override.halaman' (itu kuota harian) — pakai tabel
+        // tetap per-dokumen supaya tidak ketarik naik kalau admin naikkan kuota harian.
+        dokumenMaksHalaman: DOKUMEN_MAKS_HALAMAN_DEFAULT[key] || 999,
       };
     }
     return {
@@ -167,6 +184,7 @@ const AkAccount = (function () {
       wordsPerPage: 300,
       parafraseMaksKata: 2000,
       pptMaksSlide: PPT_SLIDE_DEFAULT[key] || 999,
+      dokumenMaksHalaman: DOKUMEN_MAKS_HALAMAN_DEFAULT[key] || 999,
     };
   }
 
