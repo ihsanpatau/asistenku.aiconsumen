@@ -301,9 +301,15 @@
 <script src="shared-config.js"></script>
 <script>
 async function muatHargaTerbaru() {
-  if (!window.AkPricing) return;
-  const pkgs = await AkPricing.getPackages();
+  if (typeof window.supabase === 'undefined') return;
+  const sbPricing = akCreateClient();
+  const { data: pkgs, error } = await sbPricing
+    .from('packages')
+    .select('key, label, real_price, display_price, strike_price, halaman_limit, pesan_limit')
+    .eq('active', true);
+  if (error || !Array.isArray(pkgs)) { console.warn('muatHargaTerbaru gagal:', error); return; }
   pkgs.forEach(p => {
+    p.key = (p.key || '').toLowerCase();
     const priceEl = document.getElementById('price_' + p.key);
     if (priceEl) {
       const coret = p.strike_price ? `<div style="font-size:12px;font-weight:600;text-decoration:line-through;opacity:.5;line-height:1.2;">Rp${Number(p.strike_price).toLocaleString('id-ID')}</div>` : '';
