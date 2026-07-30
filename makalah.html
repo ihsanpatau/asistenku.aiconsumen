@@ -123,7 +123,7 @@ async function extractFileTextMakalah(file){
 function capMakalahPills(){
   if (typeof AkAccount === 'undefined') return;
   const plan = AkAccount.getPlan();
-  const maks = plan.halaman >= 99999 ? 999 : plan.halaman;
+  const maks = plan.dokumenMaksHalaman >= 999 ? 999 : plan.dokumenMaksHalaman;
   const pills = document.querySelectorAll('#halamanMakalahPills .type-pill');
   let lastEnabled = null;
   pills.forEach(btn => {
@@ -148,7 +148,7 @@ function capMakalahPills(){
   }
   const note = document.getElementById('halamanMakalahLockNote');
   if (note) {
-    if (plan.halaman < 99999 && maks < 25) {
+    if (plan.dokumenMaksHalaman < 999 && maks < 25) {
       note.style.display = 'block';
       note.innerHTML = `ℹ️ Paket ${plan.label} maks. ${maks} halaman/makalah. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade</a> untuk halaman lebih banyak.`;
     } else {
