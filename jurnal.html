@@ -145,7 +145,7 @@ function selectPillHalamanJurnal(btn){btn.closest('.type-pills').querySelectorAl
 function capHalamanJurnalPills(){
   if (typeof AkAccount === 'undefined') return;
   const plan = AkAccount.getPlan();
-  const maks = plan.halaman >= 99999 ? 999 : plan.halaman;
+  const maks = (plan.dokumenMaksHalaman >= 999 ? 999 : plan.dokumenMaksHalaman) || 999;
   const pills = document.querySelectorAll('#pillsHalamanJurnal .type-pill');
   let lastEnabled = null;
   pills.forEach(btn => {
@@ -169,9 +169,9 @@ function capHalamanJurnalPills(){
   }
   const note = document.getElementById('halamanJurnalLockNote');
   if (note) {
-    if (plan.halaman < 99999 && maks < 20) {
+    if (maks < 999 && maks < 20) {
       note.style.display = 'block';
-      note.innerHTML = `ℹ️ Paket ${plan.label} maks. ${maks} halaman/hari. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade</a> untuk target jurnal lebih panjang.`;
+      note.innerHTML = `ℹ️ Paket ${plan.label} maks. ${maks} halaman/jurnal. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade</a> untuk target jurnal lebih panjang.`;
     } else {
       note.style.display = 'none';
     }
