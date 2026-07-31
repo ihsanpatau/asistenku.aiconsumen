@@ -174,9 +174,15 @@ const AkAccount = (function () {
         wordsPerPage: override.wordsPerPage || 300,
         parafraseMaksKata: override.parafraseMaksKata || 2000,
         pptMaksSlide: override.pptMaksSlide || PPT_SLIDE_DEFAULT[key] || 999,
-        // Sengaja TIDAK ikut 'override.halaman' (itu kuota harian) — pakai tabel
-        // tetap per-dokumen supaya tidak ketarik naik kalau admin naikkan kuota harian.
-        dokumenMaksHalaman: DOKUMEN_MAKS_HALAMAN_DEFAULT[key] || 999,
+        // Diatur admin di kolom 'dokumen_maks_halaman' (menu Paket & Harga —
+        // "Maks Halaman Dokumen"). Sengaja TIDAK ikut 'override.halaman' (itu
+        // kuota harian) — dipisah jadi field sendiri, sama seperti pptMaksSlide,
+        // supaya batas per-dokumen tidak ikut naik kalau admin cuma naikkan
+        // kuota harian. Fallback ke tabel bawaan kalau admin belum mengisi.
+        dokumenMaksHalaman:
+          override.dokumenMaksHalaman ||
+          DOKUMEN_MAKS_HALAMAN_DEFAULT[key] ||
+          999,
       };
     }
     return {
@@ -540,7 +546,7 @@ const AkAccount = (function () {
       const { data, error } = await sb
         .from("packages")
         .select(
-          "key, label, halaman_limit, pesan_limit, durasi_hari, words_per_page, pesan_interval_hari, parafrase_maks_kata, ppt_maks_slide"
+          "key, label, halaman_limit, pesan_limit, durasi_hari, words_per_page, pesan_interval_hari, parafrase_maks_kata, ppt_maks_slide, dokumen_maks_halaman"
         )
         .eq("active", true);
 
@@ -572,6 +578,14 @@ const AkAccount = (function () {
             Number(p.ppt_maks_slide) > 0
               ? Number(p.ppt_maks_slide)
               : PPT_SLIDE_DEFAULT[k] || 999,
+          // Batas jumlah halaman maksimum PER DOKUMEN untuk fitur Makalah &
+          // Jurnal — diatur admin di kolom 'dokumen_maks_halaman'. Fallback
+          // pakai DOKUMEN_MAKS_HALAMAN_DEFAULT per paket kalau admin belum
+          // mengisi, supaya paket Gratis tetap dibatasi walau kolomnya kosong.
+          dokumenMaksHalaman:
+            Number(p.dokumen_maks_halaman) > 0
+              ? Number(p.dokumen_maks_halaman)
+              : DOKUMEN_MAKS_HALAMAN_DEFAULT[k] || 999,
         };
         // Masa aktif (hari) per paket — diatur admin. Fallback 30 hari kalau kolom belum diisi.
         durasi[k] =
