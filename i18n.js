@@ -1,11 +1,4 @@
-/* i18n.js — Kamus terjemahan ID ⇄ EN untuk asistenku.pro
-   Menyediakan window.AkI18n dengan API:
-     AkI18n.t(key)        -> string
-     AkI18n.apply()        -> terjemahkan semua [data-i18n] di halaman aktif
-     AkI18n.getLang()      -> 'id' | 'en'
-     AkI18n.setLang(code)  -> ganti bahasa & terjemahkan langsung + simpan ke localStorage
-   Catatan: Bahasa Arab belum didukung penuh (butuh RTL), jadi hanya 'id' dan 'en' yang aktif.
-*/
+/* i18n.js — Kamus terjemahan ID ⇄ EN untuk asistenku.pro Menyediakan window.AkI18n dengan API: AkI18n.t(key) -> string AkI18n.apply() -> terjemahkan semua [data-i18n] di halaman aktif AkI18n.getLang() -> 'id' | 'en' AkI18n.setLang(code) -> ganti bahasa & terjemahkan langsung + simpan ke localStorage Catatan: Bahasa Arab belum didukung penuh (butuh RTL), jadi hanya 'id' dan 'en' yang aktif. */
 (function (global) {
   var DICT = {
     id: {
@@ -23,6 +16,12 @@
       "auth.loginHere": "Masuk di sini",
       "auth.noAccount": "Belum punya akun?",
       "auth.or": "atau",
+      "auth.namePlaceholder": "Nama lengkap",
+      "auth.emailPlaceholder": "Email atau nomor HP",
+      "auth.emailOnlyPlaceholder": "Email",
+      "auth.phonePlaceholder": "Nomor HP (opsional)",
+      "auth.passwordPlaceholder": "Kata sandi",
+      "auth.confirmPasswordPlaceholder": "Konfirmasi kata sandi",
       "auth.register.sub": "Daftar untuk mulai menggunakan asistenku.pro",
       "auth.register.title": "Buat akun baru",
       "auth.registerBtn": "Daftar",
@@ -47,7 +46,8 @@
       "backnav.keamanan.title": "Keamanan",
       "backnav.makalah.sub": "Buat makalah akademik dari judul atau file",
       "backnav.makalah.title": "Makalah",
-      "backnav.parafrase.sub": "Tulis ulang teks & deteksi risiko plagiarisme/AI",
+      "backnav.parafrase.sub":
+        "Tulis ulang teks & deteksi risiko plagiarisme/AI",
       "backnav.parafrase.title": "Parafrase & Cek Plagiasi",
       "backnav.pembayaran.sub": "Kelola metode pembayaran Anda",
       "backnav.pembayaran.title": "Metode Pembayaran",
@@ -67,7 +67,8 @@
       "backnav.skripsi_pengaturan.title": "Pengaturan",
       "backnav.tanyajawab.sub": "AI bantu revisi per poin & belajar dari file",
       "backnav.tanyajawab.title": "Revisi Skripsi & Belajar",
-      "backnav.tugas.sub": "Satu halaman serba-bisa untuk tugas apapun &amp; pekerjaan kantor.",
+      "backnav.tugas.sub":
+        "Satu halaman serba-bisa untuk tugas apapun &amp; pekerjaan kantor.",
       "backnav.tugas.title": "Tugas &amp; Project",
       "backnav.voucher.sub": "Lihat voucher dan promo yang tersedia",
       "backnav.voucher.title": "Voucher &amp; Promo",
@@ -84,7 +85,8 @@
       "settings.cancel": "Batal",
       "settings.chooseLang": "Pilih Bahasa",
       "settings.confirmDelete.h": "Hapus Semua Data?",
-      "settings.confirmDelete.p": "Semua riwayat dan data lokal akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.",
+      "settings.confirmDelete.p":
+        "Semua riwayat dan data lokal akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.",
       "settings.darkMode": "Mode Gelap",
       "settings.darkMode.sub.off": "Tampilan terang aktif",
       "settings.darkMode.sub.on": "Tampilan gelap aktif",
@@ -96,7 +98,8 @@
       "settings.font.normal": "Normal",
       "settings.font.small": "Kecil",
       "settings.fontSize": "Ukuran Font",
-      "settings.lang.note": "Bahasa Arab sedang dalam pengembangan dan akan hadir di update berikutnya.",
+      "settings.lang.note":
+        "Bahasa Arab sedang dalam pengembangan dan akan hadir di update berikutnya.",
       "settings.lang.noteLabel": "Catatan:",
       "settings.latest": "Terbaru",
       "settings.logout": "Keluar dari Akun",
@@ -133,19 +136,26 @@
       "terms.sub": "Ketentuan penggunaan asistenku.pro",
       "terms.updated": "Terakhir diperbarui: Juli 2026",
       "terms.h1": "1. Penerimaan Ketentuan",
-      "terms.p1": "Dengan mengakses dan menggunakan asistenku.pro, Anda menyetujui untuk terikat oleh Syarat &amp; Ketentuan ini. Jika Anda tidak menyetujui salah satu bagian dari ketentuan ini, mohon untuk tidak menggunakan layanan kami.",
+      "terms.p1":
+        "Dengan mengakses dan menggunakan asistenku.pro, Anda menyetujui untuk terikat oleh Syarat &amp; Ketentuan ini. Jika Anda tidak menyetujui salah satu bagian dari ketentuan ini, mohon untuk tidak menggunakan layanan kami.",
       "terms.h2": "2. Deskripsi Layanan",
-      "terms.p2": "asistenku.pro menyediakan alat bantu berbasis AI untuk membantu penyusunan tugas akademik seperti skripsi, makalah, jurnal, presentasi, dan parafrase. Hasil yang dihasilkan oleh AI bersifat sebagai draf/bantuan awal dan tetap memerlukan tinjauan serta penyuntingan dari pengguna sebelum digunakan secara resmi.",
+      "terms.p2":
+        "asistenku.pro menyediakan alat bantu berbasis AI untuk membantu penyusunan tugas akademik seperti skripsi, makalah, jurnal, presentasi, dan parafrase. Hasil yang dihasilkan oleh AI bersifat sebagai draf/bantuan awal dan tetap memerlukan tinjauan serta penyuntingan dari pengguna sebelum digunakan secara resmi.",
       "terms.h3": "3. Akun Pengguna",
-      "terms.p3": "Anda bertanggung jawab untuk menjaga kerahasiaan informasi akun dan kata sandi Anda, serta atas seluruh aktivitas yang terjadi di bawah akun Anda. Segera hubungi kami jika Anda menduga terjadi penggunaan akun tanpa izin.",
+      "terms.p3":
+        "Anda bertanggung jawab untuk menjaga kerahasiaan informasi akun dan kata sandi Anda, serta atas seluruh aktivitas yang terjadi di bawah akun Anda. Segera hubungi kami jika Anda menduga terjadi penggunaan akun tanpa izin.",
       "terms.h4": "4. Penggunaan yang Wajar",
-      "terms.p4": "Pengguna dilarang menggunakan layanan untuk tujuan yang melanggar hukum, menyalahgunakan sistem kuota, atau mendistribusikan ulang hasil AI secara komersial tanpa izin. Pengguna bertanggung jawab penuh atas orisinalitas dan kepatuhan akademik dari dokumen akhir yang diserahkan ke institusi masing-masing.",
+      "terms.p4":
+        "Pengguna dilarang menggunakan layanan untuk tujuan yang melanggar hukum, menyalahgunakan sistem kuota, atau mendistribusikan ulang hasil AI secara komersial tanpa izin. Pengguna bertanggung jawab penuh atas orisinalitas dan kepatuhan akademik dari dokumen akhir yang diserahkan ke institusi masing-masing.",
       "terms.h5": "5. Pembayaran &amp; Kuota",
-      "terms.p5": "Paket berbayar memberikan kuota penggunaan sesuai dengan tier yang dipilih. Kuota yang tidak terpakai tidak dapat diuangkan kembali (non-refundable), kecuali diwajibkan oleh peraturan perundang-undangan yang berlaku.",
+      "terms.p5":
+        "Paket berbayar memberikan kuota penggunaan sesuai dengan tier yang dipilih. Kuota yang tidak terpakai tidak dapat diuangkan kembali (non-refundable), kecuali diwajibkan oleh peraturan perundang-undangan yang berlaku.",
       "terms.h6": "6. Perubahan Ketentuan",
-      "terms.p6": "Kami dapat memperbarui Syarat &amp; Ketentuan ini dari waktu ke waktu. Perubahan akan berlaku efektif sejak dipublikasikan di halaman ini. Penggunaan layanan secara berkelanjutan setelah perubahan dianggap sebagai persetujuan Anda terhadap ketentuan yang baru.",
+      "terms.p6":
+        "Kami dapat memperbarui Syarat &amp; Ketentuan ini dari waktu ke waktu. Perubahan akan berlaku efektif sejak dipublikasikan di halaman ini. Penggunaan layanan secara berkelanjutan setelah perubahan dianggap sebagai persetujuan Anda terhadap ketentuan yang baru.",
       "terms.h7": "7. Kontak",
-      "terms.p7": "Untuk pertanyaan mengenai Syarat &amp; Ketentuan ini, silakan hubungi kami melalui support@asistenku.pro."
+      "terms.p7":
+        "Untuk pertanyaan mengenai Syarat &amp; Ketentuan ini, silakan hubungi kami melalui support@asistenku.pro.",
     },
     en: {
       "auth.agree1": "I agree to the",
@@ -162,6 +172,12 @@
       "auth.loginHere": "Sign in here",
       "auth.noAccount": "Don't have an account?",
       "auth.or": "or",
+      "auth.namePlaceholder": "Full name",
+      "auth.emailPlaceholder": "Email or phone number",
+      "auth.emailOnlyPlaceholder": "Email",
+      "auth.phonePlaceholder": "Phone number (optional)",
+      "auth.passwordPlaceholder": "Password",
+      "auth.confirmPasswordPlaceholder": "Confirm password",
       "auth.register.sub": "Sign up to start using asistenku.pro",
       "auth.register.title": "Create a new account",
       "auth.registerBtn": "Sign Up",
@@ -200,13 +216,16 @@
       "backnav.skripsi.title": "Thesis &amp; Dissertation",
       "backnav.skripsi_konfirmasi.sub": "Review before generating",
       "backnav.skripsi_konfirmasi.title": "Confirm &amp; Start",
-      "backnav.skripsi_outline.sub": "Arrange chapter and sub-chapter structure",
+      "backnav.skripsi_outline.sub":
+        "Arrange chapter and sub-chapter structure",
       "backnav.skripsi_outline.title": "Thesis Outline",
       "backnav.skripsi_pengaturan.sub": "Document style & format",
       "backnav.skripsi_pengaturan.title": "Settings",
-      "backnav.tanyajawab.sub": "AI helps revise point-by-point & learn from files",
+      "backnav.tanyajawab.sub":
+        "AI helps revise point-by-point & learn from files",
       "backnav.tanyajawab.title": "Thesis Revision & Learning",
-      "backnav.tugas.sub": "One all-in-one page for any assignment or office work.",
+      "backnav.tugas.sub":
+        "One all-in-one page for any assignment or office work.",
       "backnav.tugas.title": "Assignments &amp; Projects",
       "backnav.voucher.sub": "View available vouchers and promos",
       "backnav.voucher.title": "Vouchers &amp; Promos",
@@ -223,7 +242,8 @@
       "settings.cancel": "Cancel",
       "settings.chooseLang": "Choose Language",
       "settings.confirmDelete.h": "Delete All Data?",
-      "settings.confirmDelete.p": "All history and local data will be permanently deleted. This action cannot be undone.",
+      "settings.confirmDelete.p":
+        "All history and local data will be permanently deleted. This action cannot be undone.",
       "settings.darkMode": "Dark Mode",
       "settings.darkMode.sub.off": "Light theme active",
       "settings.darkMode.sub.on": "Dark theme active",
@@ -235,7 +255,8 @@
       "settings.font.normal": "Normal",
       "settings.font.small": "Small",
       "settings.fontSize": "Font Size",
-      "settings.lang.note": "Arabic is under development and will arrive in a future update.",
+      "settings.lang.note":
+        "Arabic is under development and will arrive in a future update.",
       "settings.lang.noteLabel": "Note:",
       "settings.latest": "Latest",
       "settings.logout": "Log Out",
@@ -272,20 +293,27 @@
       "terms.sub": "Terms of use for asistenku.pro",
       "terms.updated": "Last updated: July 2026",
       "terms.h1": "1. Acceptance of Terms",
-      "terms.p1": "By accessing and using asistenku.pro, you agree to be bound by these Terms &amp; Conditions. If you do not agree with any part of these terms, please do not use our service.",
+      "terms.p1":
+        "By accessing and using asistenku.pro, you agree to be bound by these Terms &amp; Conditions. If you do not agree with any part of these terms, please do not use our service.",
       "terms.h2": "2. Service Description",
-      "terms.p2": "asistenku.pro provides AI-based tools to help with academic assignments such as theses, papers, journals, presentations, and paraphrasing. AI-generated output is intended as an initial draft/aid and still requires review and editing by the user before official use.",
+      "terms.p2":
+        "asistenku.pro provides AI-based tools to help with academic assignments such as theses, papers, journals, presentations, and paraphrasing. AI-generated output is intended as an initial draft/aid and still requires review and editing by the user before official use.",
       "terms.h3": "3. User Accounts",
-      "terms.p3": "You are responsible for keeping your account information and password confidential, and for all activity that occurs under your account. Contact us immediately if you suspect any unauthorized use of your account.",
+      "terms.p3":
+        "You are responsible for keeping your account information and password confidential, and for all activity that occurs under your account. Contact us immediately if you suspect any unauthorized use of your account.",
       "terms.h4": "4. Fair Use",
-      "terms.p4": "Users may not use the service for unlawful purposes, abuse the quota system, or redistribute AI output commercially without permission. Users are fully responsible for the originality and academic integrity of the final document submitted to their institution.",
+      "terms.p4":
+        "Users may not use the service for unlawful purposes, abuse the quota system, or redistribute AI output commercially without permission. Users are fully responsible for the originality and academic integrity of the final document submitted to their institution.",
       "terms.h5": "5. Payments &amp; Quota",
-      "terms.p5": "Paid plans grant usage quota based on the selected tier. Unused quota is non-refundable, except where required by applicable law.",
+      "terms.p5":
+        "Paid plans grant usage quota based on the selected tier. Unused quota is non-refundable, except where required by applicable law.",
       "terms.h6": "6. Changes to Terms",
-      "terms.p6": "We may update these Terms &amp; Conditions from time to time. Changes take effect once published on this page. Continued use of the service after changes constitutes your acceptance of the new terms.",
+      "terms.p6":
+        "We may update these Terms &amp; Conditions from time to time. Changes take effect once published on this page. Continued use of the service after changes constitutes your acceptance of the new terms.",
       "terms.h7": "7. Contact",
-      "terms.p7": "For questions about these Terms &amp; Conditions, please contact us at support@asistenku.pro."
-    }
+      "terms.p7":
+        "For questions about these Terms &amp; Conditions, please contact us at support@asistenku.pro.",
+    },
   };
 
   var LANG_KEY = "ak_lang";
@@ -324,7 +352,9 @@
     if (SUPPORTED.indexOf(code) === -1) code = "id";
     localStorage.setItem(LANG_KEY, code);
     apply();
-    document.dispatchEvent(new CustomEvent("ak-i18n-changed", { detail: { lang: code } }));
+    document.dispatchEvent(
+      new CustomEvent("ak-i18n-changed", { detail: { lang: code } })
+    );
   }
 
   global.AkI18n = {
@@ -332,7 +362,7 @@
     apply: apply,
     getLang: getLang,
     setLang: setLang,
-    SUPPORTED: SUPPORTED
+    SUPPORTED: SUPPORTED,
   };
 
   if (document.readyState === "loading") {
