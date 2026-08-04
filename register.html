@@ -116,14 +116,14 @@
       <div class="input-wrap">
         <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
         <input type="password" class="form-input has-icon has-action" id="pass1" placeholder="Kata sandi" data-i18n-placeholder="auth.passwordPlaceholder" autocomplete="new-password">
-        <button class="input-action" type="button" onclick="togglePass('pass1')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button class="input-action" type="button" onclick="togglePass('pass1',this)" aria-label="Tampilkan kata sandi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
     </div>
     <div class="form-group">
       <div class="input-wrap">
         <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
         <input type="password" class="form-input has-icon has-action" id="pass2" placeholder="Konfirmasi kata sandi" data-i18n-placeholder="auth.confirmPasswordPlaceholder" autocomplete="new-password">
-        <button class="input-action" type="button" onclick="togglePass('pass2')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button class="input-action" type="button" onclick="togglePass('pass2',this)" aria-label="Tampilkan kata sandi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
     </div>
 
@@ -174,7 +174,17 @@ async function bridgeSupabaseSession() {
 }
 if (window.location.hash.includes('access_token')) { bridgeSupabaseSession(); }
 function toast(msg,d=2600){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),d);}
-function togglePass(id){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
+function togglePass(id,btn){
+  const i=document.getElementById(id);
+  const show=i.type==='password';
+  i.type=show?'text':'password';
+  if(btn){
+    btn.setAttribute('aria-label', show?'Sembunyikan kata sandi':'Tampilkan kata sandi');
+    btn.innerHTML = show
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.7 18.7 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  }
+}
 function showErr(msg){const e=document.getElementById('errMsg');document.getElementById('errText').textContent=msg;e.style.display='flex';}
 function hideErr(){document.getElementById('errMsg').style.display='none';}
 
@@ -194,18 +204,36 @@ async function doRegister(){
   try{
     const res=await fetch(`${SB_URL}/auth/v1/signup`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify({email,password:pass1,data:{full_name:nama}})});
     const data=await res.json();
-    if(data.user||data.id){
-      toast('Akun berhasil dibuat! Silakan masuk 🎉');
-      setTimeout(()=>location.href='login.html',1600);
-    } else {
-      showErr(data.msg||data.message||'Gagal mendaftar, coba lagi');
+    const user=data.user||(data.id?data:null);
+    if(!res.ok || !user){
+      // Signup benar-benar gagal (mis. password ditolak, error server, dsb.)
+      showErr(data.msg||data.message||data.error_description||'Gagal mendaftar, coba lagi');
       btn.textContent='Daftar';btn.disabled=false;
+      return;
     }
+    // Supabase punya perilaku khusus untuk mencegah "email enumeration":
+    // kalau email SUDAH terdaftar sebelumnya, endpoint signup tetap
+    // membalas 200 dengan objek user, tapi identities-nya kosong dan
+    // TIDAK ADA akun baru yang benar-benar dibuat/diubah.
+    const identities = user.identities;
+    const alreadyRegistered = Array.isArray(identities) && identities.length===0;
+    if(alreadyRegistered){
+      showErr('Email ini sudah terdaftar. Silakan masuk atau gunakan "Lupa kata sandi?" kalau lupa sandinya.');
+      btn.textContent='Daftar';btn.disabled=false;
+      return;
+    }
+    if(!user.confirmed_at && !user.email_confirmed_at && !data.access_token){
+      // Akun baru dibuat tapi proyek Supabase mewajibkan konfirmasi email
+      // dulu sebelum bisa login dengan password.
+      toast('Akun dibuat! Cek email kamu untuk konfirmasi sebelum masuk. 📧', 4000);
+      setTimeout(()=>location.href='login.html',2200);
+      return;
+    }
+    toast('Akun berhasil dibuat! Silakan masuk 🎉');
+    setTimeout(()=>location.href='login.html',1600);
   } catch {
-    localStorage.setItem('ak_token','demo');
-    localStorage.setItem('ak_user',JSON.stringify({email,id:'demo',user_metadata:{full_name:nama}}));
-    toast('Akun berhasil dibuat! 🎉');
-    setTimeout(()=>location.href='beranda.html',1400);
+    showErr('Tidak bisa terhubung ke server. Periksa koneksi internet lalu coba lagi.');
+    btn.textContent='Daftar';btn.disabled=false;
   }
 }
 </script>
