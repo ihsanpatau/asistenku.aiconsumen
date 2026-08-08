@@ -139,7 +139,13 @@ img{max-width:100%;display:block;}
 .header-cta{display:flex;align-items:center;gap:10px;}
 @media (max-width:860px){
   .nav-links{display:none;}
-  .header-cta .btn-ghost{display:none;}
+  .header-cta{gap:8px;}
+  .header-cta .btn{padding:9px 14px;font-size:13px;}
+}
+@media (max-width:380px){
+  .brand{font-size:17px;}
+  .brand img{width:28px;height:28px;}
+  .header-cta .btn{padding:8px 11px;font-size:12.5px;}
 }
 
 .hero{padding:64px 0 40px;position:relative;overflow:hidden;}
@@ -505,20 +511,20 @@ footer{border-top:1px solid var(--line);padding:56px 0 30px;background:var(--pap
       <div class="price-grid">
         <div class="price-card">
           <div class="price-name">Gratis</div>
-          <div class="price-amt">Rp0</div>
+          <div class="price-amt" id="price_gratis">Rp0</div>
           <ul class="price-list">
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Kuota harian dasar</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="hal_gratis">10</span> halaman / hari</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="pesan_gratis">50</span> chat DoktrAI / hari</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Akses semua fitur inti</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Chat DoktrAI terbatas</li>
           </ul>
           <a href="register.html" class="btn btn-ghost btn-block btn-sm">Daftar Gratis</a>
         </div>
         <div class="price-card">
           <div class="price-name">Standar</div>
-          <div class="price-amt">Rp20.000<span>/bulan</span></div>
+          <div class="price-amt" id="price_standar">Rp20.000<span>/bulan</span></div>
           <ul class="price-list">
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Kuota halaman lebih besar</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Kuota chat DoktrAI lebih banyak</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="hal_standar">25</span> halaman / hari</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="pesan_standar">200</span> chat DoktrAI / hari</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Cocok untuk tugas rutin</li>
           </ul>
           <a href="upgrade.html" class="btn btn-ghost btn-block btn-sm">Pilih Standar</a>
@@ -526,20 +532,20 @@ footer{border-top:1px solid var(--line);padding:56px 0 30px;background:var(--pap
         <div class="price-card featured">
           <div class="price-tag">Paling Populer</div>
           <div class="price-name">Pro</div>
-          <div class="price-amt">Rp59.000<span>/bulan</span></div>
+          <div class="price-amt" id="price_pro">Rp59.000<span>/bulan</span></div>
           <ul class="price-list">
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Kuota dokumen &amp; halaman luas</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Prioritas proses lebih cepat</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="hal_pro">40</span> halaman / hari</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="pesan_pro">500</span> chat DoktrAI / hari</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Ideal untuk skripsi &amp; tesis</li>
           </ul>
           <a href="upgrade.html" class="btn btn-primary btn-block btn-sm">Pilih Pro</a>
         </div>
         <div class="price-card">
           <div class="price-name">Lanjutan</div>
-          <div class="price-amt">Rp99.000<span>/bulan</span></div>
+          <div class="price-amt" id="price_lanjutan">Rp99.000<span>/bulan</span></div>
           <ul class="price-list">
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Kuota paling besar</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Semua fitur tanpa batas wajar</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="hal_lanjutan">60</span> halaman / hari</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="pesan_lanjutan">Unlimited</span> chat DoktrAI</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Untuk kebutuhan intensif</li>
           </ul>
           <a href="upgrade.html" class="btn btn-ghost btn-block btn-sm">Pilih Lanjutan</a>
@@ -637,5 +643,46 @@ footer{border-top:1px solid var(--line);padding:56px 0 30px;background:var(--pap
 </footer>
 
 <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+
+<!-- ===== HARGA DINAMIS — diambil dari tabel "packages" yang sama dengan
+     upgrade.html & Admin Panel, supaya harga di landing page selalu ikut
+     angka yang diatur admin, tanpa perlu edit HTML lagi. ===== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="shared-config.js"></script>
+<script>
+async function muatHargaLanding() {
+  try {
+    if (typeof window.supabase === 'undefined' || typeof akCreateClient !== 'function') return;
+    const sb = akCreateClient();
+    const { data: pkgs, error } = await sb
+      .from('packages')
+      .select('key, label, real_price, display_price, strike_price, halaman_limit, pesan_limit')
+      .eq('active', true);
+    if (error || !Array.isArray(pkgs)) { console.warn('muatHargaLanding gagal:', error); return; }
+
+    pkgs.forEach(p => {
+      const key = (p.key || '').toLowerCase();
+
+      const priceEl = document.getElementById('price_' + key);
+      if (priceEl) {
+        const coret = p.strike_price
+          ? `<div style="font-size:12px;font-weight:600;text-decoration:line-through;opacity:.5;line-height:1.2;">Rp${Number(p.strike_price).toLocaleString('id-ID')}</div>`
+          : '';
+        const sub = (key === 'gratis' || Number(p.display_price) === 0) ? '' : '<span>/bulan</span>';
+        priceEl.innerHTML = coret + '<div>Rp' + Number(p.display_price).toLocaleString('id-ID') + sub + '</div>';
+      }
+
+      const halEl = document.getElementById('hal_' + key);
+      if (halEl) halEl.textContent = p.halaman_limit;
+
+      const pesanEl = document.getElementById('pesan_' + key);
+      if (pesanEl) pesanEl.textContent = (p.pesan_limit >= 99999) ? 'Unlimited' : p.pesan_limit;
+    });
+  } catch (e) {
+    console.warn('muatHargaLanding error:', e);
+  }
+}
+document.addEventListener('DOMContentLoaded', muatHargaLanding);
+</script>
 </body>
 </html>
