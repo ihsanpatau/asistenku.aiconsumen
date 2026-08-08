@@ -508,6 +508,39 @@ footer{border-top:1px solid var(--line);padding:56px 0 30px;background:var(--pap
         <h2>Mulai gratis, upgrade saat butuh lebih</h2>
         <p>Semua paket bisa dicoba tanpa komitmen jangka panjang, berhenti berlangganan kapan saja.</p>
       </div>
+
+      <!-- ===== PROMO KILAT BANNER (dari Supabase, diatur admin) ===== -->
+      <div id="flashPromoBannerLanding" style="display:none;margin:0 0 28px;">
+        <div style="background:linear-gradient(135deg,#FF6B00 0%,#FFB800 50%,#FF6B00 100%);border-radius:20px;padding:0;box-shadow:0 8px 32px rgba(255,107,0,.35);position:relative;overflow:hidden;max-width:720px;margin:0 auto;">
+          <!-- Stripe pattern overlay -->
+          <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,0.04) 0px,rgba(255,255,255,0.04) 10px,transparent 10px,transparent 20px);pointer-events:none;"></div>
+          <!-- Badge TERBATAS -->
+          <div style="position:absolute;top:12px;right:14px;background:rgba(0,0,0,0.25);color:#fff;font-size:10px;font-weight:900;padding:4px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;">TERBATAS</div>
+          <div style="padding:18px 18px 14px;display:flex;align-items:center;gap:14px;">
+            <!-- Icon kilat -->
+            <div style="width:50px;height:50px;background:rgba(255,255,255,0.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">⚡</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:15px;font-weight:900;color:#fff;line-height:1.2;" id="flashPromoLabelLanding">Promo Kilat Hanya Hari Ini!!</div>
+              <div style="font-size:13px;color:rgba(255,255,255,0.92);margin-top:4px;line-height:1.4;" id="flashPromoDeskripsLanding">Unlimited Akses Sepuasnya Dalam Satu Hari</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:3px;" id="flashPromoAksesLanding"></div>
+            </div>
+            <div style="flex-shrink:0;text-align:center;">
+              <a id="flashPromoBtnLanding" href="upgrade.html" style="background:#fff;color:#D97706;border:none;border-radius:14px;padding:12px 16px;font-size:12px;font-weight:900;cursor:pointer;display:block;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.15);text-decoration:none;line-height:1.3;">
+                <span style="font-size:10px;color:#aaa;display:block;font-weight:600;">TERBATAS</span>
+                Rp<span id="flashPromoHargaLanding">19.000</span>
+                <span style="font-size:9px;font-weight:600;color:#aaa;display:block;">Beli Sekarang</span>
+              </a>
+            </div>
+          </div>
+          <!-- Countdown bar -->
+          <div style="background:rgba(0,0,0,0.2);padding:8px 18px;display:flex;align-items:center;gap:8px;border-top:1px solid rgba(255,255,255,0.1);">
+            <span style="font-size:11px;color:rgba(255,255,255,0.7);">🕐</span>
+            <span style="font-size:11px;color:rgba(255,255,255,0.9);font-weight:600;" id="flashCountdownLanding">Penawaran hari ini saja</span>
+          </div>
+        </div>
+      </div>
+      <!-- ===== END PROMO KILAT BANNER ===== -->
+
       <div class="price-grid">
         <div class="price-card">
           <div class="price-name">Gratis</div>
@@ -683,6 +716,53 @@ async function muatHargaLanding() {
   }
 }
 document.addEventListener('DOMContentLoaded', muatHargaLanding);
+</script>
+
+<!-- ===== PROMO KILAT LANDING — fetch dari Supabase, sync dgn upgrade.html & admin panel ===== -->
+<script>
+async function muatFlashPromoLanding() {
+  const banner = document.getElementById('flashPromoBannerLanding');
+  if (!banner) return;
+  try {
+    if (typeof window.supabase === 'undefined') return;
+    const sbFlash = window.supabase.createClient(
+      'https://dkpztybbcvvzatgwhano.supabase.co',
+      'sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm'
+    );
+    const { data: fp, error } = await sbFlash.from('flash_promo_settings').select('*').eq('id', 1).maybeSingle();
+    if (error || !fp || !fp.active) { banner.style.display = 'none'; return; }
+
+    const label     = fp.label      || 'Promo Kilat Hanya Hari Ini!!';
+    const deskripsi = fp.deskripsi  || 'Unlimited Akses Sepuasnya Dalam Satu Hari';
+    const harga     = Number(fp.harga       || 19000);
+    const durasi    = Number(fp.durasi_hari || 1);
+
+    document.getElementById('flashPromoLabelLanding').textContent    = label;
+    document.getElementById('flashPromoDeskripsLanding').textContent = deskripsi;
+    document.getElementById('flashPromoAksesLanding').textContent    =
+      durasi === 1 ? '⏱️ Akses 1 hari penuh' : `⏱️ Akses ${durasi} hari`;
+    document.getElementById('flashPromoHargaLanding').textContent    = harga.toLocaleString('id-ID');
+
+    // Countdown real-time sampai tengah malam
+    const countdownEl = document.getElementById('flashCountdownLanding');
+    if (countdownEl) {
+      const midnight = new Date(); midnight.setHours(24, 0, 0, 0);
+      function updateCountdown() {
+        const diff = midnight - new Date();
+        if (diff <= 0) { countdownEl.textContent = 'Penawaran telah berakhir'; return; }
+        const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+        const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+        const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+        countdownEl.textContent = `Berakhir dalam ${h}:${m}:${s}`;
+      }
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    }
+
+    banner.style.display = 'block';
+  } catch (e) { console.warn('muatFlashPromoLanding gagal:', e); }
+}
+document.addEventListener('DOMContentLoaded', muatFlashPromoLanding);
 </script>
 </body>
 </html>
