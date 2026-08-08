@@ -4,222 +4,607 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#1A3DC2">
-<meta name="description" content="asistenku.pro – Asisten AI pintar untuk tugas akademik dan profesional">
+
+<title>asistenku.pro – Asisten AI untuk Skripsi, Tugas, Jurnal &amp; Presentasi Kuliah</title>
+<meta name="description" content="asistenku.pro adalah asisten AI untuk mahasiswa &amp; profesional: bantu susun skripsi, tesis, jurnal, makalah, presentasi (PPT), parafrase &amp; cek plagiasi, sampai konsultasi AI 24 jam lewat DoktrAI. Coba gratis sekarang.">
+<meta name="keywords" content="asisten AI skripsi, aplikasi bantu skripsi, AI tugas kuliah, parafrase online, cek plagiasi, buat jurnal ilmiah, buat PPT presentasi, asistenku.pro">
+<link rel="canonical" href="https://www.asistenku.pro/">
+
 <link rel="icon" type="image/png" href="cat-logo.png">
 <link rel="apple-touch-icon" href="cat-logo.png">
-<meta property="og:title" content="asistenku.pro – Asisten AI untuk Tugas Akademik">
-<meta property="og:description" content="Asisten AI pintar untuk membantu tugas akademik dan profesionalmu.">
-<meta property="og:image" content="https://www.asistenku.pro/cat-logo.png">
+
+<meta property="og:title" content="asistenku.pro – Asisten AI untuk Tugas Akademik &amp; Profesional">
+<meta property="og:description" content="Susun skripsi, jurnal, makalah, presentasi, dan lainnya lebih cepat dengan bantuan AI. Mulai gratis, tanpa kartu kredit.">
+<meta property="og:image" content="https://www.asistenku.pro/cat-main.png">
 <meta property="og:url" content="https://www.asistenku.pro/">
 <meta property="og:type" content="website">
+<meta property="og:locale" content="id_ID">
 <meta name="twitter:card" content="summary_large_image">
-<title>asistenku.pro</title>
+<meta name="twitter:title" content="asistenku.pro – Asisten AI untuk Tugas Akademik &amp; Profesional">
+<meta name="twitter:description" content="Susun skripsi, jurnal, makalah, presentasi, dan lainnya lebih cepat dengan bantuan AI.">
+<meta name="twitter:image" content="https://www.asistenku.pro/cat-main.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<script src="theme.js"></script>
-<script src="i18n.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "asistenku.pro",
+  "operatingSystem": "Web, Android",
+  "applicationCategory": "EducationalApplication",
+  "url": "https://www.asistenku.pro/",
+  "image": "https://www.asistenku.pro/cat-main.png",
+  "description": "Asisten AI untuk membantu menyusun skripsi, tesis, jurnal, makalah, presentasi, parafrase, cek plagiasi, dan konsultasi AI untuk mahasiswa dan profesional.",
+  "offers": [
+    { "@type": "Offer", "name": "Gratis", "price": "0", "priceCurrency": "IDR" },
+    { "@type": "Offer", "name": "Standar", "price": "20000", "priceCurrency": "IDR" },
+    { "@type": "Offer", "name": "Pro", "price": "59000", "priceCurrency": "IDR" },
+    { "@type": "Offer", "name": "Lanjutan", "price": "99000", "priceCurrency": "IDR" }
+  ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "ratingCount": "12450"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Apa itu asistenku.pro?",
+      "acceptedAnswer": { "@type": "Answer", "text": "asistenku.pro adalah asisten AI yang membantu mahasiswa dan profesional menyusun skripsi, tesis, jurnal, makalah, presentasi, hingga parafrase dan cek plagiasi, lengkap dengan fitur konsultasi AI bernama DoktrAI." }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah asistenku.pro gratis?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Ya. Ada paket Gratis dengan kuota harian terbatas. Untuk kebutuhan lebih besar, tersedia paket Standar, Pro, dan Lanjutan dengan kuota lebih luas." }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah hasil dari asistenku.pro bebas plagiarisme?",
+      "acceptedAnswer": { "@type": "Answer", "text": "asistenku.pro dilengkapi fitur parafrase dan pengecekan plagiasi sehingga pengguna dapat meninjau dan menyesuaikan orisinalitas dokumen sebelum dikumpulkan." }
+    },
+    {
+      "@type": "Question",
+      "name": "Bagaimana cara mulai menggunakan asistenku.pro?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Daftar akun gratis, lalu pilih fitur yang dibutuhkan seperti Skripsi, Jurnal, Makalah, atau Presentasi dari halaman Beranda." }
+    }
+  ]
+}
+</script>
+
 <style>
-/* ── Splash-specific overrides ── */
-.splash {
-  width: 100%; max-width: 430px; min-height: 100vh; min-height: 100dvh;
-  background: #fff; display: flex; flex-direction: column;
-  align-items: center; position: relative; overflow: hidden;
+:root{
+  --brand:#1A3DC2; --brand-light:#3B5BFF; --brand-dark:#0D2490;
+  --brand-50:#EEF2FF; --brand-100:#DCE4FF;
+  --ink:#10142B; --ink-soft:#4B5170;
+  --paper:#FBF9F4; --paper-2:#F3EFE4;
+  --green:#16A34A; --green-50:#F0FDF4;
+  --purple:#7C3AED; --purple-50:#F5F3FF;
+  --gold:#C99A2E; --gold-50:#FBF3DF;
+  --line:#E7E2D3;
+  --r:16px; --r-lg:22px; --r-xl:28px;
+  --shadow:0 20px 44px -20px rgba(16,20,43,.28);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:"Plus Jakarta Sans",system-ui,sans-serif;
+  background:var(--paper); color:var(--ink);
+  line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.serif{ font-family:"Fraunces",Georgia,serif; letter-spacing:-.01em; }
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;display:block;}
+.container{width:100%;max-width:1160px;margin:0 auto;padding:0 24px;}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--brand); background:var(--brand-50); border:1px solid var(--brand-100);
+  padding:6px 14px;border-radius:999px;
+}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-family:inherit;font-weight:700;font-size:15px;
+  padding:14px 26px;border-radius:999px;border:1.5px solid transparent;
+  cursor:pointer;transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  white-space:nowrap;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--brand);color:#fff;box-shadow:0 14px 28px -12px rgba(26,61,194,.55);}
+.btn-primary:hover{background:var(--brand-dark);}
+.btn-ghost{background:#fff;color:var(--ink);border-color:var(--line);}
+.btn-ghost:hover{border-color:var(--brand);color:var(--brand);}
+.btn-block{width:100%;}
+.btn-sm{padding:10px 18px;font-size:13.5px;}
+
+.site-header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(251,249,244,.85); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.site-header .inner{display:flex;align-items:center;justify-content:space-between;height:74px;}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:20px;color:var(--brand-dark);}
+.brand img{width:34px;height:34px;object-fit:contain;}
+.brand .pro{background:var(--brand);color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:7px;}
+.nav-links{display:flex;align-items:center;gap:30px;font-size:14.5px;font-weight:600;color:var(--ink-soft);}
+.nav-links a:hover{color:var(--brand);}
+.header-cta{display:flex;align-items:center;gap:10px;}
+@media (max-width:860px){
+  .nav-links{display:none;}
+  .header-cta .btn-ghost{display:none;}
 }
 
-/* Top area */
-.splash-top {
-  width: 100%; padding: 64px 28px 0;
-  display: flex; flex-direction: column; align-items: center; gap: 12px;
-  z-index: 2; position: relative;
+.hero{padding:64px 0 40px;position:relative;overflow:hidden;}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;}
+.hero h1{font-size:44px;line-height:1.08;font-weight:600;margin:18px 0 20px;color:var(--ink);}
+.hero h1 em{font-style:italic;color:var(--brand);}
+.hero p.lead{font-size:17.5px;color:var(--ink-soft);max-width:520px;margin-bottom:30px;}
+.hero-ctas{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px;}
+.hero-trust{display:flex;gap:22px;flex-wrap:wrap;font-size:13px;color:var(--ink-soft);}
+.hero-trust span{display:flex;align-items:center;gap:6px;font-weight:600;}
+.hero-trust svg{width:16px;height:16px;color:var(--green);flex-shrink:0;}
+.hero-art{position:relative;display:flex;justify-content:center;}
+.hero-art .blob{
+  position:absolute;inset:6% 8%;
+  background:radial-gradient(circle at 30% 25%, var(--brand-100), transparent 60%),
+             radial-gradient(circle at 75% 75%, var(--gold-50), transparent 55%);
+  border-radius:48% 52% 55% 45% / 45% 48% 52% 55%;
+  z-index:0;
 }
-.splash-logo {
-  display: flex; align-items: center;
-  font-size: 34px; font-weight: 800; color: #1A3DC2; letter-spacing: -1px;
+.hero-art img{position:relative;z-index:1;width:100%;max-width:380px;filter:drop-shadow(0 24px 30px rgba(16,20,43,.18));}
+.hero-badge{
+  position:absolute;z-index:2;background:#fff;border:1px solid var(--line);
+  border-radius:16px;padding:12px 16px;box-shadow:var(--shadow);
+  font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:10px;
 }
-.splash-logo-pro {
-  background: #3B5BFF; color: #fff;
-  font-size: 21px; font-weight: 700;
-  padding: 2px 10px; border-radius: 9px; margin-left: 1px;
-}
-.splash-tagline {
-  font-size: 16px; color: #6B7280; text-align: center;
-  line-height: 1.5; max-width: 280px;
-}
-
-/* Wave background */
-.wave-bg {
-  position: absolute;
-  bottom: 230px; left: 0; right: 0; height: 340px;
-  background: linear-gradient(180deg, #EEF2FF 0%, #C7D5FF 100%);
-  border-radius: 58% 58% 0 0 / 38% 38% 0 0;
-  z-index: 1;
-}
-
-/* Mascot */
-.splash-mascot {
-  width: 100%; max-width: 340px;
-  position: relative; z-index: 2; margin-top: 6px;
-  display: flex; justify-content: center;
+.hero-badge.b1{top:6%;right:0;color:var(--brand);}
+.hero-badge.b2{bottom:10%;left:-4%;color:var(--green);}
+.hero-badge .dot{width:9px;height:9px;border-radius:50%;background:currentColor;}
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr;}
+  .hero-art{order:-1;margin-bottom:8px;}
+  .hero h1{font-size:34px;}
+  .hero-badge{display:none;}
 }
 
-/* Sparkles */
-.sparkle {
-  position: absolute; border-radius: 50%; z-index: 3;
-  animation: sparklePulse 3s ease-in-out infinite alternate;
-}
-@keyframes sparklePulse {
-  0%   { transform: scale(1) rotate(0deg); opacity: .5; }
-  100% { transform: scale(1.3) rotate(30deg); opacity: .9; }
-}
-/* 4-point star shape */
-.star {
-  position: absolute; z-index: 3;
-  animation: starFloat 2.5s ease-in-out infinite alternate;
-}
-@keyframes starFloat {
-  0%   { transform: translateY(0) scale(1); opacity: .6; }
-  100% { transform: translateY(-10px) scale(1.1); opacity: 1; }
-}
+.stats-strip{background:var(--brand-dark);color:#fff;padding:26px 0;}
+.stats-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.stat{text-align:center;flex:1;min-width:120px;}
+.stat .val{font-family:"Fraunces",serif;font-size:26px;font-weight:600;}
+.stat .lbl{font-size:12.5px;opacity:.8;margin-top:2px;}
 
-/* Features bar */
-.features-bar {
-  background: #fff; border-radius: 20px 20px 0 0;
-  width: 100%; padding: 20px 18px 0;
-  z-index: 3; box-shadow: 0 -6px 28px rgba(27,61,194,.07);
-}
-.features-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
-.feat-item { display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; }
-.feat-icon {
-  width: 46px; height: 46px; background: #EEF2FF; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-}
-.feat-icon svg { width: 22px; height: 22px; color: #1A3DC2; }
-.feat-label { font-size: 12px; font-weight: 700; color: #1A3DC2; }
-.feat-desc  { font-size: 10px; color: #6B7280; line-height: 1.3; }
+section{padding:88px 0;}
+.sec-head{max-width:640px;margin:0 auto 48px;text-align:center;}
+.sec-head h2{font-size:32px;font-weight:600;margin:14px 0 12px;}
+.sec-head p{color:var(--ink-soft);font-size:15.5px;}
 
-/* Loading bar area */
-.splash-footer {
-  background: #1A3DC2; width: 100%;
-  padding: 20px 32px 40px;
-  display: flex; flex-direction: column; align-items: center; gap: 12px;
-  z-index: 3;
+.feat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+.feat-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:26px 22px;display:flex;flex-direction:column;gap:14px;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
-.loading-text { color: #fff; font-size: 14px; font-weight: 500; }
-.loading-track {
-  width: 100%; max-width: 260px; height: 6px;
-  background: rgba(255,255,255,.25); border-radius: 99px; overflow: hidden;
+.feat-card:hover{transform:translateY(-5px);box-shadow:var(--shadow);border-color:transparent;}
+.feat-icon{
+  width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+  color:#fff;
 }
-.loading-fill {
-  height: 100%; width: 0%; background: #fff; border-radius: 99px;
-  transition: width .4s ease;
+.feat-icon svg{width:23px;height:23px;}
+.feat-card h3{font-family:"Plus Jakarta Sans";font-weight:800;font-size:16px;}
+.feat-card p{font-size:13.5px;color:var(--ink-soft);flex:1;}
+.feat-link{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:5px;}
+.feat-link svg{width:12px;height:12px;transition:transform .15s;}
+.feat-card:hover .feat-link svg{transform:translateX(3px);}
+.c-blue .feat-icon{background:linear-gradient(135deg,#1A2B6D,var(--brand-light));}
+.c-blue .feat-link{color:var(--brand);}
+.c-green .feat-icon{background:linear-gradient(135deg,#052e16,#16A34A);}
+.c-green .feat-link{color:var(--green);}
+.c-purple .feat-icon{background:linear-gradient(135deg,#2e1065,var(--purple));}
+.c-purple .feat-link{color:var(--purple);}
+.c-gold .feat-icon{background:linear-gradient(135deg,#7a5a12,var(--gold));}
+.c-gold .feat-link{color:var(--gold);}
+@media (max-width:920px){.feat-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:560px){.feat-grid{grid-template-columns:1fr;}}
+
+.how{background:var(--paper-2);}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;}
+.how-card{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:32px 26px;}
+.how-num{
+  font-family:"Fraunces",serif;font-size:15px;font-weight:600;color:var(--brand);
+  width:38px;height:38px;border-radius:50%;border:1.5px solid var(--brand-100);
+  display:flex;align-items:center;justify-content:center;margin-bottom:18px;
 }
-.start-btn {
-  display: none;
-  width: 100%; max-width: 260px; padding: 14px;
-  background: #fff; color: #1A3DC2;
-  font-family: inherit; font-size: 16px; font-weight: 700;
-  border: none; border-radius: 14px; cursor: pointer;
-  transition: transform .1s;
+.how-card h3{font-size:17px;font-weight:800;margin-bottom:8px;}
+.how-card p{font-size:14px;color:var(--ink-soft);}
+@media (max-width:820px){.how-grid{grid-template-columns:1fr;}}
+
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
+.why-card{text-align:center;padding:8px;}
+.why-card .ic{
+  width:56px;height:56px;border-radius:16px;background:var(--brand-50);color:var(--brand);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
 }
-.start-btn:hover { transform: scale(1.02); }
-.start-btn:active { transform: scale(.98); }
+.why-card .ic svg{width:26px;height:26px;}
+.why-card h3{font-size:15.5px;font-weight:800;margin-bottom:6px;}
+.why-card p{font-size:13.5px;color:var(--ink-soft);}
+@media (max-width:820px){.why-grid{grid-template-columns:repeat(2,1fr);}}
+
+.price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;align-items:stretch;}
+.price-card{
+  background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg);
+  padding:28px 22px;display:flex;flex-direction:column;gap:16px;position:relative;
+}
+.price-card.featured{border-color:var(--brand);box-shadow:var(--shadow);transform:translateY(-8px);}
+.price-tag{
+  position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  background:var(--brand);color:#fff;font-size:11px;font-weight:800;letter-spacing:.03em;
+  padding:5px 14px;border-radius:999px;
+}
+.price-name{font-size:12.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);}
+.price-amt{font-family:"Fraunces",serif;font-size:30px;font-weight:600;}
+.price-amt span{font-size:13px;font-weight:500;color:var(--ink-soft);font-family:"Plus Jakarta Sans";}
+.price-list{list-style:none;display:flex;flex-direction:column;gap:10px;font-size:13.5px;color:var(--ink-soft);flex:1;}
+.price-list li{display:flex;gap:8px;align-items:flex-start;}
+.price-list svg{width:15px;height:15px;color:var(--green);flex-shrink:0;margin-top:2px;}
+@media (max-width:920px){.price-grid{grid-template-columns:repeat(2,1fr);}.price-card.featured{transform:none;}}
+@media (max-width:560px){.price-grid{grid-template-columns:1fr;}}
+
+.faq{max-width:760px;margin:0 auto;}
+.faq-item{border-bottom:1px solid var(--line);}
+.faq-item summary{
+  list-style:none;cursor:pointer;padding:22px 4px;font-weight:700;font-size:15.5px;
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item summary .plus{width:22px;height:22px;flex-shrink:0;border-radius:50%;border:1.5px solid var(--line);position:relative;}
+.faq-item summary .plus::before,.faq-item summary .plus::after{content:"";position:absolute;background:var(--ink);top:50%;left:50%;}
+.faq-item summary .plus::before{width:9px;height:1.6px;transform:translate(-50%,-50%);}
+.faq-item summary .plus::after{width:1.6px;height:9px;transform:translate(-50%,-50%);transition:opacity .15s;}
+.faq-item[open] summary .plus::after{opacity:0;}
+.faq-item p{padding:0 4px 22px;color:var(--ink-soft);font-size:14.5px;max-width:640px;}
+
+.cta-band{
+  background:linear-gradient(135deg,var(--brand-dark),var(--brand));
+  color:#fff;border-radius:var(--r-xl);padding:56px 40px;
+  display:flex;align-items:center;justify-content:space-between;gap:30px;flex-wrap:wrap;
+}
+.cta-band h2{font-size:28px;font-weight:600;max-width:420px;}
+.cta-band p{opacity:.85;margin-top:8px;font-size:14.5px;max-width:420px;}
+.cta-band .btn-primary{background:#fff;color:var(--brand-dark);box-shadow:none;}
+.cta-band .btn-primary:hover{background:var(--paper);}
+
+footer{border-top:1px solid var(--line);padding:56px 0 30px;background:var(--paper-2);}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:30px;margin-bottom:40px;}
+.foot-brand p{color:var(--ink-soft);font-size:13.5px;margin-top:12px;max-width:260px;}
+.foot-col h4{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;color:var(--ink-soft);}
+.foot-col a{display:block;font-size:13.5px;color:var(--ink);opacity:.85;margin-bottom:10px;}
+.foot-col a:hover{color:var(--brand);opacity:1;}
+.foot-bottom{border-top:1px solid var(--line);padding-top:22px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--ink-soft);}
+@media (max-width:820px){.foot-grid{grid-template-columns:1fr 1fr;}}
 </style>
 </head>
 <body>
-<div class="splash">
-  <!-- Sparkle decorations -->
-  <div class="star" style="top:105px;left:52px;animation-delay:.1s;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="#3B5BFF" opacity=".7"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-  </div>
-  <div class="star" style="top:88px;right:56px;animation-delay:.6s;">
-    <svg width="10" height="10" viewBox="0 0 24 24" fill="#A5B4FC" opacity=".8"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-  </div>
-  <div class="star" style="top:195px;left:28px;animation-delay:1s;">
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="#6366F1" opacity=".6"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-  </div>
-  <div class="star" style="top:210px;right:36px;animation-delay:.3s;">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="#93C5FD" opacity=".7"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-  </div>
 
-  <!-- Top brand -->
-  <div class="splash-top">
-    <div class="splash-logo">asistenku<span class="splash-logo-pro">.pro</span></div>
-    <p class="splash-tagline">Asisten AI pintar untuk membantu tugas akademik dan profesionalmu.</p>
+<header class="site-header">
+  <div class="container inner">
+    <a href="index.html" class="brand"><img src="cat-logo.png" alt="Logo asistenku.pro"> asistenku<span class="pro">.pro</span></a>
+    <nav class="nav-links">
+      <a href="#fitur">Fitur</a>
+      <a href="#cara-kerja">Cara Kerja</a>
+      <a href="#harga">Harga</a>
+      <a href="#faq">FAQ</a>
+      <a href="bantuan.html">Bantuan</a>
+    </nav>
+    <div class="header-cta">
+      <a href="login.html" class="btn btn-ghost btn-sm">Masuk</a>
+      <a href="register.html" class="btn btn-primary btn-sm">Daftar Gratis</a>
+    </div>
   </div>
+</header>
 
-  <!-- Wave bg -->
-  <div class="wave-bg"></div>
+<main>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <span class="eyebrow">🐾 Asisten AI Akademik &amp; Profesional</span>
+        <h1>Selesaikan tugas kuliah &amp; skripsi <em>lebih tenang</em>, ditemani AI.</h1>
+        <p class="lead">asistenku.pro membantu kamu menyusun skripsi, tesis, jurnal, makalah, sampai presentasi — lengkap dengan parafrase, cek plagiasi, dan konsultasi AI 24 jam lewat DoktrAI.</p>
+        <div class="hero-ctas">
+          <a href="register.html" class="btn btn-primary">Mulai Gratis Sekarang</a>
+          <a href="#fitur" class="btn btn-ghost">Lihat Semua Fitur</a>
+        </div>
+        <div class="hero-trust">
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Tanpa kartu kredit</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Kuota harian gratis</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Data privasi terjaga</span>
+        </div>
+      </div>
+      <div class="hero-art">
+        <div class="blob"></div>
+        <img src="cat-main.png" alt="Maskot AI asistenku.pro">
+        <div class="hero-badge b1"><span class="dot"></span>245.800+ dokumen dibuat</div>
+        <div class="hero-badge b2"><span class="dot"></span>Rating 4.9 / 5 pengguna</div>
+      </div>
+    </div>
+  </section>
 
-  <!-- Mascot -->
-  <div class="splash-mascot">
-<img src="mascot-logo.png" alt="Maskot asistenku.pro" style="width:100%;max-width:260px;display:block;margin:0 auto;">
-  </div>
-
-  <!-- Features -->
-  <div class="features-bar">
-    <div class="features-grid">
-      <div class="feat-item">
-        <div class="feat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-        </div>
-        <div class="feat-label">Cerdas</div>
-        <div class="feat-desc">AI terdepan untuk hasil terbaik</div>
-      </div>
-      <div class="feat-item">
-        <div class="feat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <div class="feat-label">Aman</div>
-        <div class="feat-desc">Data dan privasi terjamin</div>
-      </div>
-      <div class="feat-item">
-        <div class="feat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        </div>
-        <div class="feat-label">Cepat</div>
-        <div class="feat-desc">Kerjakan apa saja dalam detik</div>
-      </div>
-      <div class="feat-item">
-        <div class="feat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <div class="feat-label">Serba Bisa</div>
-        <div class="feat-desc">Akademik, kerja, konsultasi</div>
-      </div>
+  <div class="stats-strip">
+    <div class="container stats-row">
+      <div class="stat"><div class="val">12.450+</div><div class="lbl">Pengguna Aktif</div></div>
+      <div class="stat"><div class="val">245.800+</div><div class="lbl">Dokumen Dibuat</div></div>
+      <div class="stat"><div class="val">99.9%</div><div class="lbl">Aman &amp; Terpercaya</div></div>
+      <div class="stat"><div class="val">4.9/5</div><div class="lbl">Rating Pengguna</div></div>
     </div>
   </div>
 
-  <!-- Loading footer -->
-  <div class="splash-footer">
-    <p class="loading-text" id="loadText">Menyiapkan pengalaman terbaik untukmu...</p>
-    <div class="loading-track">
-      <div class="loading-fill" id="loadFill"></div>
+  <section id="fitur">
+    <div class="container">
+      <div class="sec-head">
+        <span class="eyebrow">Fitur Lengkap</span>
+        <h2>Semua yang kamu butuhkan, dalam satu asisten</h2>
+        <p>Delapan fitur inti asistenku.pro saling terhubung — mulai dari riset, penulisan, sampai persiapan sidang, semua bisa dikerjakan tanpa pindah aplikasi.</p>
+      </div>
+
+      <div class="feat-grid">
+        <a class="feat-card c-blue" href="skripsi.html">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+          <h3>Skripsi, Tesis &amp; Disertasi</h3>
+          <p>Susun naskah akademik lengkap BAB I–V, outline, hingga revisi — sesuai kaidah penulisan ilmiah.</p>
+          <span class="feat-link">Buka fitur <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></span>
+        </a>
+
+        <a class="feat-card c-green" href="jurnal.html">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg></div>
+          <h3>Jurnal Ilmiah</h3>
+          <p>Buat draf jurnal ilmiah dengan struktur akademik yang rapi dan siap disesuaikan sebelum submit.</p>
+          <span class="feat-link">Buka fitur <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></span>
+        </a>
+
+        <a class="feat-card c-gold" href="makalah.html">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <h3>Makalah</h3>
+          <p>Susun makalah kuliah lengkap dengan referensi dan struktur bab yang jelas dalam hitungan menit.</p>
+          <span class="feat-link">Buka fitur <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></span>
+        </a>
+
+        <a class="feat-card c-purple" href="presentasi.html">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+          <h3>Presentasi (PPT)</h3>
+          <p>Hasilkan slide presentasi otomatis dari materi kuliah atau hasil skripsi, siap dipakai untuk sidang.</p>
+          <span class="feat-link">Buka fitur <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></span>
+        </a>
+
+        <a class="feat-card c-blue" href="parafrase.html">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></div>
+          <h3>Parafrase &amp; Cek Plagiasi</h3>
+          <p>Parafrase otomatis dan cek tingkat plagiarisme dokumen sebelum kamu kumpulkan.</p>
+          <span class="feat-link">Buka fitur <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></span>
+        </a>
+
+        <a class="feat-card c-green" href="tugas.html">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          <h3>Tugas &amp; Project</h3>
+          <p>Satu halaman serba-bisa untuk mengerjakan tugas kuliah maupun project profesional apa pun.</p>
+          <span class="feat-link">Buka fitur <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></span>
+        </a>
+
+        <a class="feat-card c-purple" href="doktrai.html">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <h3>DoktrAI — Konsultasi AI</h3>
+          <p>Chat bebas dengan AI untuk tanya-jawab, revisi, dan belajar topik apa saja, 24 jam nonstop.</p>
+          <span class="feat-link">Buka fitur <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></span>
+        </a>
+
+        <a class="feat-card c-gold" href="abstrak.html">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg></div>
+          <h3>Abstrak Otomatis</h3>
+          <p>Hasilkan abstrak dari dokumen skripsi atau tugas akhir secara otomatis dan ringkas.</p>
+          <span class="feat-link">Buka fitur <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg></span>
+        </a>
+      </div>
     </div>
-    <button class="start-btn" id="startBtn" onclick="location.href='login.html'">
-      Mulai Sekarang →
-    </button>
+  </section>
+
+  <section id="cara-kerja" class="how">
+    <div class="container">
+      <div class="sec-head">
+        <span class="eyebrow">Cara Kerja</span>
+        <h2>Tiga langkah, dokumen siap</h2>
+        <p>Tidak perlu instalasi rumit. Buka browser, daftar, dan langsung mulai mengerjakan.</p>
+      </div>
+      <div class="how-grid">
+        <div class="how-card">
+          <div class="how-num">01</div>
+          <h3>Daftar akun gratis</h3>
+          <p>Buat akun dalam hitungan detik dan langsung dapat kuota harian gratis untuk mencoba semua fitur.</p>
+        </div>
+        <div class="how-card">
+          <div class="how-num">02</div>
+          <h3>Pilih fitur yang dibutuhkan</h3>
+          <p>Dari Beranda, pilih Skripsi, Jurnal, Makalah, Presentasi, Parafrase, Tugas, atau DoktrAI sesuai kebutuhanmu.</p>
+        </div>
+        <div class="how-card">
+          <div class="how-num">03</div>
+          <h3>Unduh &amp; sesuaikan hasil</h3>
+          <p>Tinjau hasil, revisi lewat DoktrAI bila perlu, lalu unduh dokumen dan simpan di halaman Dokumen kamu.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="sec-head">
+        <span class="eyebrow">Kenapa asistenku.pro</span>
+        <h2>Dibangun untuk menemani, bukan menggantikan</h2>
+      </div>
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <h3>Privasi Terjaga</h3>
+          <p>Dokumen dan percakapanmu bersifat pribadi dan hanya bisa diakses lewat akunmu sendiri.</p>
+        </div>
+        <div class="why-card">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+          <h3>Cepat &amp; Responsif</h3>
+          <p>Hasil draf dikerjakan dalam hitungan menit, sehingga kamu punya lebih banyak waktu untuk revisi.</p>
+        </div>
+        <div class="why-card">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></div>
+          <h3>Bebas Plagiarisme</h3>
+          <p>Fitur parafrase dan cek plagiasi membantu memastikan orisinalitas sebelum dokumen dikumpulkan.</p>
+        </div>
+        <div class="why-card">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+          <h3>Support Responsif</h3>
+          <p>Ada kendala? Tim bantuan kami siap membantu lewat halaman Bantuan &amp; Tanya Jawab.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="harga" class="how">
+    <div class="container">
+      <div class="sec-head">
+        <span class="eyebrow">Harga</span>
+        <h2>Mulai gratis, upgrade saat butuh lebih</h2>
+        <p>Semua paket bisa dicoba tanpa komitmen jangka panjang — berhenti berlangganan kapan saja.</p>
+      </div>
+      <div class="price-grid">
+        <div class="price-card">
+          <div class="price-name">Gratis</div>
+          <div class="price-amt">Rp0</div>
+          <ul class="price-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Kuota harian dasar</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Akses semua fitur inti</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Chat DoktrAI terbatas</li>
+          </ul>
+          <a href="register.html" class="btn btn-ghost btn-block btn-sm">Daftar Gratis</a>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Standar</div>
+          <div class="price-amt">Rp20.000<span>/bulan</span></div>
+          <ul class="price-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Kuota halaman lebih besar</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Kuota chat DoktrAI lebih banyak</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Cocok untuk tugas rutin</li>
+          </ul>
+          <a href="upgrade.html" class="btn btn-ghost btn-block btn-sm">Pilih Standar</a>
+        </div>
+        <div class="price-card featured">
+          <div class="price-tag">Paling Populer</div>
+          <div class="price-name">Pro</div>
+          <div class="price-amt">Rp59.000<span>/bulan</span></div>
+          <ul class="price-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Kuota dokumen &amp; halaman luas</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Prioritas proses lebih cepat</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Ideal untuk skripsi &amp; tesis</li>
+          </ul>
+          <a href="upgrade.html" class="btn btn-primary btn-block btn-sm">Pilih Pro</a>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Lanjutan</div>
+          <div class="price-amt">Rp99.000<span>/bulan</span></div>
+          <ul class="price-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Kuota paling besar</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Semua fitur tanpa batas wajar</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Untuk kebutuhan intensif</li>
+          </ul>
+          <a href="upgrade.html" class="btn btn-ghost btn-block btn-sm">Pilih Lanjutan</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="container">
+      <div class="sec-head">
+        <span class="eyebrow">FAQ</span>
+        <h2>Pertanyaan yang sering ditanyakan</h2>
+      </div>
+      <div class="faq">
+        <details class="faq-item" open>
+          <summary>Apa itu asistenku.pro?<span class="plus"></span></summary>
+          <p>asistenku.pro adalah asisten AI yang membantu mahasiswa dan profesional menyusun skripsi, tesis, jurnal, makalah, presentasi, hingga parafrase dan cek plagiasi — lengkap dengan fitur konsultasi AI bernama DoktrAI.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Apakah asistenku.pro gratis digunakan?<span class="plus"></span></summary>
+          <p>Ya. Tersedia paket Gratis dengan kuota harian. Untuk kebutuhan lebih besar, ada paket Standar, Pro, dan Lanjutan dengan kuota lebih luas dan proses lebih cepat.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Apakah hasilnya bebas plagiarisme?<span class="plus"></span></summary>
+          <p>asistenku.pro dilengkapi fitur parafrase dan pengecekan plagiasi sehingga kamu bisa meninjau dan meningkatkan orisinalitas dokumen sebelum dikumpulkan.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Bagaimana cara mulai menggunakan asistenku.pro?<span class="plus"></span></summary>
+          <p>Daftar akun gratis lewat tombol "Daftar Gratis", lalu pilih fitur yang kamu butuhkan dari halaman Beranda — misalnya Skripsi, Jurnal, Makalah, atau Presentasi.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Apakah data saya aman?<span class="plus"></span></summary>
+          <p>Keamanan dan privasi data pengguna menjadi prioritas kami. Detail lebih lanjut bisa dilihat di halaman Keamanan &amp; Privasi.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="container">
+      <div class="cta-band">
+        <div>
+          <h2>Siap kerjakan tugas berikutnya bareng AI?</h2>
+          <p>Daftar gratis hari ini, tanpa kartu kredit, dan rasakan sendiri bedanya.</p>
+        </div>
+        <a href="register.html" class="btn btn-primary">Daftar Gratis Sekarang</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="index.html" class="brand"><img src="cat-logo.png" alt="Logo asistenku.pro" style="width:30px;height:30px;"> asistenku<span class="pro">.pro</span></a>
+        <p>Asisten AI untuk membantu tugas akademik dan profesional — dari skripsi, jurnal, makalah, presentasi, sampai konsultasi AI harian.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Fitur</h4>
+        <a href="skripsi.html">Skripsi &amp; Tesis</a>
+        <a href="jurnal.html">Jurnal</a>
+        <a href="makalah.html">Makalah</a>
+        <a href="presentasi.html">Presentasi</a>
+        <a href="parafrase.html">Parafrase</a>
+        <a href="doktrai.html">DoktrAI</a>
+      </div>
+      <div class="foot-col">
+        <h4>Perusahaan</h4>
+        <a href="bantuan.html">Bantuan</a>
+        <a href="tanyajawab.html">Tanya Jawab</a>
+        <a href="keamanan.html">Keamanan &amp; Privasi</a>
+        <a href="syarat-ketentuan.html">Syarat &amp; Ketentuan</a>
+      </div>
+      <div class="foot-col">
+        <h4>Akun</h4>
+        <a href="login.html">Masuk</a>
+        <a href="register.html">Daftar</a>
+        <a href="upgrade.html">Harga &amp; Paket</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© <span id="yr"></span> asistenku.pro. Seluruh hak cipta dilindungi.</span>
+      <span>Dibuat dengan 🐾 untuk mahasiswa &amp; profesional Indonesia.</span>
+    </div>
   </div>
-</div>
+</footer>
 
-<script>
-// Animate loading bar
-const fill = document.getElementById('loadFill');
-const text = document.getElementById('loadText');
-const btn  = document.getElementById('startBtn');
-
-let pct = 0;
-const interval = setInterval(() => {
-  pct = Math.min(pct + (Math.random() * 18 + 8), 100);
-  fill.style.width = pct + '%';
-  if (pct >= 100) {
-    clearInterval(interval);
-    text.textContent = 'Siap! Selamat datang 🎓';
-    btn.style.display = 'block';
-    // Auto-redirect after 3.5s
-    setTimeout(() => location.href = 'login.html', 3500);
-  }
-}, 200);
-</script>
+<script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
 </body>
 </html>
