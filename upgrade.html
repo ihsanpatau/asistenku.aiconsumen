@@ -572,23 +572,12 @@ async function prosesPayment(){
 
     document.getElementById('payModal').classList.remove('open');
 
-    // 3) Buka popup pembayaran Midtrans Snap
-    window.snap.pay(data.token, {
-      onSuccess: function(){
-        showToast('Pembayaran berhasil! Paket sedang diaktifkan...');
-        if (voucherCode) localStorage.removeItem('ak_voucher_applied');
-        setTimeout(() => location.reload(), 2000); // reload supaya sync dari Supabase (di-update webhook)
-      },
-      onPending: function(){
-        showToast('Menunggu pembayaran kamu. Paket aktif otomatis setelah pembayaran dikonfirmasi.', 4000);
-      },
-      onError: function(){
-        showToast('Pembayaran gagal. Silakan coba lagi.');
-      },
-      onClose: function(){
-        showToast('Pembayaran dibatalkan.');
-      }
-    });
+    // 3) Redirect ke halaman pembayaran Midtrans (kompatibel semua browser termasuk Safari iOS)
+    if (voucherCode) localStorage.removeItem('ak_voucher_applied');
+    showToast('Mengarahkan ke halaman pembayaran...');
+    setTimeout(() => {
+      window.location.href = `https://app.midtrans.com/snap/v2/vtweb/${data.token}`;
+    }, 800);
 
   } catch(e) {
     console.error('prosesPayment error:', e);
