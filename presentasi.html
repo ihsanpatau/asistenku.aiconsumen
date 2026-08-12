@@ -199,41 +199,19 @@
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function selectPill(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active');}
 
-// Batasi pilihan Jumlah Slide sesuai "Maks Slide PPT" yang diatur admin per paket (LIVE dari admin).
+// Jumlah Slide TIDAK lagi dikunci per-fitur — semua pilihan selalu bisa dipilih.
+// Gerbang satu-satunya adalah SISA KUOTA HALAMAN/HARI TOTAL (dicek AkAccount.cekKuotaHalaman()
+// saat tombol Generate ditekan), sama seperti Skripsi, Tugas, Makalah, Jurnal, dll —
+// supaya tidak ada lagi batasan ganda per fitur.
 function capPptSlidePills(){
   if (typeof AkAccount === 'undefined') return;
-  const plan = AkAccount.getPlan();
-  const maks = plan.pptMaksSlide || 999;
-  const pills = document.querySelectorAll('#pillsJumlah .type-pill');
-  let lastEnabled = null;
-  pills.forEach(btn => {
-    const nilai = parseInt(btn.textContent, 10) || 0;
-    if (nilai > maks) {
-      btn.disabled = true;
-      btn.style.opacity = '0.4';
-      btn.style.cursor = 'not-allowed';
-      btn.title = `Perlu upgrade paket — maks. ${maks} slide untuk paket ${plan.label}`;
-      btn.classList.remove('active');
-    } else {
-      btn.disabled = false;
-      btn.style.opacity = '';
-      btn.style.cursor = '';
-      btn.title = '';
-      lastEnabled = btn;
-    }
-  });
-  if (!document.querySelector('#pillsJumlah .type-pill.active') && lastEnabled) {
-    lastEnabled.classList.add('active');
-  }
+  const k = AkAccount.getKuota();
   const note = document.getElementById('pptSlideLockNote');
-  if (note) {
-    if (maks < 999) {
-      note.style.display = 'block';
-      note.innerHTML = `ℹ️ Paket ${plan.label} maks. ${maks} slide per presentasi. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade</a> untuk slide lebih banyak.`;
-    } else {
-      note.style.display = 'none';
-    }
-  }
+  if (!note) return;
+  const sisa = Math.max(0, k.halamanLimit - k.halamanUsed);
+  note.style.display = 'block';
+  note.style.color = 'var(--gray-500)';
+  note.innerHTML = `ℹ️ Sisa kuota halaman hari ini: <b>${sisa}${k.halamanLimit>=99999?'':' / '+k.halamanLimit}</b> halaman (dipakai bersama semua fitur dokumen).`;
 }
 document.addEventListener('DOMContentLoaded', capPptSlidePills);
 window.addEventListener('ak:synced', capPptSlidePills);
@@ -314,13 +292,6 @@ async function generateAll(){
   // --- GERBANG KUOTA: perkirakan halaman-setara dari jumlah slide (±3 slide = 1 halaman) ---
   let estimasiSlide = parseInt(jumlah, 10) || 15;
   if (typeof AkAccount !== 'undefined') {
-    // Jaring pengaman kedua: pastikan jumlah slide tidak melebihi batas admin,
-    // walau pill di UI seharusnya sudah mengunci pilihan di atas batas ini.
-    const maksSlide = AkAccount.getPlan().pptMaksSlide || 999;
-    if (estimasiSlide > maksSlide) {
-      showToast(`Jumlah slide dibatasi maks. ${maksSlide} untuk paket kamu saat ini.`, 4000);
-      estimasiSlide = maksSlide;
-    }
     const cek = AkAccount.cekKuotaHalaman(Math.max(1, Math.round(estimasiSlide / 3)));
     if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
     if (cek.partial) showToast(cek.pesan, 4000);

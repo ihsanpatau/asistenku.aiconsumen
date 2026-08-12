@@ -296,14 +296,14 @@
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function selectPill(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active');}
 
-// Ambil batas kata maks per proses dari paket aktif (diatur admin di kolom 'parafrase_maks_kata').
-function getMaksKataParafrase(){
-  if (typeof AkAccount === 'undefined') return 2000;
-  return AkAccount.getPlan().parafraseMaksKata || 2000;
-}
+// Parafrase & Cek Plagiasi TIDAK lagi dibatasi jumlah kata per proses secara
+// terpisah — gerbang satu-satunya adalah SISA KUOTA HALAMAN/HARI TOTAL (dicek
+// AkAccount.cekKuotaHalaman() saat tombol ditekan), sama seperti fitur lain.
 function syncMaksKataLabel(){
-  const maks = getMaksKataParafrase();
-  const teks = `Maks. ${maks.toLocaleString('id-ID')} kata per proses`;
+  if (typeof AkAccount === 'undefined') return;
+  const k = AkAccount.getKuota();
+  const sisa = Math.max(0, k.halamanLimit - k.halamanUsed);
+  const teks = `Sisa kuota hari ini: ${sisa}${k.halamanLimit>=99999?'':' / '+k.halamanLimit} halaman`;
   const l1 = document.getElementById('maksKataLabelParafrase'); if (l1) l1.textContent = teks;
   const l2 = document.getElementById('maksKataLabelCek'); if (l2) l2.textContent = teks;
 }
@@ -425,12 +425,6 @@ const style=()=>document.querySelectorAll('.type-pills')[1]?.querySelector('.typ
 async function doParafrase(){
   const text=document.getElementById('inputText').value.trim();
   if(!text){showToast('Masukkan teks yang ingin diparafrase');return;}
-  const maksKataParafrase = getMaksKataParafrase();
-  const wordsParafrase = text.split(/\s+/).filter(w=>w);
-  if (wordsParafrase.length > maksKataParafrase) {
-    showToast(`Maksimal ${maksKataParafrase.toLocaleString('id-ID')} kata per proses untuk paket kamu saat ini.`, 4000);
-    return;
-  }
   if (typeof AkAccount !== 'undefined') {
     const cek = AkAccount.cekKuotaHalaman();
     if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
@@ -487,9 +481,10 @@ async function doCekPlagiasi(mode){
   }
   const text=document.getElementById('cekInputText').value.trim();
   if(!text){showToast('Masukkan teks yang ingin dicek');return;}
-  const words=text.split(/\s+/).filter(w=>w);
-  const maksKataCek = getMaksKataParafrase();
-  if(words.length>maksKataCek){showToast(`Maksimal ${maksKataCek.toLocaleString('id-ID')} kata per proses untuk paket kamu saat ini.`);return;}
+  if (typeof AkAccount !== 'undefined') {
+    const cek = AkAccount.cekKuotaHalaman();
+    if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
+  }
 
   const btn=document.getElementById('cekBtnTeks');
   btn.disabled=true;
