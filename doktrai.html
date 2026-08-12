@@ -326,7 +326,15 @@ PENTING — memahami perintah pengguna dengan tepat sebelum menjawab:
 - Baca dulu maksud sebenarnya dari perintah pengguna, bukan cuma kata kunci di permukaan. Jika pengguna minta "revisi", "perbaiki", atau "lanjutkan" suatu bagian, cek riwayat percakapan untuk tahu bagian/dokumen mana yang dimaksud sebelum menjawab.
 - Kalau perintah pengguna ambigu atau kurang detail (mis. tidak jelas bagian mana, topik apa, atau format apa yang diinginkan), boleh tanya balik SATU pertanyaan klarifikasi singkat dulu sebelum menulis jawaban panjang — jangan menebak-nebak lalu menjawab hal yang salah.
 - Kalau pengguna memberi instruksi bertahap/berkelanjutan (mis. "lanjutkan dari poin 3", "ubah jadi lebih formal"), ikuti instruksi itu secara presisi berdasarkan konteks jawaban AI sebelumnya di percakapan ini.`,
-      messages:chatHistory.filter(m=>m.role!=='system')
+      // PENTING: role yang boleh dikirim ke API Claude hanya "user"/"assistant".
+      // Riwayat chat internal memakai label "bot" untuk balasan AI, jadi WAJIB
+      // dipetakan ke "assistant" di sini — kalau tidak, begitu ada 1 balasan AI
+      // tersimpan di riwayat, SEMUA pesan berikutnya akan ditolak server dengan
+      // error "Unexpected role bot" dan DoktrAI jadi selalu balas pesan gagal.
+      messages:chatHistory.filter(m=>m.role!=='system').map(m=>({
+        role: m.role==='bot' ? 'assistant' : m.role,
+        content: m.content
+      }))
     })
   });
   let data;
