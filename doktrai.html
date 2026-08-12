@@ -168,8 +168,69 @@ let chatSessionId=null;
 localStorage.removeItem('doktrai_current_chat');
 localStorage.removeItem('doktrai_chat_id');
 
+function escapeHtmlChat(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Ubah teks markdown ringan (heading #, list -/1., garis pemisah ---, **bold**, `code`)
+// jadi HTML yang rapi. Sebelumnya fungsi ini hanya menangani baris baru dan **bold**,
+// jadi sisa sintaks markdown (heading, list, dan terutama garis pemisah "---") ikut
+// tampil apa adanya sebagai teks mentah di bubble chat.
+function inlineFormatChat(s){
+  return s
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/`([^`]+)`/g,'<code style="background:var(--gray-100);padding:1px 5px;border-radius:4px;font-size:12px;">$1</code>');
+}
+
 function formatKontenChat(text){
-  return String(text).replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  const lines = escapeHtmlChat(text).split('\n');
+  let html = '';
+  let listType = null; // 'ul' | 'ol' | null
+
+  function closeList(){
+    if(listType){ html += (listType==='ul' ? '</ul>' : '</ol>'); listType = null; }
+  }
+
+  lines.forEach(raw=>{
+    const line = raw.trim();
+
+    // Garis pemisah markdown (---, ***, ___) -> dibuang, bukan ditampilkan sebagai teks
+    if(/^(-{3,}|\*{3,}|_{3,})$/.test(line)){
+      closeList();
+      return;
+    }
+
+    // Heading (#, ##, ###, ...)
+    const headingMatch = line.match(/^#{1,6}\s+(.*)$/);
+    if(headingMatch){
+      closeList();
+      html += `<div style="font-weight:800;margin:10px 0 4px;">${inlineFormatChat(headingMatch[1])}</div>`;
+      return;
+    }
+
+    // List berpoin (- item / * item)
+    const bulletMatch = line.match(/^[-*]\s+(.*)$/);
+    if(bulletMatch){
+      if(listType!=='ul'){ closeList(); html+='<ul style="margin:4px 0 8px;padding-left:20px;">'; listType='ul'; }
+      html += `<li style="margin-bottom:4px;">${inlineFormatChat(bulletMatch[1])}</li>`;
+      return;
+    }
+
+    // List bernomor (1. item)
+    const numberedMatch = line.match(/^\d+\.\s+(.*)$/);
+    if(numberedMatch){
+      if(listType!=='ol'){ closeList(); html+='<ol style="margin:4px 0 8px;padding-left:20px;">'; listType='ol'; }
+      html += `<li style="margin-bottom:4px;">${inlineFormatChat(numberedMatch[1])}</li>`;
+      return;
+    }
+
+    closeList();
+    if(!line){ html += '<br>'; return; }
+    html += inlineFormatChat(line) + '<br>';
+  });
+
+  closeList();
+  return html;
 }
 
 function simpanSesiChat(){
@@ -207,7 +268,7 @@ function setJawabMode(mode){
 // Bungkus teks jawaban jadi file .doc sederhana (format HTML yang dikenali Word)
 // tanpa perlu library tambahan, lalu picu unduhan di browser.
 function unduhJawabanSebagaiDoc(teks, judul){
-  const isiHtml = String(teks||'').replace(/\n/g,'<br>');
+  const isiHtml = formatKontenChat(teks);
   const doc = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
   <head><meta charset='utf-8'><title>${judul}</title></head>
   <body style="font-family:Calibri,Arial,sans-serif;font-size:12pt;line-height:1.5;">${isiHtml}</body></html>`;
@@ -320,7 +381,7 @@ try{
   const res=await fetch('/api/generate',{
     method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},
     body:JSON.stringify({
-      system:`Kamu adalah DoktrAI, asisten AI dari asistenku.pro. Kamu membantu menjawab pertanyaan seputar akademik, penelitian, penulisan, kesehatan, hukum, bisnis, dan karier dalam Bahasa Indonesia. Jawab dengan ramah, informatif, dan terstruktur. Aplikasi dan AI ini dimiliki serta diciptakan oleh ${NAMA_PEMILIK}; jika ditanya siapa pemilik, pencipta, pembuat, atau developer aplikasi/AI ini, jawab dengan nama tersebut.
+      system:`Kamu adalah DoktrAI, asisten AI dari asistenku.pro. Kamu membantu menjawab pertanyaan seputar akademik, penelitian, penulisan, kesehatan, hukum, bisnis, dan karier dalam Bahasa Indonesia. Jawab dengan ramah, informatif, dan terstruktur. Jangan gunakan garis pemisah markdown seperti "---", "***", atau "___" di jawabanmu. Aplikasi dan AI ini dimiliki serta diciptakan oleh ${NAMA_PEMILIK}; jika ditanya siapa pemilik, pencipta, pembuat, atau developer aplikasi/AI ini, jawab dengan nama tersebut.
 
 PENTING — memahami perintah pengguna dengan tepat sebelum menjawab:
 - Baca dulu maksud sebenarnya dari perintah pengguna, bukan cuma kata kunci di permukaan. Jika pengguna minta "revisi", "perbaiki", atau "lanjutkan" suatu bagian, cek riwayat percakapan untuk tahu bagian/dokumen mana yang dimaksud sebelum menjawab.

@@ -304,11 +304,26 @@ function switchTab(tab, btn){
   ['preview','outline','ringkasan','info'].forEach(t=>document.getElementById('tab-'+t).style.display='none');
   document.getElementById('tab-'+tab).style.display='block';
 }
+function escapeHtmlHasilSkripsi(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function inlineHasilSkripsi(s){ return escapeHtmlHasilSkripsi(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>'); }
+
+// Ubah teks hasil skripsi jadi paragraf HTML untuk export PDF/Word.
+// Sebelumnya fungsi ini cuma memecah per baris-kosong tanpa membuang sisa sintaks
+// markdown (garis pemisah "---", tanda bintang "**") yang kadang masih terbawa AI,
+// jadi ikut tercetak mentah di file yang diunduh.
+function buatBodyHtmlSkripsi(text){
+  return text.split(/\n{2,}/)
+    .map(p=>p.trim())
+    .filter(p=>p && !/^(-{3,}|\*{3,}|_{3,})$/.test(p))
+    .map(p=>`<p>${inlineHasilSkripsi(p).replace(/\n/g,'<br>')}</p>`)
+    .join('');
+}
+
 function downloadFile(type){
   const text = localStorage.getItem('skripsi_hasil') || '';
   if(!text){ showToast('Belum ada konten skripsi tersimpan. Buat dari halaman Skripsi dulu.'); return; }
   const judul = (data.judul || 'Skripsi').substring(0,40).replace(/[^a-z0-9]+/gi,'_');
-  const bodyHtml = text.split(/\n{2,}/).map(p=>`<p>${p.replace(/\n/g,'<br>').replace(/</g,'&lt;')}</p>`).join('');
+  const bodyHtml = buatBodyHtmlSkripsi(text);
 
   if(type==='PDF'){
     const win=window.open('','_blank');

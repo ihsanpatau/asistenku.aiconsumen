@@ -312,6 +312,15 @@ window.addEventListener('ak:synced', syncMaksKataLabel);
 function countWords(){const words=document.getElementById('inputText').value.trim().split(/\s+/).filter(w=>w);document.getElementById('wordCount').textContent=words.length+' kata';}
 function countWordsCek(){const words=document.getElementById('cekInputText').value.trim().split(/\s+/).filter(w=>w);document.getElementById('cekWordCount').textContent=words.length+' kata';}
 function escapeHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// Sebelumnya hasil AI di sini cuma diganti \n -> <br> tanpa membuang sisa sintaks markdown,
+// jadi garis pemisah "---" dan tanda "**bold**" ikut tampil mentah di layar.
+function formatHasilAI(text){
+  return String(text||'').split('\n')
+    .filter(line=>!/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(line))
+    .map(line=>escapeHtml(line).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>'))
+    .join('<br>');
+}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
 
 /* ================================================
@@ -434,7 +443,7 @@ async function doParafrase(){
     const data=await res.json();
     if(!res.ok){throw new Error(data.error||'Gagal terhubung ke server');}
     const result=data.text||'';
-    document.getElementById('resultText').innerHTML=result.replace(/\n/g,'<br>');
+    document.getElementById('resultText').innerHTML=formatHasilAI(result);
     const change=Math.floor(Math.random()*20)+65;
     document.getElementById('simScore').textContent=(100-change)+'%';
     document.getElementById('changeScore').textContent=change+'%';
@@ -530,7 +539,7 @@ function renderCekResult(parsed){
       <div class="meter-label"><span>Kemungkinan Ditulis AI</span><span style="color:${aiColor};">${ai}%</span></div>
       <div class="meter"><div class="meter-fill" style="width:${ai}%;background:${aiColor};"></div></div>
     </div>`;
-  document.getElementById('cekRingkasan').innerHTML=escapeHtml(parsed.ringkasan||'-').replace(/\n/g,'<br>');
+  document.getElementById('cekRingkasan').innerHTML=formatHasilAI(parsed.ringkasan||'-');
   const temuan=parsed.temuan||[];
   const listEl=document.getElementById('cekTemuanList');
   if(!temuan.length){listEl.innerHTML='<div style="font-size:12.5px;color:var(--gray-500);">Tidak ada bagian berisiko yang signifikan ditemukan.</div>';return;}

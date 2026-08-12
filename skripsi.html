@@ -1191,6 +1191,7 @@ Tulis dalam Bahasa Indonesia formal dan akademis. Jangan gunakan format markdown
 ATURAN PENULISAN PENTING:
 - Gunakan Bahasa Indonesia yang formal, baku, dan akademis
 - JANGAN gunakan tanda pagar (#) atau format markdown dalam output
+- JANGAN tulis garis pemisah markdown seperti "---", "***", atau "___" di manapun dalam output
 - JANGAN tulis **teks** atau *teks* — langsung saja tanpa formatting
 - Untuk judul bab atau sub-bab, tulis langsung dengan huruf kapital (contoh: "BAB I PENDAHULUAN" bukan "# BAB I")
 - Pisahkan paragraf dengan baris kosong
@@ -1726,6 +1727,10 @@ function renumberTables(text, jenisDokumen){
 
 function escapeHtmlSkripsi(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// Jaring pengaman kalau AI tetap lolos menulis **bold** meski sudah dilarang di prompt --
+// daripada tanda bintang tampil mentah di dokumen, ubah jadi <strong> beneran.
+function inlineSkripsi(s){ return escapeHtmlSkripsi(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>'); }
+
 // Detect BAB headers, section titles (ALL CAPS), and numbered sub-headings (1.1, 2.3, ...)
 // so the exported document looks like a real academic paper, not a wall of plain paragraphs.
 function formatSkripsiBody(text){
@@ -1736,7 +1741,7 @@ function formatSkripsiBody(text){
   function flushPara(){
     if(paraBuffer.length){
       const joined = paraBuffer.join(' ').trim();
-      if(joined) html += `<p style="margin:0 0 12px;text-align:justify;text-indent:1.25cm;">${escapeHtmlSkripsi(joined)}</p>`;
+      if(joined) html += `<p style="margin:0 0 12px;text-align:justify;text-indent:1.25cm;">${inlineSkripsi(joined)}</p>`;
       paraBuffer = [];
     }
   }
@@ -1759,6 +1764,10 @@ function formatSkripsiBody(text){
   lines.forEach(raw=>{
     const line = raw.trim();
     if(!line){ flushPara(); return; }
+    // Garis pemisah markdown (---, ***, ___) yang kadang tetap terbawa AI meski sudah
+    // dilarang di prompt -- dibuang di sini juga sebagai jaring pengaman, bukan ikut
+    // tercetak sebagai baris "---" di badan skripsi.
+    if(/^(-{3,}|\*{3,}|_{3,})$/.test(line)){ flushPara(); return; }
     const tableMatch = line.match(/^\[\[TABEL_(\d+)\]\]$/);
     if(tableMatch){
       flushPara();
@@ -1780,10 +1789,10 @@ function formatSkripsiBody(text){
       html += `<div style="text-align:center;font-style:italic;margin:14px 0;">${escapeHtmlSkripsi(line)}</div>`;
     } else if(/^[-*•]\s+/.test(line)){
       flushPara();
-      html += `<p style="margin:0 0 6px 1.25cm;text-align:justify;">• ${escapeHtmlSkripsi(line.replace(/^[-*•]\s+/,''))}</p>`;
+      html += `<p style="margin:0 0 6px 1.25cm;text-align:justify;">• ${inlineSkripsi(line.replace(/^[-*•]\s+/,''))}</p>`;
     } else if(/^[0-9a-z]+[.)]\s+/.test(line) && line.length < 250){
       flushPara();
-      html += `<p style="margin:0 0 6px 1.25cm;text-align:justify;">${escapeHtmlSkripsi(line)}</p>`;
+      html += `<p style="margin:0 0 6px 1.25cm;text-align:justify;">${inlineSkripsi(line)}</p>`;
     } else {
       paraBuffer.push(line);
     }

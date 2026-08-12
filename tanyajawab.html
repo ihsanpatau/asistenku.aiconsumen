@@ -219,6 +219,50 @@ function escapeHtml(s){
   return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// Ubah teks markdown ringan (heading #, list -/1., garis pemisah ---, **bold**, `code`)
+// jadi HTML rapi. Sebelumnya beberapa tempat di halaman ini cuma ganti \n -> <br> tanpa
+// membuang sisa sintaks markdown, jadi ikut tampil mentah di layar (termasuk garis "---").
+function inlineFormatHasilAI(s){
+  return s
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/`([^`]+)`/g,'<code style="background:var(--gray-100,#F3F4F6);padding:1px 5px;border-radius:4px;font-size:12px;">$1</code>');
+}
+function formatHasilAI(text){
+  const lines = escapeHtml(text).split('\n');
+  let html = '';
+  let listType = null; // 'ul' | 'ol' | null
+  function closeList(){
+    if(listType){ html += (listType==='ul' ? '</ul>' : '</ol>'); listType = null; }
+  }
+  lines.forEach(raw=>{
+    const line = raw.trim();
+    if(/^(-{3,}|\*{3,}|_{3,})$/.test(line)){ closeList(); return; }
+    const headingMatch = line.match(/^#{1,6}\s+(.*)$/);
+    if(headingMatch){
+      closeList();
+      html += `<div style="font-weight:800;margin:10px 0 4px;">${inlineFormatHasilAI(headingMatch[1])}</div>`;
+      return;
+    }
+    const bulletMatch = line.match(/^[-*]\s+(.*)$/);
+    if(bulletMatch){
+      if(listType!=='ul'){ closeList(); html+='<ul style="margin:4px 0 8px;padding-left:20px;">'; listType='ul'; }
+      html += `<li style="margin-bottom:4px;">${inlineFormatHasilAI(bulletMatch[1])}</li>`;
+      return;
+    }
+    const numberedMatch = line.match(/^\d+\.\s+(.*)$/);
+    if(numberedMatch){
+      if(listType!=='ol'){ closeList(); html+='<ol style="margin:4px 0 8px;padding-left:20px;">'; listType='ol'; }
+      html += `<li style="margin-bottom:4px;">${inlineFormatHasilAI(numberedMatch[1])}</li>`;
+      return;
+    }
+    closeList();
+    if(!line){ html += '<br>'; return; }
+    html += inlineFormatHasilAI(line) + '<br>';
+  });
+  closeList();
+  return html;
+}
+
 /* ---------- Revisi Skripsi Mode ---------- */
 let revisiFiles=[]; // {id,name,type:'image'|'text', mediaType, base64, text}
 let revisiLastResult=null;
@@ -315,7 +359,7 @@ Jika tidak ada revisi yang bisa diidentifikasi, kembalikan poin sebagai array ko
     let parsed;
     try{ parsed=JSON.parse(raw); }
     catch(e){
-      list.innerHTML=`<div style="color:var(--red,#DC2626);">⚠️ AI memberi jawaban yang tidak bisa diproses otomatis. Coba proses ulang.</div><div class="belajar-result" style="margin-top:8px;">${escapeHtml(data.text||'').replace(/\n/g,'<br>')}</div>`;
+      list.innerHTML=`<div style="color:var(--red,#DC2626);">⚠️ AI memberi jawaban yang tidak bisa diproses otomatis. Coba proses ulang.</div><div class="belajar-result" style="margin-top:8px;">${formatHasilAI(data.text||'')}</div>`;
       return;
     }
     revisiLastResult=parsed;
@@ -340,8 +384,8 @@ function renderRevisiResult(parsed){
   poin.forEach(p=>{
     html+=`<div class="revisi-card">
       <div class="revisi-card-head">${escapeHtml(p.label||'Poin')}${p.lokasi?' · '+escapeHtml(p.lokasi):''}</div>
-      <div class="revisi-block sebelum"><span class="tag tag-red">Sebelum</span>${escapeHtml(p.sebelum||'-').replace(/\n/g,'<br>')}</div>
-      <div class="revisi-block sesudah"><span class="tag tag-green">Sesudah</span>${escapeHtml(p.sesudah||'-').replace(/\n/g,'<br>')}</div>
+      <div class="revisi-block sebelum"><span class="tag tag-red">Sebelum</span>${formatHasilAI(p.sebelum||'-')}</div>
+      <div class="revisi-block sesudah"><span class="tag tag-green">Sesudah</span>${formatHasilAI(p.sesudah||'-')}</div>
     </div>`;
   });
   list.innerHTML=html;
@@ -353,9 +397,9 @@ function downloadRevisiHtml(){
     <div class="poin">
       <h3>${escapeHtml(p.label||'')}${p.lokasi?' — '+escapeHtml(p.lokasi):''}</h3>
       <p class="label-sebelum">Sebelum</p>
-      <blockquote>${escapeHtml(p.sebelum||'-').replace(/\n/g,'<br>')}</blockquote>
+      <blockquote>${formatHasilAI(p.sebelum||'-')}</blockquote>
       <p class="label-sesudah">Sesudah</p>
-      <p class="sesudah-text">${escapeHtml(p.sesudah||'-').replace(/\n/g,'<br>')}</p>
+      <p class="sesudah-text">${formatHasilAI(p.sesudah||'-')}</p>
     </div>`).join('');
   const fullHtml=`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Hasil Revisi Skripsi</title>
 <style>
@@ -469,7 +513,7 @@ async function doBelajar(instruction, btn){
       box.innerHTML='<div style="color:var(--red,#DC2626);">⚠️ AI tidak memberikan jawaban. Coba pilih genre lain atau unggah ulang file.</div>';
       return;
     }
-    box.innerHTML=result.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    box.innerHTML=formatHasilAI(result);
     AkAccount.catatPesan(1);
     showToast('Selesai! ✓');
   }catch(e){

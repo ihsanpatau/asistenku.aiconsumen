@@ -305,6 +305,7 @@ function renderHasilHTML(rawText) {
   function flushTable(){if(tableRows.length){let out='';if(tableTitle)out+=`<div style="font-size:12px;font-weight:700;text-align:center;margin-bottom:4px;">${esc(tableTitle)}</div>`;out+='<div style="overflow-x:auto;margin:12px 0"><table style="width:100%;border-collapse:collapse;font-size:12px;">';tableRows.forEach((row,ri)=>{const cells=row.split('|').map(c=>c.trim()).filter(c=>c!=='');if(!cells.length)return;out+='<tr>'+cells.map(c=>ri===0?`<th style="background:#1a6fa4;color:#fff;border:1px solid #1a6fa4;padding:7px 10px;font-weight:700;text-align:center;">${esc(c)}</th>`:`<td style="border:1px solid #e5e7eb;padding:6px 10px;${ri%2===0?'background:#f0f6ff;':''}">${applyInline(esc(c))}</td>`).join('')+'</tr>';});out+='</table></div>';html+=out;tableRows=[];tableTitle='';}inTable=false;}
   lines.forEach(raw=>{
     const trimmed=raw.trim();
+    if(/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)){flushPara();flushBullets();flushNumbered();if(inTable)flushTable();return;}
     if(/^\|.+\|/.test(trimmed)){flushPara();flushBullets();flushNumbered();if(/^\|[\s\-:]+\|/.test(trimmed))return;inTable=true;tableRows.push(trimmed.replace(/^\||\|$/g,''));return;}
     if(inTable&&!trimmed)return;
     if(inTable)flushTable();
@@ -437,7 +438,11 @@ function parseAIJson(raw){
 
 function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function paragraphize(text){
-  return (text||'').split(/\n{2,}/).map(p=>`<p style="margin:0 0 12px;text-align:justify;text-indent:1.25cm;">${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('');
+  return (text||'').split(/\n{2,}/)
+    .map(p=>p.trim())
+    .filter(p=>p && !/^(-{3,}|\*{3,}|_{3,})$/.test(p))
+    .map(p=>`<p style="margin:0 0 12px;text-align:justify;text-indent:1.25cm;">${escapeHtml(p).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</p>`)
+    .join('');
 }
 
 // Build a proper makalah document (sampul, daftar isi, bab, daftar pustaka) from structured AI JSON
@@ -552,7 +557,7 @@ async function generateContent(){
   }
 
   setLoadingUI(true, null);
-  const basePrompt = fullPromptOverride || `Kerjakan tugas berikut dalam Bahasa Indonesia. Tulis lengkap: seluruh isi/hasil tugasnya (bukan ringkasan), lalu di baris paling akhir tambahkan satu baris ringkasan diawali dengan tanda '---RINGKASAN---'. Tugas: "${p}". Mulai langsung dengan konten, tanpa preamble.`;
+  const basePrompt = fullPromptOverride || `Kerjakan tugas berikut dalam Bahasa Indonesia. Tulis lengkap: seluruh isi/hasil tugasnya (bukan ringkasan), lalu di baris paling akhir tambahkan satu baris ringkasan diawali dengan tanda '---RINGKASAN---'. Jangan gunakan garis pemisah markdown seperti "---", "***", atau "___" di badan tugas (selain penanda '---RINGKASAN---' di baris akhir itu). Tugas: "${p}". Mulai langsung dengan konten, tanpa preamble.`;
 
   async function callAI(promptText){
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({messages:[{role:'user',content:promptText}]})});
