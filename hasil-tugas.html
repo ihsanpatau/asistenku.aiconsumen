@@ -427,13 +427,43 @@ function setLoadingUI(isLoading, errorMsg){
 }
 
 // Extract & parse JSON robustly even if the AI wraps it in code fences or adds stray text
+// AI sering menulis paragraf panjang di dalam nilai JSON dengan enter/baris-baru MENTAH
+// (bukan escape \n), sehingga JSON.parse() gagal terus-menerus walau jumlah halaman
+// sudah dikecilkan. Fungsi ini menyisir teks dan meng-escape karakter kontrol yang
+// berada DI DALAM string JSON saja (di luar string tidak disentuh), supaya parsing
+// jauh lebih tahan banting terhadap gaya penulisan AI.
+function sanitizeJsonControlChars(t){
+  let out=''; let inString=false; let escaping=false;
+  for(let i=0;i<t.length;i++){
+    const ch=t[i];
+    if(inString){
+      if(escaping){ out+=ch; escaping=false; continue; }
+      if(ch==='\\'){ out+=ch; escaping=true; continue; }
+      if(ch==='"'){ inString=false; out+=ch; continue; }
+      if(ch==='\n'){ out+='\\n'; continue; }
+      if(ch==='\r'){ out+='\\r'; continue; }
+      if(ch==='\t'){ out+='\\t'; continue; }
+      out+=ch;
+    } else {
+      if(ch==='"'){ inString=true; out+=ch; continue; }
+      out+=ch;
+    }
+  }
+  return out;
+}
+
 function parseAIJson(raw){
   let t=(raw||'').trim();
   t=t.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/,'').trim();
   const start=t.indexOf('{'); const end=t.lastIndexOf('}');
   if(start!==-1 && end!==-1 && end>start){ t=t.substring(start,end+1); }
-  t=t.replace(/,(\s*[}\]])/g,'$1'); // remove trailing commas
-  return JSON.parse(t);
+  try{
+    return JSON.parse(t.replace(/,(\s*[}\]])/g,'$1'));
+  }catch(firstErr){
+    // Percobaan kedua: perbaiki karakter kontrol mentah di dalam string sebelum parse ulang.
+    const fixed=sanitizeJsonControlChars(t).replace(/,(\s*[}\]])/g,'$1');
+    return JSON.parse(fixed);
+  }
 }
 
 function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
