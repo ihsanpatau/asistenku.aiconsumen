@@ -283,6 +283,9 @@ ${TARGET_PANJANG_JURNAL_TEXT}${CHART_TABLE_INSTRUCTION}`;
     localStorage.setItem('task_output_format', formatJurnalTerpilih);
     localStorage.setItem('task_prompt', catatanTambahan || 'Jurnal dari Skripsi');
     localStorage.setItem('task_full_prompt', prompt);
+    // PERBAIKAN: simpan target kata supaya hasil-tugas.html bisa menghitung max_tokens
+    // yang cukup, dan tidak lagi terpotong sebelum Daftar Pustaka selesai.
+    localStorage.setItem('task_target_kata', String(targetKataJurnal));
     btnLabel.textContent='Memproses dengan AI...';
     showToast('Memproses jurnal dengan AI...');
     setTimeout(()=>window.location.href='hasil-tugas.html',400);
@@ -304,6 +307,9 @@ ${TARGET_PANJANG_JURNAL_TEXT}${CHART_TABLE_INSTRUCTION}`;
     localStorage.setItem('task_output_format', formatJurnalTerpilih);
     localStorage.setItem('task_prompt', judul);
     localStorage.setItem('task_full_prompt', prompt);
+    // PERBAIKAN: simpan target kata supaya hasil-tugas.html bisa menghitung max_tokens
+    // yang cukup, dan tidak lagi terpotong sebelum Daftar Pustaka selesai.
+    localStorage.setItem('task_target_kata', String(targetKataJurnal));
     btn.disabled=true; btnLabel.textContent='Memproses dengan AI...';
     showToast('Memproses jurnal dengan AI...');
     setTimeout(()=>window.location.href='hasil-tugas.html',400);

@@ -189,11 +189,17 @@ Balas HANYA dengan JSON valid (tanpa blok kode markdown, tanpa teks lain di luar
 }
 
 ATURAN PENTING:
-- Semua teks di dalam nilai "isi" dan "kata_pengantar" HARUS berupa paragraf biasa dalam Bahasa Indonesia akademik formal.
+- Semua teks di dalam nilai "isi" dan "kata_pengantar" HARUS berupa paragraf biasa dalam Bahasa Indonesia akademik formal, gaya penulisan ilmiah (bukan gaya percakapan/santai) — sesuai kaidah penulisan makalah/karya ilmiah Indonesia.
 - JANGAN gunakan tanda pagar (#), tanda bintang (**), garis pemisah markdown ("---", "***", "___"), atau format markdown apapun di dalam teks.
 - WAJIB: hasil akhir harus berupa JSON yang valid. Jika sebuah nilai teks berisi lebih dari satu paragraf, gabungkan dengan spasi ganda TANPA karakter enter/baris-baru mentah, atau gunakan escape "\\n" — jangan pernah menaruh baris baru mentah di dalam tanda kutip string JSON.
 - Bab 2 (Pembahasan) berisi ${jumlahSubBab} sub-bab dengan topik yang relevan dan spesifik terhadap judul makalah (ganti [sub-topik pembahasan relevan] dengan topik nyata).
-- TARGET PANJANG TOTAL seluruh isi (kata_pengantar + semua "isi" di bab1_sub, bab2_sub, bab3_sub digabung): ±${targetKataMakalah.toLocaleString('id-ID')} kata (setara ±${estimasiHalamanMakalah} halaman, spasi 1.5 TNR 12pt). Bagi porsi kata secara proporsional antar sub-bab, dan kembangkan tiap "isi" secukupnya agar totalnya mendekati target ini — jangan jauh lebih pendek maupun lebih panjang dari target.
+
+TARGET PANJANG TOTAL: ±${targetKataMakalah.toLocaleString('id-ID')} kata (setara ±${estimasiHalamanMakalah} halaman, spasi 1.5 TNR 12pt) — target ini SUDAH TERMASUK daftar_pustaka, BUKAN tambahan di luar itu. Sebelum mulai menulis, rencanakan dulu (di kepalamu, tidak perlu ditulis di JSON) berapa kata untuk tiap bagian mengikuti PRIORITAS berikut, supaya totalnya pas dan Daftar Pustaka tidak pernah terpotong:
+1. Bab 2 (Pembahasan) — bagian TERPENTING & terpanjang, alokasikan ±55-65% dari total target kata, dibagi proporsional ke ${jumlahSubBab} sub-babnya.
+2. Bab 1 (Pendahuluan) — ±15-20% dari total, dibagi ke 3 sub-babnya.
+3. Bab 3 (Penutup) — ±10-15% dari total, ringkas dan padat.
+4. Kata Pengantar — paling ringkas, cukup 1-2 paragraf singkat.
+5. Daftar Pustaka — sisihkan ±25-35 kata per sumber (format APA lengkap), WAJIB selesai utuh sebagai bagian TERAKHIR yang ditulis. Jika saat menulis kata mulai menipis, PERSINGKAT bagian sekunder (Kata Pengantar/Bab 3) yang belum ditulis — JANGAN PERNAH memotong atau menyingkat Daftar Pustaka.
 - Daftar pustaka harus realistis dan dalam format APA, gunakan nama penulis dan tahun yang masuk akal untuk bidang ilmu terkait.${referensiText ? '\n- WAJIB gunakan isi file referensi di atas sebagai sumber utama pembahasan, bukan hanya pengetahuan umum — sebutkan poin-poin pentingnya di Bab 2, dan masukkan sumbernya ke daftar pustaka.' : ''}`;
 
   localStorage.removeItem('task_result');
@@ -201,6 +207,10 @@ ATURAN PENTING:
   localStorage.setItem('task_prompt', judul);
   localStorage.setItem('task_type', 'makalah');
   localStorage.setItem('task_full_prompt', prompt);
+  // PERBAIKAN: simpan target kata supaya hasil-tugas.html bisa menghitung max_tokens
+  // yang cukup (sebelumnya max_tokens di server selalu 4096 utk semua panjang makalah,
+  // itu sebabnya makalah 10+ halaman selalu terpotong sebelum sampai Daftar Pustaka).
+  localStorage.setItem('task_target_kata', String(targetKataMakalah));
   localStorage.setItem('makalah_meta', JSON.stringify({judul, bidang, jenis, penulis}));
   showToast('Memproses makalah dengan AI...');
   setTimeout(()=>window.location.href='hasil-tugas.html',500);

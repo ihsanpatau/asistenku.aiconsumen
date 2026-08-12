@@ -333,6 +333,40 @@ document.getElementById('hasilTanggalTugas').textContent=`${now.getDate()} ${['J
 const prompt=localStorage.getItem('task_prompt');
 const fullPromptOverride=localStorage.getItem('task_full_prompt');
 const taskType=localStorage.getItem('task_type')||'umum';
+
+// ===== PERBAIKAN: gaya penulisan akademik + max_tokens dinamis =====
+// Sebelumnya halaman ini SELALU memanggil /api/generate tanpa system prompt sendiri,
+// jadi yang terpasang cuma "gaya percakapan santai" bawaan endpoint (dibuat utk DoktrAI),
+// bukan gaya ilmiah — makanya hasil makalah/tugas/jurnal cuma berupa paragraf biasa,
+// tidak sesuai kaidah penulisan ilmiah. Sekarang semua tugas dari halaman ini (makalah,
+// tugas, jurnal) dikirim dengan system prompt akademik + academicMode:true, supaya
+// endpoint TIDAK menempelkan gaya santai di atasnya.
+const ACADEMIC_SYSTEM = `Kamu adalah asisten akademik profesional dari asistenku.pro. Kamu membantu mahasiswa Indonesia menulis karya ilmiah (makalah, tugas, jurnal) berkualitas.
+
+ATURAN PENULISAN PENTING:
+- Gunakan Bahasa Indonesia yang formal, baku, dan akademis — BUKAN gaya percakapan santai/ngobrol.
+- JANGAN gunakan tanda pagar (#) atau format markdown dalam output.
+- JANGAN tulis garis pemisah markdown seperti "---", "***", atau "___" di manapun (kecuali memang diminta sebagai penanda khusus, misalnya '---RINGKASAN---').
+- JANGAN tulis **teks** atau *teks* — langsung saja tanpa formatting.
+- Judul bab/bagian ditulis langsung huruf kapital (contoh: "BAB I PENDAHULUAN", bukan "# BAB I"), sub-bab format "1.1 Judul Sub-bab" (bukan "## 1.1 ...").
+- Pisahkan paragraf dengan baris kosong.
+- Konten harus substantif dan sesuai standar akademik Indonesia, bukan sekadar paragraf umum.
+- WAJIB sertakan kutipan (Nama, Tahun) untuk klaim/data/teori yang butuh sumber, dan WAJIB tutup dengan DAFTAR PUSTAKA format APA edisi ke-7 yang benar-benar lengkap (bukan terpotong di tengah entri). Daftar Pustaka adalah bagian WAJIB dari target panjang total, BUKAN tambahan di luar target.
+- Ikuti target jumlah halaman/kata pada instruksi tugas SETEPAT mungkin — jangan jauh lebih pendek maupun jauh lebih panjang dari target.`;
+
+// Perkiraan token per kata Bahasa Indonesia (termasuk buffer tanda baca/spasi/struktur
+// JSON) — dipakai menghitung max_tokens yang pas dari target kata (halaman × kata/halaman
+// yang diatur admin), supaya AI tidak lagi terpotong (stop_reason:"max_tokens") sebelum
+// menyelesaikan Daftar Pustaka. makalah.html / jurnal.html menyimpan target katanya ke
+// localStorage('task_target_kata') sebelum membuka halaman ini.
+const TOKENS_PER_KATA_ID = 2.2;
+const targetKataOverride = parseInt(localStorage.getItem('task_target_kata') || '0', 10) || 0;
+function hitungMaxTokens(){
+  if (!targetKataOverride) return undefined; // tidak ada target eksplisit -> pakai default server
+  // +30% buffer (struktur JSON/heading/kutipan makan token lebih dari kata biasa) + buffer tetap
+  const tokens = Math.ceil(targetKataOverride * TOKENS_PER_KATA_ID * 1.3) + 800;
+  return Math.min(32000, Math.max(2048, tokens));
+}
 if(prompt){
   document.getElementById('hasilJudulTugas').textContent=prompt.substring(0,30)+(prompt.length>30?'...':'');
   document.getElementById('namaFileTugas').textContent=prompt.substring(0,30).replace(/\s/g,'_')+'.docx';
@@ -590,16 +624,12 @@ async function generateContent(){
   const basePrompt = fullPromptOverride || `Kerjakan tugas berikut dalam Bahasa Indonesia. Tulis lengkap: seluruh isi/hasil tugasnya (bukan ringkasan), lalu di baris paling akhir tambahkan satu baris ringkasan diawali dengan tanda '---RINGKASAN---'. Jangan gunakan garis pemisah markdown seperti "---", "***", atau "___" di badan tugas (selain penanda '---RINGKASAN---' di baris akhir itu). Tugas: "${p}". Mulai langsung dengan konten, tanpa preamble.`;
 
   async function callAI(promptText){
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({messages:[{role:'user',content:promptText}]})});
-    const data=await res.json();
-    if(!res.ok){ throw new Error(data.error || `Server error (${res.status})`); }
-    const full=(data.text||'').trim();
-    if(!full){ throw new Error('AI mengembalikan hasil kosong.'); }
-    return full;
-  }
-
-  async function callAI(promptText){
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({messages:[{role:'user',content:promptText}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({
+      system: ACADEMIC_SYSTEM,
+      academicMode: true,
+      max_tokens: hitungMaxTokens(),
+      messages:[{role:'user',content:promptText}]
+    })});
     const data=await res.json();
     if(!res.ok){
       const e = new Error(data.error || `Server error (${res.status})`);
@@ -621,7 +651,13 @@ async function generateContent(){
     while (stopReason === 'max_tokens' && tries < 3) {
       tries++;
       const ekor = text.slice(-800);
-      const lanjutPrompt = `Ini permintaan tugas sebelumnya:\n"${promptText}"\n\nJawabanmu tadi TERPOTONG karena kepanjangan. Ini adalah akhir dari teks yang sudah kamu tulis:\n"""${ekor}"""\n\nLANJUTKAN PERSIS dari kata terakhir di atas sampai benar-benar selesai (jangan mengulang bagian yang sudah ada, jangan menulis ulang dari awal, jangan beri komentar/pengantar apapun, langsung sambung kalimatnya).`;
+      // Kasih tahu AI sudah menulis berapa kata & sisa berapa kata dari target admin,
+      // supaya sambungannya TIDAK melebihi target total (sebelumnya sambungan ini "buta"
+      // soal sisa target, jadi total akhir bisa jauh lebih panjang dari yang diminta).
+      const kataSudahDitulis = text.trim().split(/\s+/).filter(Boolean).length;
+      const sisaKata = targetKataOverride ? Math.max(200, targetKataOverride - kataSudahDitulis) : null;
+      const infoSisaKata = sisaKata ? ` Kamu sudah menulis sekitar ${kataSudahDitulis} kata dari target total ±${targetKataOverride} kata — sisakan kira-kira ${sisaKata} kata lagi untuk bagian yang belum selesai TERMASUK DAFTAR PUSTAKA, jangan menulis jauh lebih panjang dari sisa ini.` : '';
+      const lanjutPrompt = `Ini permintaan tugas sebelumnya:\n"${promptText}"\n\nJawabanmu tadi TERPOTONG karena kepanjangan. Ini adalah akhir dari teks yang sudah kamu tulis:\n"""${ekor}"""\n\nLANJUTKAN PERSIS dari kata terakhir di atas sampai benar-benar selesai TERMASUK DAFTAR PUSTAKA yang lengkap (jangan mengulang bagian yang sudah ada, jangan menulis ulang dari awal, jangan beri komentar/pengantar apapun, langsung sambung kalimatnya).${infoSisaKata}`;
       const cont = await callAI(lanjutPrompt);
       text += cont.text;
       stopReason = cont.stopReason;
@@ -645,7 +681,10 @@ async function generateContent(){
         while(res.stopReason==='max_tokens' && tries<3){
           tries++;
           const ekor=full.slice(-600);
-          const lanjutPrompt=`Kamu tadi sedang menulis JSON makalah ini, tapi TERPOTONG karena kepanjangan. Ini akhir dari JSON yang sudah kamu tulis (jangan ulangi):\n"""${ekor}"""\n\nLANJUTKAN PERSIS dari karakter terakhir di atas sampai JSON-nya benar-benar lengkap dan valid (tutup semua kurung/kutip yang belum ditutup). Jangan menulis ulang dari awal, jangan beri komentar apapun, langsung sambung karakternya.`;
+          const kataSudahDitulisJson = full.trim().split(/\s+/).filter(Boolean).length;
+          const sisaKataJson = targetKataOverride ? Math.max(150, targetKataOverride - kataSudahDitulisJson) : null;
+          const infoSisaKataJson = sisaKataJson ? ` Kamu sudah menulis sekitar ${kataSudahDitulisJson} kata dari target ±${targetKataOverride} kata — sisakan kira-kira ${sisaKataJson} kata lagi untuk sisa field yang belum selesai TERMASUK "daftar_pustaka", jangan lebih panjang dari itu.` : '';
+          const lanjutPrompt=`Kamu tadi sedang menulis JSON makalah ini, tapi TERPOTONG karena kepanjangan. Ini akhir dari JSON yang sudah kamu tulis (jangan ulangi):\n"""${ekor}"""\n\nLANJUTKAN PERSIS dari karakter terakhir di atas sampai JSON-nya benar-benar lengkap dan valid (tutup semua kurung/kutip yang belum ditutup), TERMASUK field "daftar_pustaka" yang lengkap. Jangan menulis ulang dari awal, jangan beri komentar apapun, langsung sambung karakternya.${infoSisaKataJson}`;
           res = await callAI(lanjutPrompt); // kalau ini gagal karena API error asli, langsung lempar ke luar (lihat catch di bawah)
           full += res.text;
         }
