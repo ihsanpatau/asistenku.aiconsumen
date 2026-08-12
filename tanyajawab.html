@@ -53,6 +53,8 @@
 .tag-red{background:#FEE2E2;color:#DC2626;}
 .tag-green{background:#DCFCE7;color:#16A34A;}
 .revisi-ringkasan{background:var(--blue-pale);border-radius:10px;padding:12px 14px;font-size:12.5px;color:var(--dark);margin-bottom:14px;line-height:1.6;}
+.revisi-format-chip{border:1.5px solid var(--gray-200);background:var(--white);color:var(--dark);border-radius:20px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+.revisi-format-chip.active{border-color:var(--blue);background:var(--blue-pale);color:var(--blue);}
 .spin-dot{width:14px;height:14px;border:2px solid var(--gray-200);border-top-color:var(--blue-light);border-radius:50%;animation:spin .8s linear infinite;}
 </style>
 </head>
@@ -94,7 +96,16 @@
         <textarea id="revisiInstruction" class="revisi-textarea" placeholder="Contoh: revisi sesuai catatan dosen di gambar, perbaiki penulisan di Bab 2 poin A dan B, sesuaikan tabel 3.1, dll."></textarea>
       </div>
 
-      <button class="btn btn-primary" id="revisiGenerateBtn" onclick="triggerRevisi()" style="width:100%;">
+      <div class="form-group" style="margin-top:14px;">
+        <label class="form-label">Format Hasil Akhir</label>
+        <div id="revisiFormatChooser" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="revisi-format-chip active" data-format="word" onclick="selectRevisiFormat('word',this)">📄 Word (.docx)</button>
+          <button type="button" class="revisi-format-chip" data-format="pdf" onclick="selectRevisiFormat('pdf',this)">🧾 PDF</button>
+          <button type="button" class="revisi-format-chip" data-format="txt" onclick="selectRevisiFormat('txt',this)">📝 Teks (.txt)</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="revisiGenerateBtn" onclick="triggerRevisi()" style="width:100%;margin-top:14px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
         Proses Revisi
       </button>
@@ -102,14 +113,19 @@
       <div id="revisiResultWrap" style="display:none;">
         <div style="font-size:14px;font-weight:700;color:var(--dark);margin:18px 0 10px;">Hasil Revisi:</div>
         <div id="revisiResultList"></div>
-        <div style="font-size:12px;font-weight:600;color:var(--gray-500);margin:14px 0 6px;">Pilih format unduhan:</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('word')">📄 Unduh Word (.docx)</button>
-          <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('pdf')">🧾 Unduh PDF</button>
-          <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('txt')">📝 Unduh Teks (.txt)</button>
+        <div id="revisiDownloadWrap" style="display:none;margin-top:6px;">
+          <button class="btn btn-primary" id="revisiDownloadBtn" onclick="downloadRevisiSelected()" style="width:100%;"></button>
+          <div style="text-align:center;margin-top:8px;">
+            <span id="revisiChangeFormatLink" style="font-size:12px;color:var(--blue-light);cursor:pointer;text-decoration:underline;" onclick="toggleRevisiFormatSwitcher()">Ubah format unduhan</span>
+          </div>
+          <div id="revisiFormatSwitcher" style="display:none;margin-top:8px;flex-wrap:wrap;gap:8px;">
+            <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('word')">📄 Word (.docx)</button>
+            <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('pdf')">🧾 PDF</button>
+            <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('txt')">📝 Teks (.txt)</button>
+          </div>
         </div>
-        <div style="margin-top:8px;">
-          <button class="btn btn-primary btn-sm" onclick="resetRevisi()" style="width:100%;">Revisi Lagi</button>
+        <div style="margin-top:10px;">
+          <button class="btn btn-secondary btn-sm" onclick="resetRevisi()" style="width:100%;">Revisi Lagi</button>
         </div>
       </div>
 
@@ -272,6 +288,24 @@ function formatHasilAI(text){
 /* ---------- Revisi Skripsi Mode ---------- */
 let revisiFiles=[]; // {id,name,type:'image'|'text', mediaType, base64, text}
 let revisiLastResult=null;
+let revisiSelectedFormat='word'; // dipilih SEBELUM proses supaya hasil unduhan langsung rapi sesuai format tujuan
+
+const REVISI_FORMAT_LABEL={word:'Word (.docx)',pdf:'PDF',txt:'Teks (.txt)'};
+
+function selectRevisiFormat(fmt,btnEl){
+  revisiSelectedFormat=fmt;
+  document.querySelectorAll('#revisiFormatChooser .revisi-format-chip').forEach(b=>b.classList.remove('active'));
+  btnEl.classList.add('active');
+}
+
+function toggleRevisiFormatSwitcher(){
+  const sw=document.getElementById('revisiFormatSwitcher');
+  sw.style.display = sw.style.display==='flex' ? 'none' : 'flex';
+}
+
+function downloadRevisiSelected(){
+  downloadRevisi(revisiSelectedFormat);
+}
 const MAX_IMAGE_BYTES=5*1024*1024;
 const MAX_REVISI_FILES=10;
 
@@ -326,6 +360,10 @@ async function triggerRevisi(){
   genBtn.disabled=true;
   const wrap=document.getElementById('revisiResultWrap');
   const list=document.getElementById('revisiResultList');
+  const downloadWrap=document.getElementById('revisiDownloadWrap');
+  const formatSwitcher=document.getElementById('revisiFormatSwitcher');
+  downloadWrap.style.display='none'; // tombol unduh baru muncul setelah hasil benar-benar siap, bukan saat masih loading
+  formatSwitcher.style.display='none';
   wrap.style.display='block';
   list.innerHTML='<div style="display:flex;align-items:center;gap:8px;color:var(--gray-500);"><div class="spin-dot"></div>Menganalisis file & menyusun revisi, mohon tunggu...</div>';
   wrap.scrollIntoView({behavior:'smooth'});
@@ -417,6 +455,11 @@ Jika tidak ada revisi yang bisa diidentifikasi, kembalikan poin sebagai array ko
     }
     revisiLastResult=parsed;
     renderRevisiResult(parsed);
+    if(parsed.poin && parsed.poin.length){
+      const downloadBtn=document.getElementById('revisiDownloadBtn');
+      downloadBtn.textContent='⬇️ Unduh Hasil Revisi ('+(REVISI_FORMAT_LABEL[revisiSelectedFormat]||revisiSelectedFormat)+')';
+      document.getElementById('revisiDownloadWrap').style.display='block';
+    }
     AkAccount.catatPesan(1);
     showToast('Revisi selesai! ✓');
   }catch(e){
@@ -547,6 +590,8 @@ blockquote{margin:0;padding:10px 12px;background:#FEF2F2;border-left:3px solid #
 
 function resetRevisi(){
   document.getElementById('revisiResultWrap').style.display='none';
+  document.getElementById('revisiDownloadWrap').style.display='none';
+  document.getElementById('revisiFormatSwitcher').style.display='none';
   document.getElementById('revisiInstruction').value='';
   revisiFiles=[];
   revisiLastResult=null;
