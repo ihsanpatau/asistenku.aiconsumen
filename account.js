@@ -12,11 +12,6 @@ const AkAccount = (function () {
     lanjutan: { halaman: 60, pesan: 99999, label: "Lanjutan" },
   };
   const PLAN_LIMITS = DEFAULT_LIMITS; // nama lama dipertahankan untuk kompatibilitas
-  // Batas BAWAAN "Maks Slide PPT" per paket — dipakai kalau admin belum mengisi
-  // kolom 'ppt_maks_slide' di Admin Panel untuk paket tsb. Paket Gratis dikunci
-  // di 10 slide (setara 10 halaman Makalah) supaya konsisten dengan batas
-  // Makalah: mau lebih banyak, harus upgrade minimal ke paket Standar.
-  const PPT_SLIDE_DEFAULT = { gratis: 10, standar: 20, pro: 30, lanjutan: 999 };
   const LIMITS_CACHE_KEY = "ak_plan_limits_cache";
   const DURASI_CACHE_KEY = "ak_plan_durasi_cache"; // { gratis:0, standar:30, pro:30, lanjutan:30, ... } — hari, diatur admin
   const PROMO_CACHE_KEY = "ak_promo_cache";
@@ -138,8 +133,6 @@ const AkAccount = (function () {
         isPromo: true,
         promoEndsAt: promo.endsAt,
         wordsPerPage: 300,
-        parafraseMaksKata: 2000,
-        pptMaksSlide: 999,
       };
     }
     const key = getPlanKey();
@@ -158,15 +151,11 @@ const AkAccount = (function () {
             : base.pesan,
         label: override.label || base.label,
         wordsPerPage: override.wordsPerPage || 300,
-        parafraseMaksKata: override.parafraseMaksKata || 2000,
-        pptMaksSlide: override.pptMaksSlide || PPT_SLIDE_DEFAULT[key] || 999,
       };
     }
     return {
       ...base,
       wordsPerPage: 300,
-      parafraseMaksKata: 2000,
-      pptMaksSlide: PPT_SLIDE_DEFAULT[key] || 999,
     };
   }
 
@@ -601,7 +590,7 @@ const AkAccount = (function () {
       const { data, error } = await sb
         .from("packages")
         .select(
-          "key, label, halaman_limit, pesan_limit, durasi_hari, words_per_page, pesan_interval_hari, parafrase_maks_kata, ppt_maks_slide"
+          "key, label, halaman_limit, pesan_limit, durasi_hari, words_per_page, pesan_interval_hari"
         )
         .eq("active", true);
 
@@ -619,20 +608,6 @@ const AkAccount = (function () {
           label: p.label || undefined,
           wordsPerPage:
             Number(p.words_per_page) > 0 ? Number(p.words_per_page) : 300,
-          // Batas kata maksimum per proses Parafrase/Cek Plagiasi — diatur admin
-          // di kolom 'parafrase_maks_kata'. Fallback 2000 kalau belum diisi admin.
-          parafraseMaksKata:
-            Number(p.parafrase_maks_kata) > 0
-              ? Number(p.parafrase_maks_kata)
-              : 2000,
-          // Batas jumlah slide maksimum untuk fitur PPT — diatur admin di kolom
-          // 'ppt_maks_slide'. Fallback pakai PPT_SLIDE_DEFAULT per paket (mis.
-          // Gratis=10 slide) kalau admin belum mengisi, supaya paket Gratis
-          // tetap dibatasi walau admin belum sempat set nilainya di panel.
-          pptMaksSlide:
-            Number(p.ppt_maks_slide) > 0
-              ? Number(p.ppt_maks_slide)
-              : PPT_SLIDE_DEFAULT[k] || 999,
         };
         // Masa aktif (hari) per paket — diatur admin. Fallback 30 hari kalau kolom belum diisi.
         durasi[k] =
