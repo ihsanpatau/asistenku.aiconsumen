@@ -121,42 +121,19 @@ async function extractFileTextMakalah(file){
   throw new Error('Format file tidak didukung.');
 }
 
-// Batasi pilihan Target Halaman sesuai maks paket aktif (LIVE dari admin)
+// Target Halaman Makalah TIDAK lagi dikunci per-fitur — semua pilihan selalu bisa
+// dipilih. Gerbang satu-satunya adalah SISA KUOTA HALAMAN/HARI TOTAL (dicek
+// AkAccount.cekKuotaHalaman() saat tombol Generate ditekan), sama seperti Skripsi,
+// Tugas, Jurnal, dll — supaya tidak ada lagi batasan ganda per fitur.
 function capMakalahPills(){
   if (typeof AkAccount === 'undefined') return;
-  const plan = AkAccount.getPlan();
-  const maks = plan.dokumenMaksHalaman >= 999 ? 999 : plan.dokumenMaksHalaman;
-  const pills = document.querySelectorAll('#halamanMakalahPills .type-pill');
-  let lastEnabled = null;
-  pills.forEach(btn => {
-    const nilai = parseInt(btn.textContent, 10) || 0;
-    if (nilai > maks) {
-      btn.disabled = true;
-      btn.style.opacity = '0.4';
-      btn.style.cursor = 'not-allowed';
-      btn.title = `Perlu upgrade paket — maks. ${maks} halaman untuk paket ${plan.label}`;
-      btn.classList.remove('active');
-    } else {
-      btn.disabled = false;
-      btn.style.opacity = '';
-      btn.style.cursor = '';
-      btn.title = '';
-      lastEnabled = btn;
-    }
-  });
-  // Kalau pill yang lagi aktif ternyata sekarang terkunci, pindahkan ke pill tertinggi yang masih diizinkan
-  if (!document.querySelector('#halamanMakalahPills .type-pill.active') && lastEnabled) {
-    lastEnabled.classList.add('active');
-  }
+  const k = AkAccount.getKuota();
   const note = document.getElementById('halamanMakalahLockNote');
-  if (note) {
-    if (plan.dokumenMaksHalaman < 999 && maks < 25) {
-      note.style.display = 'block';
-      note.innerHTML = `ℹ️ Paket ${plan.label} maks. ${maks} halaman/makalah. <a href="upgrade.html" style="color:var(--blue);font-weight:700;text-decoration:underline;">Upgrade</a> untuk halaman lebih banyak.`;
-    } else {
-      note.style.display = 'none';
-    }
-  }
+  if (!note) return;
+  const sisa = Math.max(0, k.halamanLimit - k.halamanUsed);
+  note.style.display = 'block';
+  note.style.color = 'var(--gray-500)';
+  note.innerHTML = `ℹ️ Sisa kuota halaman hari ini: <b>${sisa}${k.halamanLimit>=99999?'':' / '+k.halamanLimit}</b> halaman (dipakai bersama semua fitur dokumen).`;
 }
 document.addEventListener('DOMContentLoaded', capMakalahPills);
 window.addEventListener('ak:synced', capMakalahPills);
