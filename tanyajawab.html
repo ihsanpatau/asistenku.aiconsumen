@@ -11,6 +11,7 @@
 <script src="i18n.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="shared-config.js"></script>
 <script src="account.js"></script>
@@ -101,9 +102,14 @@
       <div id="revisiResultWrap" style="display:none;">
         <div style="font-size:14px;font-weight:700;color:var(--dark);margin:18px 0 10px;">Hasil Revisi:</div>
         <div id="revisiResultList"></div>
-        <div style="display:flex;gap:8px;margin-top:6px;">
-          <button class="btn btn-secondary btn-sm" onclick="downloadRevisiHtml()">Unduh HTML Revisi</button>
-          <button class="btn btn-primary btn-sm" onclick="resetRevisi()">Revisi Lagi</button>
+        <div style="font-size:12px;font-weight:600;color:var(--gray-500);margin:14px 0 6px;">Pilih format unduhan:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('word')">📄 Unduh Word (.docx)</button>
+          <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('pdf')">🧾 Unduh PDF</button>
+          <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('txt')">📝 Unduh Teks (.txt)</button>
+        </div>
+        <div style="margin-top:8px;">
+          <button class="btn btn-primary btn-sm" onclick="resetRevisi()" style="width:100%;">Revisi Lagi</button>
         </div>
       </div>
 
@@ -438,8 +444,9 @@ function renderRevisiResult(parsed){
   list.innerHTML=html;
 }
 
-function downloadRevisiHtml(){
-  if(!revisiLastResult||!revisiLastResult.poin||!revisiLastResult.poin.length){showToast('Belum ada hasil revisi untuk diunduh');return;}
+// Bangun potongan HTML isi (dipakai bareng oleh versi PDF & sebagai acuan versi Word/TXT)
+// supaya konten yang diunduh konsisten dengan yang tampil di layar.
+function buildRevisiBodyHtml(){
   const rows=revisiLastResult.poin.map(p=>`
     <div class="poin">
       <h3>${escapeHtml(p.label||'')}${p.lokasi?' — '+escapeHtml(p.lokasi):''}</h3>
@@ -448,29 +455,94 @@ function downloadRevisiHtml(){
       <p class="label-sesudah">Sesudah</p>
       <p class="sesudah-text">${formatHasilAI(p.sesudah||'-')}</p>
     </div>`).join('');
-  const fullHtml=`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Hasil Revisi Skripsi</title>
+  return `<h1>Hasil Revisi Skripsi</h1>
+<div class="ringkasan"><strong>Ringkasan:</strong> ${escapeHtml(revisiLastResult.ringkasan||'')}</div>
+${rows}`;
+}
+
+// Versi teks polos (tanpa tag HTML) dari hasil revisi, dipakai untuk unduhan .txt
+// maupun sebagai isi paragraf saat membangun .docx.
+function buildRevisiPlainText(){
+  let out=`HASIL REVISI SKRIPSI\n\nRingkasan: ${revisiLastResult.ringkasan||'-'}\n`;
+  revisiLastResult.poin.forEach((p,i)=>{
+    out+=`\n${'-'.repeat(40)}\n${p.label||('Poin '+(i+1))}${p.lokasi?' — '+p.lokasi:''}\n\nSebelum:\n${p.sebelum||'-'}\n\nSesudah:\n${p.sesudah||'-'}\n`;
+  });
+  return out;
+}
+
+// File .docx ASLI (bukan trik HTML→.doc) memakai library docx.js supaya bisa langsung
+// dibuka & diedit rapi di Word/WPS, sama seperti fitur unduh di halaman Tugas/Skripsi.
+async function buildRevisiDocxBlob(){
+  if(typeof docx==='undefined') throw new Error('Modul Word (docx.js) belum siap, cek koneksi internet lalu coba lagi.');
+  const { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel } = docx;
+  const children=[
+    new Paragraph({ text:'Hasil Revisi Skripsi', heading:HeadingLevel.HEADING_1, alignment:AlignmentType.CENTER, spacing:{after:200} }),
+    new Paragraph({ children:[new TextRun({text:'Ringkasan: ',bold:true}), new TextRun({text:revisiLastResult.ringkasan||'-'})], spacing:{after:300} }),
+  ];
+  revisiLastResult.poin.forEach((p,i)=>{
+    children.push(new Paragraph({ children:[new TextRun({text:`${p.label||('Poin '+(i+1))}${p.lokasi?' — '+p.lokasi:''}`, bold:true, size:26})], spacing:{before:300,after:120} }));
+    children.push(new Paragraph({ children:[new TextRun({text:'Sebelum',bold:true,color:'DC2626'})], spacing:{after:60} }));
+    children.push(new Paragraph({ children:[new TextRun({text:p.sebelum||'-', italics:true})], indent:{left:360}, spacing:{after:160} }));
+    children.push(new Paragraph({ children:[new TextRun({text:'Sesudah',bold:true,color:'16A34A'})], spacing:{after:60} }));
+    children.push(new Paragraph({ children:[new TextRun({text:p.sesudah||'-'})], indent:{left:360}, spacing:{after:200} }));
+  });
+  const doc=new Document({
+    styles:{ default:{ document:{ run:{ font:'Times New Roman', size:24 } } } },
+    sections:[{ properties:{}, children }]
+  });
+  return await Packer.toBlob(doc);
+}
+
+function triggerBlobDownload(blob, filename){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// Satu fungsi untuk 3 pilihan format unduhan (Word/PDF/Teks) supaya mahasiswa/konsumen
+// bisa pilih sendiri format hasil akhirnya, bukan cuma HTML mentah seperti sebelumnya.
+async function downloadRevisi(type){
+  if(!revisiLastResult||!revisiLastResult.poin||!revisiLastResult.poin.length){showToast('Belum ada hasil revisi untuk diunduh');return;}
+
+  if(type==='pdf'){
+    const bodyHtml=buildRevisiBodyHtml();
+    const win=window.open('','_blank');
+    win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Hasil Revisi Skripsi</title>
 <style>
 body{font-family:'Segoe UI',Arial,sans-serif;max-width:800px;margin:30px auto;padding:0 20px;color:#1F2937;line-height:1.7;}
 h1{font-size:22px;color:#1A3DC2;margin-bottom:16px;}
 .ringkasan{background:#EEF2FF;border-radius:10px;padding:14px;margin-bottom:24px;font-size:14px;}
-.poin{border:1px solid #E5E7EB;border-radius:12px;padding:16px;margin-bottom:18px;}
+.poin{border:1px solid #E5E7EB;border-radius:12px;padding:16px;margin-bottom:18px;page-break-inside:avoid;}
 .poin h3{font-size:15px;color:#1A3DC2;margin-bottom:10px;}
 .label-sebelum{font-weight:700;color:#DC2626;font-size:12px;margin-bottom:4px;}
 .label-sesudah{font-weight:700;color:#16A34A;font-size:12px;margin:10px 0 4px;}
 blockquote{margin:0;padding:10px 12px;background:#FEF2F2;border-left:3px solid #DC2626;font-size:13px;color:#7F1D1D;border-radius:0 6px 6px 0;}
 .sesudah-text{margin:0;padding:10px 12px;background:#F0FDF4;border-left:3px solid #16A34A;font-size:13px;color:#14532D;border-radius:0 6px 6px 0;}
-</style></head><body>
-<h1>Hasil Revisi Skripsi</h1>
-<div class="ringkasan"><strong>Ringkasan:</strong> ${escapeHtml(revisiLastResult.ringkasan||'')}</div>
-${rows}
-</body></html>`;
-  const blob=new Blob([fullHtml],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download='revisi-skripsi.html';
-  document.body.appendChild(a);a.click();a.remove();
-  URL.revokeObjectURL(url);
-  showToast('File HTML revisi diunduh!');
+</style></head><body>${bodyHtml}</body></html>`);
+    win.document.close(); win.focus();
+    setTimeout(()=>win.print(),400);
+    showToast('Silakan pilih "Simpan sebagai PDF" di dialog cetak.');
+    return;
+  }
+
+  if(type==='word'){
+    try{
+      showToast('Menyiapkan file Word...');
+      const blob=await buildRevisiDocxBlob();
+      triggerBlobDownload(blob,'revisi-skripsi.docx');
+      showToast('File Word berhasil diunduh!');
+    }catch(e){ console.error(e); showToast('Gagal membuat file Word: '+e.message); }
+    return;
+  }
+
+  if(type==='txt'){
+    const blob=new Blob([buildRevisiPlainText()],{type:'text/plain;charset=utf-8'});
+    triggerBlobDownload(blob,'revisi-skripsi.txt');
+    showToast('File TXT berhasil diunduh!');
+    return;
+  }
 }
 
 function resetRevisi(){
