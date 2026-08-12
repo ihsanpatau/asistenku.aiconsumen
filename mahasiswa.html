@@ -133,6 +133,83 @@
     border: 1px solid rgba(255,255,255,0.12) !important;
   }
   .back-btn svg { stroke: #fff !important; }
+
+  /* ── Desktop / layar lebar (≥1025px): ubah daftar fitur jadi grid kartu ── */
+  /* Sebelumnya baris fitur cuma melebar penuh jadi pipih & kosong di kanan. */
+  @media (min-width: 1025px) {
+    .backnav { padding-left: 24px; padding-right: 24px; }
+
+    .hero-mhs {
+      margin-left: 24px;
+      margin-right: 24px;
+      min-height: 172px;
+      padding: 30px 34px 0 34px !important;
+    }
+    .hero-mhs h1 { font-size: 30px !important; }
+    .hero-mhs p { font-size: 13.5px !important; max-width: 520px; }
+    .hero-mhs .hero-mhs-mascot { width: 132px !important; }
+
+    .search-wrapper { margin-left: 24px; margin-right: 24px; max-width: 480px; }
+    .promo-banner { margin-left: 24px; margin-right: 24px; }
+    .format-bar { margin-left: 24px; margin-right: 24px; }
+    .section-header { padding-left: 24px; padding-right: 24px; }
+
+    /* Grid kartu, bukan list pipih */
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      padding: 0 24px;
+    }
+    .feature-row {
+      flex-direction: column;
+      align-items: flex-start;
+      position: relative;
+      min-height: 172px;
+      padding: 22px 22px 54px;
+      border-radius: 20px !important;
+    }
+    .feature-row:hover {
+      transform: translateY(-4px);
+      background: rgba(255,255,255,0.11) !important;
+      box-shadow: 0 16px 36px rgba(3,8,30,0.45);
+    }
+    .feature-row-icon {
+      width: 52px;
+      height: 52px;
+      margin-bottom: 14px;
+    }
+    .feature-row-icon svg { width: 24px; height: 24px; }
+    .feature-row-title { font-size: 15.5px; }
+    .feature-row-desc {
+      font-size: 13px;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .feature-row-arrow {
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      width: 30px !important;
+      height: 30px !important;
+      padding: 7px;
+      box-sizing: border-box;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.55) !important;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .feature-row:hover .feature-row-arrow {
+      background: linear-gradient(135deg,#5B7FFF,#3B5BFF);
+      color: #fff !important;
+      transform: translateX(2px);
+    }
+
+    #no-result { grid-column: 1 / -1; }
+  }
 </style>
 </head>
 <body>
@@ -152,7 +229,7 @@
   <div class="page-content">
 
     <!-- Hero Card -->
-    <div style="margin:16px 16px 0;padding:20px 16px 0;border-radius:22px;position:relative;overflow:hidden;background:linear-gradient(135deg,#0f1f5c 0%,#1a3dc2 60%,#3b5bff 100%);display:flex;align-items:flex-end;justify-content:space-between;min-height:140px;box-shadow:0 8px 32px rgba(59,91,255,0.35);">
+    <div class="hero-mhs" style="margin:16px 16px 0;padding:20px 16px 0;border-radius:22px;position:relative;overflow:hidden;background:linear-gradient(135deg,#0f1f5c 0%,#1a3dc2 60%,#3b5bff 100%);display:flex;align-items:flex-end;justify-content:space-between;min-height:140px;box-shadow:0 8px 32px rgba(59,91,255,0.35);">
       <!-- Glow blobs -->
       <div style="position:absolute;width:140px;height:140px;background:radial-gradient(circle,rgba(255,183,3,.25),transparent 70%);top:-50px;right:80px;border-radius:50%;pointer-events:none;"></div>
       <div style="position:absolute;width:80px;height:80px;background:radial-gradient(circle,rgba(91,127,255,.5),transparent 70%);bottom:-20px;left:20px;border-radius:50%;pointer-events:none;"></div>
@@ -162,7 +239,7 @@
         <p style="font-size:12px;color:rgba(255,255,255,.80);margin-top:6px;line-height:1.45;">Fitur akademik lengkap untuk skripsi, jurnal, makalah, dan lainnya.</p>
       </div>
       <!-- Mascot — sits at bottom-right, not overlapping text -->
-      <div style="position:relative;z-index:2;flex-shrink:0;width:100px;align-self:flex-end;">
+      <div class="hero-mhs-mascot" style="position:relative;z-index:2;flex-shrink:0;width:100px;align-self:flex-end;">
         <img src="cat-main.png" alt="Maskot" style="width:100%;display:block;">
       </div>
     </div>

@@ -54,6 +54,22 @@ overflow: hidden;
 .chat-list-item { display: flex; gap: 4px; font-size: 14px; line-height: 1.6; }
 .chat-list-item::before { content: counter(list) '.'; counter-increment: list; color: var(--purple); font-weight: 700; flex-shrink: 0; }
 .bot-list { counter-reset: list; display: flex; flex-direction: column; gap: 4px; margin: 6px 0; }
+
+/* Layar lebar: kolom chat jangan melebar penuh, batasi & tengahkan seperti aplikasi chat pada umumnya */
+@media (min-width: 1025px) {
+  .doktrai-intro,
+  .chat-area-doktrai,
+  .quick-replies,
+  .mode-toggle-row,
+  .chat-input-area {
+    width: 100%;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+  }
+  .chat-area-doktrai { padding-left: 0; padding-right: 0; }
+}
 </style>
 </head>
 <body>

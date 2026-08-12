@@ -101,6 +101,26 @@
   font-size:12.5px; color:var(--brand-dark); line-height:1.5; display:flex; gap:9px;
 }
 .detail-tip svg { width:16px; height:16px; flex-shrink:0; margin-top:1px; }
+
+/* Layar lebar: topik populer jadi grid kartu, bukan list panjang & pipih */
+@media (min-width: 1025px) {
+  .help-hero, #faqSection, #topicsSection { max-width: 900px; margin-left: auto; margin-right: auto; }
+  .qa-grid { grid-template-columns: repeat(4, 1fr); }
+  #topicsList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .topic-row {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 0;
+    min-height: 126px;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .topic-row:hover { transform: translateY(-3px); }
+  .topic-icon { margin-bottom: 10px; }
+}
 </style>
 </head>
 <body>

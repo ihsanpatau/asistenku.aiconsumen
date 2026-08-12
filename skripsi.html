@@ -361,6 +361,39 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
 .toast.show { opacity: 1; }
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ── Layar lebar (≥1025px): samakan dengan halaman lain — nav jadi sidebar kiri,
+   konten diberi ruang napas, tidak nempel di 430px & tidak melebar penuh ── */
+@media (min-width: 1025px) {
+  body { background: #EEF1F8; }
+
+  .app {
+    max-width: 720px;
+    margin: 0 auto 0 132px;
+    box-shadow: 0 0 40px rgba(20,30,80,0.08);
+    min-height: 100vh;
+  }
+
+  .bottom-nav {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: none;
+    max-width: none;
+    width: 96px;
+    height: 100vh;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 28px;
+    border-top: none;
+    border-right: 1px solid var(--gray-200);
+    box-shadow: none;
+    padding: 0;
+  }
+  .nav-item { padding: 10px 4px; border-radius: 12px; }
+  .nav-item:hover { background: var(--gray-100); }
+}
 </style>
 </head>
 <body>
@@ -1181,20 +1214,11 @@ WAJIB: Akhiri dengan bagian DAFTAR PUSTAKA (huruf kapital) berisi semua sumber, 
 Tulis dalam Bahasa Indonesia formal dan akademis. Jangan gunakan format markdown atau tanda pagar.`;
   }
 
-  // PERBAIKAN: dulu max_tokens selalu 4096 (default lama server) utk semua BAB,
-  // dan academicMode tidak dikirim sehingga system prompt akademik di bawah ini
-  // masih ditimpa gaya santai GAYA_PENULISAN oleh server. Sekarang max_tokens
-  // dihitung dari targetKata BAB ini (dgn buffer), dan academicMode:true dikirim
-  // supaya server tidak menempelkan gaya santai di atas instruksi akademik ini.
-  const maxTokensBab = Math.min(32000, Math.max(2048, Math.ceil(targetKata * 2.2 * 1.3) + 800));
-
   try {
     const res = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+(await AkAccount.getValidToken()) },
       body: JSON.stringify({
-        academicMode: true,
-        max_tokens: maxTokensBab,
         system: `Kamu adalah asisten akademik profesional dari asistenku.pro. Kamu membantu mahasiswa Indonesia menulis karya ilmiah berkualitas.
 
 ATURAN PENULISAN PENTING:

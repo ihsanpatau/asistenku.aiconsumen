@@ -18,6 +18,21 @@
 .voucher-desc { font-size:12px; opacity:.9; margin-top:2px; }
 .voucher-expiry { font-size:11px; opacity:.75; margin-top:8px; }
 .applied-banner { margin:0 16px 16px; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:12px; padding:12px 14px; font-size:12px; color:#166534; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+
+/* Layar lebar: form kode & daftar voucher jangan melebar penuh & pipih */
+@media (min-width: 1025px) {
+  .redeem-wrap { max-width: 460px; }
+  .voucher-heading { max-width: 900px; margin: 0 auto; padding-left: 16px !important; padding-right: 16px !important; }
+  #voucherList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  #voucherList .voucher-card { margin: 0; }
+}
 </style>
 </head>
 <body>
@@ -30,7 +45,7 @@
   </div>
   <div class="page-content">
 
-    <div style="padding:16px 16px 0;">
+    <div class="redeem-wrap" style="padding:16px 16px 0;">
       <div class="search-bar">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         <input type="text" id="kodeInput" placeholder="Masukkan kode voucher" style="text-transform:uppercase;">
@@ -38,9 +53,9 @@
       <button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="redeem()">Gunakan Kode</button>
     </div>
 
-    <div id="appliedWrap"></div>
+    <div id="appliedWrap" class="redeem-wrap"></div>
 
-    <div style="padding:16px 16px 8px;font-size:14px;font-weight:700;color:var(--dark);">Voucher Tersedia</div>
+    <div class="voucher-heading" style="padding:16px 16px 8px;font-size:14px;font-weight:700;color:var(--dark);">Voucher Tersedia</div>
     <div id="voucherList"></div>
 
     <div style="height:20px;"></div>
