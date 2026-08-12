@@ -160,163 +160,6 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-@media (min-width: 430px) {
-  .app {
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.12);
-  }
-}
-
-/* ── Responsif: Mobile landscape (HP dimiringkan) ── */
-/* Deteksi lewat tinggi layar yang pendek, bukan cuma lebar, supaya HP rebahan tetap kebaca meskipun lebar viewport-nya kebetulan mirip tablet. */
-@media (max-width: 1024px) and (orientation: landscape) and (max-height: 560px) {
-  .app {
-    max-width: 100%;
-  }
-  .topnav {
-    padding: 8px 18px;
-  }
-  .hero-banner {
-    min-height: 92px;
-    margin: 10px 12px 0;
-    padding: 14px 18px 0;
-  }
-  .hero-title {
-    font-size: 17px;
-  }
-  .hero-mascot img {
-    max-height: 90px;
-  }
-  .stats-row {
-    margin: 10px 16px;
-  }
-  .stat-item {
-    padding: 8px 6px;
-  }
-  .sec-header,
-  .section-header {
-    margin: 12px 0 8px;
-  }
-  .bottom-nav {
-    padding-top: 2px;
-    padding-bottom: max(2px, env(safe-area-inset-bottom, 0));
-  }
-  .nav-item {
-    padding: 6px 4px;
-    gap: 2px;
-  }
-  .nav-item svg {
-    width: 18px;
-    height: 18px;
-  }
-  .nav-label {
-    font-size: 9px;
-  }
-  .page-body,
-  .page-content {
-    padding-bottom: 64px;
-  }
-}
-
-/* ── Responsif: Tablet ── */
-/* Layar 641px–1024px (tablet potrait/landscape, HP besar rebahan) */
-@media (min-width: 641px) and (max-width: 1024px) {
-  .app {
-    max-width: 760px;
-  }
-  .menu-cards {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  .doc-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* ── Responsif: Laptop / Desktop ── */
-/* Layar di atas 1024px: layout khas aplikasi desktop, bukan kartu HP yang diperbesar */
-@media (min-width: 1025px) {
-  body {
-    background: var(--gray-100);
-    justify-content: flex-start;
-  }
-
-  .app {
-    margin-left: 96px;
-    width: calc(100% - 96px);
-    max-width: 1180px;
-    height: 100vh;
-    height: 100dvh;
-    min-height: 100vh;
-    min-height: 100dvh;
-    border-radius: 0;
-    box-shadow: none;
-  }
-
-  /* Bottom nav berubah jadi sidebar tetap di kiri layar */
-  .bottom-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: auto;
-    width: 96px;
-    height: 100vh;
-    height: 100dvh;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 28px;
-    border-top: none;
-    border-right: 1px solid var(--gray-200);
-    padding-bottom: 0;
-    z-index: 100;
-  }
-  .nav-item {
-    flex: none;
-    width: 68px;
-    padding: 10px 4px;
-    border-radius: var(--r-lg);
-  }
-  .nav-item:hover {
-    background: var(--gray-100);
-    color: var(--gray-600);
-  }
-  .nav-item.active:hover {
-    color: var(--brand-light);
-  }
-
-  /* Grid yang lebih longgar supaya memanfaatkan ruang layar lebar */
-  .menu-cards {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 14px;
-    padding: 0 24px;
-  }
-  .doc-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 14px;
-    padding: 0 24px;
-  }
-  .stats-row {
-    margin-left: 24px;
-    margin-right: 24px;
-  }
-  .score-grid,
-  .sec-header,
-  .section-header {
-    padding-left: 24px;
-    padding-right: 24px;
-  }
-  .hero-banner {
-    margin-left: 24px;
-    margin-right: 24px;
-  }
-}
-
-/* Layar sangat lebar: batasi biar konten nggak melebar berlebihan */
-@media (min-width: 1600px) {
-  .app {
-    max-width: 1320px;
-  }
-}
-
 /* ── Scrollable Content ── */
 .page-body {
   flex: 1;
@@ -2662,5 +2505,163 @@ body {
   }
   .pricing-price {
     font-size: 19px;
+  }
+}
+
+/* =========================== Responsif: dipindahkan ke akhir file agar cascade CSS menang atas base style component (tablet/desktop/landscape) =========================== */
+@media (min-width: 430px) {
+  .app {
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* ── Responsif: Mobile landscape (HP dimiringkan) ── */
+/* Deteksi lewat tinggi layar yang pendek, bukan cuma lebar, supaya HP rebahan tetap kebaca meskipun lebar viewport-nya kebetulan mirip tablet. */
+@media (max-width: 1024px) and (orientation: landscape) and (max-height: 560px) {
+  .app {
+    max-width: 100%;
+  }
+  .topnav {
+    padding: 8px 18px;
+  }
+  .hero-banner {
+    min-height: 92px;
+    margin: 10px 12px 0;
+    padding: 14px 18px 0;
+  }
+  .hero-title {
+    font-size: 17px;
+  }
+  .hero-mascot img {
+    max-height: 90px;
+  }
+  .stats-row {
+    margin: 10px 16px;
+  }
+  .stat-item {
+    padding: 8px 6px;
+  }
+  .sec-header,
+  .section-header {
+    margin: 12px 0 8px;
+  }
+  .bottom-nav {
+    padding-top: 2px;
+    padding-bottom: max(2px, env(safe-area-inset-bottom, 0));
+  }
+  .nav-item {
+    padding: 6px 4px;
+    gap: 2px;
+  }
+  .nav-item svg {
+    width: 18px;
+    height: 18px;
+  }
+  .nav-label {
+    font-size: 9px;
+  }
+  .page-body,
+  .page-content {
+    padding-bottom: 64px;
+  }
+}
+
+/* ── Responsif: Tablet ── */
+/* Layar 641px–1024px (tablet potrait/landscape, HP besar rebahan) */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .app {
+    max-width: 760px;
+  }
+  .menu-cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .doc-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ── Responsif: Laptop / Desktop ── */
+/* Layar di atas 1024px: layout khas aplikasi desktop, bukan kartu HP yang diperbesar */
+@media (min-width: 1025px) {
+  body {
+    background: var(--gray-100);
+    justify-content: flex-start;
+  }
+
+  .app {
+    margin-left: 96px;
+    width: calc(100% - 96px);
+    max-width: 1180px;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* Bottom nav berubah jadi sidebar tetap di kiri layar */
+  .bottom-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: auto;
+    width: 96px;
+    height: 100vh;
+    height: 100dvh;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 28px;
+    border-top: none;
+    border-right: 1px solid var(--gray-200);
+    padding-bottom: 0;
+    z-index: 100;
+  }
+  .nav-item {
+    flex: none;
+    width: 68px;
+    padding: 10px 4px;
+    border-radius: var(--r-lg);
+  }
+  .nav-item:hover {
+    background: var(--gray-100);
+    color: var(--gray-600);
+  }
+  .nav-item.active:hover {
+    color: var(--brand-light);
+  }
+
+  /* Grid yang lebih longgar supaya memanfaatkan ruang layar lebar */
+  .menu-cards {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+    padding: 0 24px;
+  }
+  .doc-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    padding: 0 24px;
+  }
+  .stats-row {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+  .score-grid,
+  .sec-header,
+  .section-header {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .hero-banner {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+}
+
+/* Layar sangat lebar: batasi biar konten nggak melebar berlebihan */
+@media (min-width: 1600px) {
+  .app {
+    max-width: 1320px;
   }
 }
