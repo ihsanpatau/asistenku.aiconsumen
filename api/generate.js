@@ -43,6 +43,34 @@ const UNLIMITED_PLAN_DAILY_CAP = 500;
 const GAYA_PENULISAN =
   "Tulis jawabanmu dalam gaya percakapan biasa yang rapi dan enak dibaca, seperti orang menjelaskan langsung. ATURAN PENTING: JANGAN gunakan tanda pagar (#, ##, ###) untuk judul/heading apapun. JANGAN membuat daftar bernomor atau bullet point kecuali benar-benar dibutuhkan (misal langkah-langkah teknis yang wajib berurutan). JANGAN gunakan format markdown yang berlebihan. Tulis dalam bentuk paragraf mengalir dengan bahasa Indonesia yang natural, hangat, dan mudah dipahami, seperti sedang berbicara langsung ke orangnya.";
 
+// Dipakai HANYA sebagai jaring pengaman kalau pemanggil mengirim academicMode:true
+// tapi lupa mengirim system prompt akademiknya sendiri (harusnya tidak pernah terjadi
+// karena hasil-tugas.html selalu mengirim system-nya sendiri, tapi tetap disediakan
+// supaya endpoint ini tidak pernah jatuh balik ke gaya santai GAYA_PENULISAN untuk
+// dokumen akademik seperti makalah/skripsi/jurnal).
+const GAYA_PENULISAN_AKADEMIK_FALLBACK =
+  'Tulis jawabanmu dalam Bahasa Indonesia akademik formal dan baku, bukan gaya percakapan santai. JANGAN gunakan tanda pagar (#) atau format markdown. Judul bab ditulis huruf kapital langsung (contoh: "BAB I PENDAHULUAN"), sub-bab format "1.1 Judul Sub-bab". Sertakan kutipan (Nama, Tahun) untuk klaim/data/teori, dan akhiri dengan DAFTAR PUSTAKA format APA yang lengkap.';
+
+// --- PERBAIKAN PANJANG OUTPUT (sebelumnya max_tokens di-hardcode 4096 untuk SEMUA
+// permintaan — ini penyebab utama makalah/tugas/jurnal panjang (mis. 10+ halaman)
+// selalu "terpotong" sebelum sampai Daftar Pustaka, karena 4096 token ≈ hanya
+// 2.000-2.500 kata, jauh di bawah target kata × halaman yang diatur admin.
+// Claude Sonnet 4.5 (model yang dipakai di bawah) mendukung sampai 64.000 token
+// output, jadi sekarang max_tokens dibuat DINAMIS: pemanggil (hasil-tugas.html)
+// menghitung sendiri kira-kira berapa token yang dibutuhkan dari target kata, lalu
+// mengirimkannya sebagai `max_tokens` di body request. Tetap dibatasi (clamp) di
+// sini supaya tidak ada satu request pun yang bisa membengkak tanpa batas kalau
+// ada input yang salah/disalahgunakan. ---
+const DEFAULT_MAX_TOKENS = 8192; // naik dari 4096 lama, tetap aman utk request tanpa target eksplisit
+const MIN_MAX_TOKENS = 1024;
+const HARD_CAP_MAX_TOKENS = 32000; // jauh di bawah limit model (64k), cukup luas utk dokumen ±25 halaman
+
+function resolveMaxTokens(requested) {
+  const n = Number(requested);
+  if (!n || isNaN(n) || n <= 0) return DEFAULT_MAX_TOKENS;
+  return Math.min(HARD_CAP_MAX_TOKENS, Math.max(MIN_MAX_TOKENS, Math.round(n)));
+}
+
 // Hitung tanggal "hari ini" memakai zona waktu Jakarta, supaya batasnya
 // reset di tengah malam WIB (konsisten dengan pesan di account.js yang
 // bilang "reset besok jam 00:00").
@@ -109,12 +137,10 @@ module.exports = async (req, res) => {
 
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!serviceRoleKey) {
-      return res
-        .status(500)
-        .json({
-          error:
-            "SUPABASE_SERVICE_ROLE_KEY belum diset di Environment Variables Vercel",
-        });
+      return res.status(500).json({
+        error:
+          "SUPABASE_SERVICE_ROLE_KEY belum diset di Environment Variables Vercel",
+      });
     }
     const sbAdmin = createClient(SUPABASE_URL, serviceRoleKey);
 
@@ -123,12 +149,10 @@ module.exports = async (req, res) => {
       token
     );
     if (userErr || !userData || !userData.user) {
-      return res
-        .status(401)
-        .json({
-          error:
-            "Sesi login tidak valid atau sudah kedaluwarsa. Silakan login ulang.",
-        });
+      return res.status(401).json({
+        error:
+          "Sesi login tidak valid atau sudah kedaluwarsa. Silakan login ulang.",
+      });
     }
     const userId = userData.user.id;
 
@@ -139,12 +163,10 @@ module.exports = async (req, res) => {
       .eq("id", userId)
       .maybeSingle();
     if (profile && profile.blocked) {
-      return res
-        .status(403)
-        .json({
-          error:
-            "Akun Anda sedang diblokir. Hubungi admin untuk informasi lebih lanjut.",
-        });
+      return res.status(403).json({
+        error:
+          "Akun Anda sedang diblokir. Hubungi admin untuk informasi lebih lanjut.",
+      });
     }
 
     // --- 4) Cek batas pemakaian AI harian di SERVER (jaring pengaman) ---
@@ -169,7 +191,8 @@ module.exports = async (req, res) => {
       });
     }
 
-    const { prompt, task, messages, system } = req.body || {};
+    const { prompt, task, messages, system, max_tokens, academicMode } =
+      req.body || {};
 
     if (!prompt && !messages) {
       return res
@@ -184,13 +207,18 @@ module.exports = async (req, res) => {
         .json({ error: "API key belum dikonfigurasi di server" });
     }
 
-    const finalSystem = system
+    // academicMode:true (dikirim hasil-tugas.html utk makalah/tugas/jurnal) berarti
+    // pemanggil SUDAH mengirim system prompt akademiknya sendiri — jangan ditempeli
+    // GAYA_PENULISAN (gaya santai/ngobrol) lagi, supaya tidak saling bertentangan.
+    const finalSystem = academicMode
+      ? system || GAYA_PENULISAN_AKADEMIK_FALLBACK
+      : system
       ? `${system}\n\n${GAYA_PENULISAN}`
       : GAYA_PENULISAN;
 
     const body = {
       model: "claude-sonnet-4-5",
-      max_tokens: 4096,
+      max_tokens: resolveMaxTokens(max_tokens),
       system: finalSystem,
       messages:
         messages && messages.length
@@ -211,13 +239,11 @@ module.exports = async (req, res) => {
     const data = await response.json();
 
     if (!response.ok) {
-      return res
-        .status(response.status)
-        .json({
-          error:
-            (data.error && data.error.message) ||
-            "Terjadi kesalahan dari Anthropic API",
-        });
+      return res.status(response.status).json({
+        error:
+          (data.error && data.error.message) ||
+          "Terjadi kesalahan dari Anthropic API",
+      });
     }
 
     // --- 5) Baru dicatat SETELAH sukses, supaya panggilan yang gagal
