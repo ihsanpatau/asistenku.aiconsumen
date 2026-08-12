@@ -384,14 +384,26 @@ const AkAccount = (function () {
 
   // --- Ambil token yang masih berlaku, refresh otomatis kalau sudah kedaluwarsa ---
   // Supaya user TIDAK perlu logout/login manual tiap kali sesi lamanya habis (biasanya ±1 jam).
-  async function getValidToken() {
-    const SUPABASE_URL = "https://dkpztybbcvvzatgwhano.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm";
-    let token = localStorage.getItem("ak_token");
-    const refreshToken = localStorage.getItem("ak_refresh_token");
-    if (!token) return null;
+  //
+  // PERBAIKAN BUG "harus login ulang setelah idle 1-2 jam":
+  // Sebelumnya, kalau halaman yang sama menembak beberapa request AI hampir
+  // bersamaan (mis. generate PPT yang memanggil getValidToken() dua kali
+  // paralel), tiap panggilan bisa memicu refresh token SENDIRI-SENDIRI ke
+  // Supabase secara bersamaan. Supabase me-ROTASI refresh token setiap kali
+  // dipakai (refresh token lama langsung tidak berlaku begitu dipakai sekali).
+  // Kalau dua permintaan refresh terjadi bersamaan, permintaan yang datang
+  // sedikit lebih lambat akan ditolak ("refresh token sudah tidak valid")
+  // walau access token yang lama sebenarnya baru saja sukses diperbarui oleh
+  // request yang lain — akibatnya user mendapat pesan "Sesi login tidak
+  // valid, silakan login ulang" walau sebenarnya masih dalam keadaan login.
+  //
+  // Perbaikannya: pakai SATU promise refresh yang dibagi (lock) untuk semua
+  // pemanggil yang terjadi bersamaan, dan sebelum benar-benar refresh ke
+  // server, cek dulu apakah localStorage sudah punya token baru yang masih
+  // berlaku (mis. sudah diperbarui oleh tab/panggilan lain barusan).
+  let _refreshInFlight = null;
 
-    let expired = true;
+  function _decodeExpiry(token) {
     try {
       const payload = JSON.parse(
         decodeURIComponent(
@@ -400,37 +412,104 @@ const AkAccount = (function () {
           )
         )
       );
-      expired = !payload.exp || payload.exp * 1000 < Date.now() + 30000;
+      return payload.exp ? payload.exp * 1000 : 0;
     } catch (e) {
-      expired = true;
+      return 0;
+    }
+  }
+
+  async function _doRefresh(refreshToken) {
+    const SUPABASE_URL = "https://dkpztybbcvvzatgwhano.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_yYIlVG0GWf85R3wK_xjhfQ_1gqucStm";
+    const res = await fetch(
+      `${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      }
+    );
+    const data = await res.json();
+    if (data.access_token) {
+      localStorage.setItem("ak_token", data.access_token);
+      if (data.refresh_token)
+        localStorage.setItem("ak_refresh_token", data.refresh_token);
+      return data.access_token;
+    }
+    throw new Error(
+      (data && (data.error_description || data.error || data.msg)) ||
+        "Refresh token gagal"
+    );
+  }
+
+  async function getValidToken() {
+    let token = localStorage.getItem("ak_token");
+    if (!token) return null;
+
+    const expiryMs = _decodeExpiry(token);
+    const expired = !expiryMs || expiryMs < Date.now() + 30000;
+    if (!expired) return token;
+
+    // Kalau proses refresh dari panggilan lain (paralel) sedang berjalan,
+    // ikut menunggu hasil YANG SAMA — jangan buat request refresh baru
+    // yang bisa saling bentrok/merebut refresh token yang sama.
+    if (_refreshInFlight) {
+      try {
+        return await _refreshInFlight;
+      } catch (e) {
+        // lanjut ke bawah, coba jalur normal sebagai upaya terakhir
+      }
     }
 
-    if (!expired) return token;
+    const refreshToken = localStorage.getItem("ak_refresh_token");
     if (!refreshToken) return token; // tidak ada refresh token tersimpan, coba pakai yang lama (mungkin tetap gagal)
 
-    try {
-      const res = await fetch(
-        `${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: SUPABASE_ANON_KEY,
-          },
-          body: JSON.stringify({ refresh_token: refreshToken }),
+    _refreshInFlight = (async () => {
+      // Cek ulang: mungkin sudah diperbarui oleh panggilan/tab lain barusan.
+      const latestToken = localStorage.getItem("ak_token");
+      if (latestToken && latestToken !== token) {
+        const latestExpiry = _decodeExpiry(latestToken);
+        if (latestExpiry && latestExpiry > Date.now() + 30000) {
+          return latestToken;
         }
-      );
-      const data = await res.json();
-      if (data.access_token) {
-        localStorage.setItem("ak_token", data.access_token);
-        if (data.refresh_token)
-          localStorage.setItem("ak_refresh_token", data.refresh_token);
-        return data.access_token;
       }
+      const latestRefreshToken =
+        localStorage.getItem("ak_refresh_token") || refreshToken;
+
+      // Coba refresh, dengan SATU kali retry ringan kalau gagal karena
+      // masalah jaringan sesaat (bukan karena refresh token benar-benar
+      // sudah tidak valid) — supaya idle lama + koneksi sempat putus-nyambung
+      // tidak langsung memaksa login ulang.
+      try {
+        return await _doRefresh(latestRefreshToken);
+      } catch (e1) {
+        try {
+          await new Promise((r) => setTimeout(r, 800));
+          const retryRefreshToken =
+            localStorage.getItem("ak_refresh_token") || latestRefreshToken;
+          return await _doRefresh(retryRefreshToken);
+        } catch (e2) {
+          console.warn("Refresh token gagal:", e2.message || e2);
+          throw e2;
+        }
+      }
+    })();
+
+    try {
+      const fresh = await _refreshInFlight;
+      return fresh;
     } catch (e) {
-      console.warn("Refresh token gagal:", e);
+      // Refresh benar-benar gagal (refresh token sudah dicabut/kedaluwarsa
+      // sungguhan) — kembalikan token lama sebagai upaya terakhir. Server
+      // (/api/generate) akan menolaknya dengan pesan yang jelas kalau memang
+      // sudah tidak valid, daripada kita menebak di sini.
+      return token;
+    } finally {
+      _refreshInFlight = null;
     }
-    return token;
   }
 
   // Masa aktif (hari) untuk 1 paket, sesuai yang diatur admin di tabel packages.durasi_hari
@@ -702,3 +781,27 @@ const AkAccount = (function () {
     getActiveFlashPromo,
   };
 })();
+
+// --- Perbaikan bug "harus login ulang setelah idle lama" ---
+// Kalau tab/HP ditinggal 1-2 jam lalu dibuka lagi (mis. layar dikunci,
+// pindah app, lalu balik lagi), access token yang tersimpan hampir pasti
+// sudah kedaluwarsa. Daripada menunggu user menekan tombol generate dan
+// baru ketahuan gagal (lalu disuruh login ulang), kita refresh token di
+// LATAR BELAKANG begitu halaman terlihat kembali (tab/app aktif lagi),
+// supaya saat user benar-benar menekan tombol generate, token yang
+// dipakai sudah pasti fresh.
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", function () {
+    if (
+      document.visibilityState === "visible" &&
+      localStorage.getItem("ak_token")
+    ) {
+      AkAccount.getValidToken().catch(function () {});
+    }
+  });
+  // Jaring pengaman tambahan: begitu skrip ini dimuat (halaman baru dibuka
+  // / direfresh), langsung cek & refresh juga kalau perlu.
+  if (localStorage.getItem("ak_token")) {
+    AkAccount.getValidToken().catch(function () {});
+  }
+}
