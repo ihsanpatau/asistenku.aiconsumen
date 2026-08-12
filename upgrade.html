@@ -308,6 +308,7 @@
    diakses, otomatis pakai kurs cadangan di bawah. ===== */
 const KURS_USD_FALLBACK_UPGRADE = 18100; // kurs cadangan Rp per 1 USD (per 12 Agu 2026)
 let kursUsdCacheUpgrade = null;
+window.__akPkgCache = window.__akPkgCache || {}; // cache harga paket TERBARU dari Supabase (key -> row), dipakai bersama oleh muatHargaTerbaru() & highlightCurrentPlan() supaya kartu, tombol, dan popup konfirmasi selalu pakai angka yang sama
 async function ambilKursUsdUpgrade() {
   if (kursUsdCacheUpgrade) return kursUsdCacheUpgrade;
   try {
@@ -347,6 +348,12 @@ async function muatHargaTerbaru() {
   if (error || !Array.isArray(pkgs)) { console.warn('muatHargaTerbaru gagal:', error); return; }
   pkgs.forEach(p => {
     p.key = (p.key || '').toLowerCase();
+    // Simpan data paket (termasuk real_price) di cache global supaya
+    // highlightCurrentPlan() memakai harga TERBARU yang sama, bukan
+    // angka lama yang ditulis manual di kode — supaya kartu, tombol
+    // "Beli Sekarang", dan popup konfirmasi selalu sinkron.
+    window.__akPkgCache[p.key] = p;
+
     const priceEl = document.getElementById('price_' + p.key);
     if (priceEl) {
       const coret = p.strike_price ? `<div style="font-size:12px;font-weight:600;text-decoration:line-through;opacity:.5;line-height:1.2;">${rpKeUsdUpgrade(p.strike_price, kurs)}</div>` : '';
@@ -362,6 +369,10 @@ async function muatHargaTerbaru() {
     const cmpHal = document.getElementById('cmp_hal_' + p.key); if (cmpHal) cmpHal.textContent = p.halaman_limit;
     const cmpPesan = document.getElementById('cmp_pesan_' + p.key); if (cmpPesan) cmpPesan.textContent = p.pesan_limit >= 99999 ? 'Unlimited' : p.pesan_limit;
   });
+
+  // Kartu paket sudah punya harga terbaru — render ulang status "Paket Aktif"
+  // supaya tombol non-aktif ikut pakai harga terbaru ini, bukan versi lama.
+  if (typeof highlightCurrentPlan === 'function') highlightCurrentPlan();
 
   // Tombol promo (selalu paket Pro) — pakai harga Pro yang sebenarnya, bukan angka tetap
   const pro = pkgs.find(p => p.key === 'pro');
@@ -630,6 +641,7 @@ function highlightCurrentPlan(){
   const activePlan=(localStorage.getItem('user_plan')||'gratis');
   const order=['gratis','standar','pro','lanjutan'];
   const cards=document.querySelectorAll('.plan-card');
+  const nameMap={standar:'Standar', pro:'Pro', lanjutan:'Lanjutan'};
   cards.forEach((card,i)=>{
     const key=order[i];
     const btn=card.querySelector('.plan-btn');
@@ -639,9 +651,17 @@ function highlightCurrentPlan(){
       btn.classList.add('disabled'); btn.textContent='Paket Aktif'; btn.onclick=null;
     } else {
       btn.classList.remove('disabled'); btn.textContent='Beli Sekarang';
-      const hargaMap={standar:'20000', pro:'59000', lanjutan:'99000'};
-      const nameMap={standar:'Standar', pro:'Pro', lanjutan:'Lanjutan'};
-      if(hargaMap[key]) btn.setAttribute('onclick',`beliPaket('${nameMap[key]}','${hargaMap[key]}')`);
+      // PENTING: selalu pakai harga TERBARU dari cache (diisi oleh
+      // muatHargaTerbaru() dari Supabase) — jangan pakai angka tetap di
+      // kode, supaya tombol & popup konfirmasi tidak pernah desinkron
+      // dengan harga yang tampil di kartu paket.
+      const pkg = window.__akPkgCache[key];
+      if (pkg && pkg.real_price != null) {
+        btn.setAttribute('onclick', `beliPaket('${pkg.label || nameMap[key]}','${pkg.real_price}')`);
+      }
+      // Kalau harga terbaru belum sempat dimuat (mis. dipanggil sebelum
+      // muatHargaTerbaru selesai), biarkan onclick apa adanya dulu —
+      // akan otomatis diperbaiki begitu muatHargaTerbaru() selesai fetch.
     }
   });
 }
