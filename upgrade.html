@@ -374,10 +374,10 @@ async function muatHargaTerbaru() {
   // supaya tombol non-aktif ikut pakai harga terbaru ini, bukan versi lama.
   if (typeof highlightCurrentPlan === 'function') highlightCurrentPlan();
 
-  // Tombol promo (selalu paket Pro) — pakai harga Pro yang sebenarnya, bukan angka tetap
+  // Tombol promo (selalu paket Pro) — pakai harga Pro yang sebenarnya, dengan flag bonus=true
   const pro = pkgs.find(p => p.key === 'pro');
   const promoBtn = document.getElementById('btn_promo_pro');
-  if (pro && promoBtn) promoBtn.setAttribute('onclick', `beliPaket('Pro','${pro.real_price}')`);
+  if (pro && promoBtn) promoBtn.setAttribute('onclick', `beliPaket('Pro','${pro.real_price}',true)`);
 }
 document.addEventListener('DOMContentLoaded', muatHargaTerbaru);
 
@@ -473,17 +473,30 @@ document.addEventListener('DOMContentLoaded', muatFlashPromo);
       </div>
     </div>
 
-    <!-- Promo Banner -->
-    <div style="margin:0 16px 16px;background:linear-gradient(120deg,#8B3DEE 0%,#DB2777 55%,#F5811F 100%);border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;box-shadow:0 10px 24px rgba(219,39,119,.25);">
+    <!-- Promo Banner (bonus 7 hari, muncul hanya jika belum dipakai bulan ini) -->
+    <div id="promoBonusBanner" style="margin:0 16px 16px;background:linear-gradient(120deg,#8B3DEE 0%,#DB2777 55%,#F5811F 100%);border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;box-shadow:0 10px 24px rgba(219,39,119,.25);">
       <div style="font-size:32px;">🎁</div>
       <div style="flex:1;">
         <div style="font-size:14px;font-weight:800;color:#fff;">Promo Hari Ini!</div>
         <div style="font-size:12px;color:rgba(255,255,255,0.85);margin-top:2px;">Upgrade sekarang dan dapat bonus <strong>7 hari akses PRO.</strong></div>
       </div>
-      <button class="plan-btn gold" id="btn_promo_pro" style="white-space:nowrap;font-size:12px;padding:10px 14px;" onclick="beliPaket('Pro','59000')">
+      <button class="plan-btn gold" id="btn_promo_pro" style="white-space:nowrap;font-size:12px;padding:10px 14px;" onclick="beliPaket('Pro','59000',true)">
         Beli Paket →
       </button>
     </div>
+    <script>
+    // Sembunyikan banner promo bonus jika user sudah dapat bonus bulan ini
+    (function() {
+      try {
+        const saved = localStorage.getItem('ak_bonus_pro_month');
+        const nowMonth = new Date().toISOString().slice(0, 7);
+        if (saved === nowMonth) {
+          const el = document.getElementById('promoBonusBanner');
+          if (el) el.style.display = 'none';
+        }
+      } catch(e) {}
+    })();
+    </script>
 
     <!-- FAQ -->
     <div style="padding:0 16px;">
@@ -554,8 +567,8 @@ document.addEventListener('DOMContentLoaded', muatFlashPromo);
     <div class="modal-handle"></div>
     <div style="font-size:18px;font-weight:800;color:var(--dark);margin-bottom:4px;">Konfirmasi Pembelian</div>
     <div style="font-size:13px;color:var(--gray-500);margin-bottom:16px;">Paket <strong id="payPaket">PRO</strong> – <strong id="payHarga">Rp59.000</strong>/bulan</div>
-    <div style="background:var(--blue-pale);border-radius:12px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--blue);">
-      🎁 Bonus 7 hari akses PRO jika beli sekarang!
+    <div id="payBonusNote" style="display:none;background:var(--blue-pale);border-radius:12px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--blue);">
+      🎁 Bonus 7 hari akses PRO ditambahkan ke paket kamu!
     </div>
     <div style="font-size:13px;color:var(--gray-500);margin-bottom:16px;">💳 Pilih metode pembayaran (QRIS, transfer bank, e-wallet, kartu, dll) di halaman berikutnya.</div>
     <button class="btn btn-primary" onclick="prosesPayment()">Bayar Sekarang →</button>
@@ -577,14 +590,48 @@ try{
   if(v && v.code){ voucherDiscount=v.discountPercent||0; voucherCode=v.code; }
 }catch(e){}
 
-function beliPaket(name,harga){
+/* ===== BONUS 7 HARI: cek apakah user berhak dapat bonus bulan ini =====
+   Bonus hanya untuk user yang klik tombol dari banner "Promo Hari Ini"
+   (bukan tombol "Beli Sekarang" biasa di kartu paket).
+   Setiap user hanya bisa dapat bonus 1x per bulan kalender.
+   Disimpan di localStorage key: ak_bonus_pro_month → "YYYY-MM"
+================================================================ */
+function cekBonusAktif() {
+  try {
+    const saved = localStorage.getItem('ak_bonus_pro_month');
+    const nowMonth = new Date().toISOString().slice(0, 7); // "2026-08"
+    return saved !== nowMonth; // true = belum pakai bonus bulan ini
+  } catch(e) { return false; }
+}
+function tandaiBonusDipakai() {
+  try {
+    const nowMonth = new Date().toISOString().slice(0, 7);
+    localStorage.setItem('ak_bonus_pro_month', nowMonth);
+  } catch(e) {}
+}
+
+function beliPaket(name, harga, pakaiBonus = false) {
   const finalHarga = voucherDiscount ? Math.round(parseInt(harga) * (1 - voucherDiscount/100)) : parseInt(harga);
-  document.getElementById('payPaket').textContent=name;
-  document.getElementById('payHarga').textContent='Rp'+finalHarga.toLocaleString('id-ID');
-  document.getElementById('payModal').dataset.planKey=name.toLowerCase();
+  document.getElementById('payPaket').textContent = name;
+  document.getElementById('payHarga').textContent = 'Rp' + finalHarga.toLocaleString('id-ID');
+  document.getElementById('payModal').dataset.planKey = name.toLowerCase();
+  // Simpan flag bonus di dataset modal (dipakai saat prosesPayment)
+  document.getElementById('payModal').dataset.pakaiBonus = pakaiBonus ? '1' : '0';
   document.getElementById('payModal').classList.add('open');
-  const bonusNote=document.querySelector('#payModal [style*="Bonus"]');
-  if(voucherCode && bonusNote){ bonusNote.textContent = `🎟️ Voucher ${voucherCode} diterapkan: diskon ${voucherDiscount}%!`; }
+
+  // Tampilkan atau sembunyikan banner bonus
+  const bonusNote = document.getElementById('payBonusNote');
+  if (bonusNote) {
+    if (pakaiBonus && cekBonusAktif()) {
+      bonusNote.style.display = 'block';
+      bonusNote.innerHTML = '🎁 <strong>Bonus 7 hari akses PRO</strong> ditambahkan ke paket kamu!';
+    } else if (voucherCode) {
+      bonusNote.style.display = 'block';
+      bonusNote.innerHTML = `🎟️ Voucher <strong>${voucherCode}</strong> diterapkan: diskon ${voucherDiscount}%!`;
+    } else {
+      bonusNote.style.display = 'none';
+    }
+  }
 }
 
 async function prosesPayment(){
@@ -607,11 +654,20 @@ async function prosesPayment(){
 
     if (!userId || !userEmail) { showToast('Gagal membaca data akun, coba login ulang.'); return; }
 
+    // Cek apakah bonus 7 hari harus dikirim ke backend
+    const pakaiBonus = document.getElementById('payModal').dataset.pakaiBonus === '1';
+    const bonusValid = pakaiBonus && cekBonusAktif();
+
     // 2) Minta Snap Token ke server kita (backend yang hubungi Midtrans, bukan browser)
     const resp = await fetch('/api/midtrans-create-transaction', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (await AkAccount.getValidToken()) },
-      body: JSON.stringify((() => { const b = { package_key: planKey, user_name: userName }; if (planKey === 'flash' && flashDurasi) b.flash_durasi = Number(flashDurasi); return b; })())
+      body: JSON.stringify((() => {
+        const b = { package_key: planKey, user_name: userName };
+        if (planKey === 'flash' && flashDurasi) b.flash_durasi = Number(flashDurasi);
+        if (bonusValid) b.bonus_hari = 7; // Backend akan tambah 7 hari ke masa aktif
+        return b;
+      })())
     });
     const data = await resp.json();
 
@@ -624,6 +680,8 @@ async function prosesPayment(){
 
     // 3) Redirect ke halaman pembayaran Midtrans (kompatibel semua browser termasuk Safari iOS)
     if (voucherCode) localStorage.removeItem('ak_voucher_applied');
+    // Tandai bonus sudah dipakai bulan ini (sebelum redirect, supaya tidak dobel)
+    if (bonusValid) tandaiBonusDipakai();
     showToast('Mengarahkan ke halaman pembayaran...');
     setTimeout(() => {
       window.location.href = `https://app.midtrans.com/snap/v2/vtweb/${data.token}`;
