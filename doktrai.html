@@ -231,7 +231,7 @@ if(role==='user'){
 area.innerHTML+=`<div class="chat-msg user"><div><div class="chat-bubble">${html}</div><div class="chat-time">${time} ✓✓</div></div></div>`;
 } else {
 area.innerHTML+=`<div class="chat-msg bot">
-<div class="chat-avatar" style="width:30px;height:30px;border-radius:50%;background:#F5F3FF;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🐱</div>
+<div class="chat-avatar" style="width:30px;height:30px;border-radius:50%;background:#F5F3FF;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;"><img src="cat-doktrai.png" alt="DoktrAI" style="width:100%;height:100%;object-fit:cover;"></div>
 <div>
 <div class="chat-bubble">${html}</div>
 <div class="chat-time">${time}</div>
@@ -255,7 +255,7 @@ simpanSesiChat();
 function showTyping(){
 const area=document.getElementById('chatArea');
 area.innerHTML+=`<div class="chat-msg bot" id="typingIndicator">
-<div style="width:30px;height:30px;border-radius:50%;background:#F5F3FF;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🐱</div>
+<div style="width:30px;height:30px;border-radius:50%;background:#F5F3FF;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;"><img src="cat-doktrai.png" alt="DoktrAI" style="width:100%;height:100%;object-fit:cover;"></div>
 <div class="chat-bubble" style="background:var(--white);border:1px solid var(--gray-200);">
 <div class="typing-indicator">
 <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
