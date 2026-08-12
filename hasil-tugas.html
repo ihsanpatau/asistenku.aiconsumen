@@ -14,6 +14,7 @@
 <script src="riwayat-store.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
+<script src="ai-loading.js"></script>
 </head>
 <body>
 <div class="app">
@@ -414,10 +415,13 @@ function setLoadingUI(isLoading, errorMsg){
   if(isLoading){
     document.getElementById('ringkasanTugas').textContent = '⏳ AI sedang memproses tugasmu, mohon tunggu (bisa 10–40 detik)...';
     setBanner('loading');
+    if (typeof AkLoading !== 'undefined') AkLoading.show('AI sedang mengerjakan tugasmu...');
   } else if(errorMsg){
     setBanner('error', 'AI gagal menghasilkan tugas. Klik "Coba Lagi" di bawah.');
+    if (typeof AkLoading !== 'undefined') AkLoading.hide(true);
   } else {
     setBanner('done');
+    if (typeof AkLoading !== 'undefined') AkLoading.hide(true);
   }
 }
 

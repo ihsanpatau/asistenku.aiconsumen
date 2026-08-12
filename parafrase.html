@@ -14,6 +14,7 @@
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
 <script src="quota-popup.js"></script>
+<script src="ai-loading.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 /* === TABS === */
@@ -425,9 +426,11 @@ async function doParafrase(){
     const cek = AkAccount.cekKuotaHalaman();
     if (!cek.ok) { AkQuotaPopup.show(cek.pesan); return; }
   }
-  showToast('Memparafrase teks...');
+  if (typeof AkLoading !== 'undefined') AkLoading.show('AI sedang membuat parafrase teks kamu...');
+  else showToast('Memparafrase teks...');
   try{
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({messages:[{role:'user',content:`Parafrasekan teks berikut dalam Bahasa Indonesia dengan tingkat perubahan ${level()} dan gaya bahasa ${style()}. Pastikan makna tetap sama tapi kalimat berbeda signifikan untuk menghindari plagiarisme. Langsung tulis hasil parafrase tanpa penjelasan:\n\n${text}`}]})});
+    if (typeof AkLoading !== 'undefined') AkLoading.update('Menyusun hasil akhir...');
     const data=await res.json();
     if(!res.ok){throw new Error(data.error||'Gagal terhubung ke server');}
     const result=data.text||'';
@@ -440,6 +443,7 @@ async function doParafrase(){
     showToast('Parafrase selesai! ✓');
     if (typeof AkAccount !== 'undefined') AkAccount.catatHalaman('parafrase_'+Date.now(), 0.5);
   }catch(e){showToast('Gagal. Coba lagi.');}
+  finally{ if (typeof AkLoading !== 'undefined') AkLoading.hide(); }
 }
 function copyResult(){navigator.clipboard.writeText(document.getElementById('resultText').innerText).then(()=>showToast('Disalin!'));}
 

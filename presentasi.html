@@ -14,6 +14,7 @@
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
 <script src="quota-popup.js"></script>
+<script src="ai-loading.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
@@ -111,45 +112,32 @@
           <span style="font-size:10px;font-weight:500;color:#9CA3AF;margin-left:6px;">AI buat desain unik sesuai pilihan ini</span>
         </label>
 
-        <!-- Mood -->
+        <!-- Mood (disederhanakan) -->
         <div style="font-size:11px;font-weight:700;color:#6B7280;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">Suasana</div>
         <div class="style-pill-row" id="pillsMood">
           <button class="style-pill active" onclick="selectStylePill(this,'mood')">🔥 Modern Bold</button>
-          <button class="style-pill" onclick="selectStylePill(this,'mood')">✨ Elegan Mewah</button>
-          <button class="style-pill" onclick="selectStylePill(this,'mood')">🌿 Natural Tenang</button>
-          <button class="style-pill" onclick="selectStylePill(this,'mood')">⚡ Energik Dinamis</button>
-          <button class="style-pill" onclick="selectStylePill(this,'mood')">🎓 Akademik Formal</button>
-          <button class="style-pill" onclick="selectStylePill(this,'mood')">💼 Korporat Profesional</button>
+          <button class="style-pill" onclick="selectStylePill(this,'mood')">✨ Elegan</button>
+          <button class="style-pill" onclick="selectStylePill(this,'mood')">🎓 Akademik</button>
+          <button class="style-pill" onclick="selectStylePill(this,'mood')">💼 Korporat</button>
           <button class="style-pill" onclick="selectStylePill(this,'mood')">🌙 Dark Premium</button>
-          <button class="style-pill" onclick="selectStylePill(this,'mood')">☀️ Cerah Playful</button>
-          <button class="style-pill" onclick="selectStylePill(this,'mood')">🎨 Kreatif Artsy</button>
-          <button class="style-pill" onclick="selectStylePill(this,'mood')">🏔️ Minimalis Bersih</button>
         </div>
 
-        <!-- Warna dominan -->
+        <!-- Warna dominan (disederhanakan) -->
         <div style="font-size:11px;font-weight:700;color:#6B7280;margin:10px 0 5px;text-transform:uppercase;letter-spacing:0.5px;">Warna Dominan</div>
         <div class="style-pill-row" id="pillsWarna">
           <button class="style-pill active" onclick="selectStylePill(this,'warna')">🔵 Biru</button>
           <button class="style-pill" onclick="selectStylePill(this,'warna')">🟣 Ungu</button>
           <button class="style-pill" onclick="selectStylePill(this,'warna')">🟢 Hijau</button>
-          <button class="style-pill" onclick="selectStylePill(this,'warna')">🔴 Merah</button>
-          <button class="style-pill" onclick="selectStylePill(this,'warna')">🟠 Oranye</button>
-          <button class="style-pill" onclick="selectStylePill(this,'warna')">🟡 Kuning Emas</button>
-          <button class="style-pill" onclick="selectStylePill(this,'warna')">⚫ Hitam</button>
-          <button class="style-pill" onclick="selectStylePill(this,'warna')">🟤 Coklat Teh</button>
-          <button class="style-pill" onclick="selectStylePill(this,'warna')">🩵 Teal Tosca</button>
+          <button class="style-pill" onclick="selectStylePill(this,'warna')">🟡 Emas</button>
           <button class="style-pill" onclick="selectStylePill(this,'warna')">🎨 Terserah AI</button>
         </div>
 
-        <!-- Layout -->
+        <!-- Layout: 1 kolom teks saja, tanpa opsi "2 Kolom" -->
         <div style="font-size:11px;font-weight:700;color:#6B7280;margin:10px 0 5px;text-transform:uppercase;letter-spacing:0.5px;">Gaya Layout</div>
         <div class="style-pill-row" id="pillsLayout">
           <button class="style-pill active" onclick="selectStylePill(this,'layout')">📦 Kartu Bernomor</button>
-          <button class="style-pill" onclick="selectStylePill(this,'layout')">📊 2 Kolom</button>
           <button class="style-pill" onclick="selectStylePill(this,'layout')">🔷 Icon + Teks</button>
           <button class="style-pill" onclick="selectStylePill(this,'layout')">📌 Timeline / Alur</button>
-          <button class="style-pill" onclick="selectStylePill(this,'layout')">🧱 Grid Kotak</button>
-          <button class="style-pill" onclick="selectStylePill(this,'layout')">🎯 Callout Besar</button>
           <button class="style-pill" onclick="selectStylePill(this,'layout')">🤖 Terserah AI</button>
         </div>
       </div>
@@ -380,7 +368,7 @@ Pilih jenis yang PALING PAS untuk tiap bagian isi (bukan asal random):
 
 - "title": slide pembuka. field: title, subtitle
 - "section": pemisah bab/bagian besar. field: title
-- "content": poin-poin dengan penjelasan, BUKAN cuma fragmen kata. field: title, points (3-4 poin). SETIAP poin WAJIB format "Sub-judul singkat: penjelasan 1 kalimat (10-16 kata)" — sub-judul maks 4 kata sebelum tanda titik dua, lalu penjelasan yang menjabarkan maksudnya. Contoh benar: "Asas Legalitas: hukuman hanya boleh dijatuhkan jika sudah diatur lebih dulu dalam undang-undang". Contoh SALAH (jangan begini): "Asas Legalitas" (tanpa penjelasan).
+- "content": WAJIB berisi DUA bagian — bukan cuma poin. field: title, narasi (1 paragraf pembuka 2-3 kalimat/30-50 kata yang menjelaskan konteks slide secara mengalir, bukan poin-poin — contoh untuk slide "Latar Belakang": jelaskan duduk perkara/masalahnya dalam bentuk paragraf utuh), points (3-4 poin). SETIAP poin WAJIB format "Sub-judul singkat: penjelasan 1 kalimat (10-16 kata)" — sub-judul maks 4 kata sebelum tanda titik dua, lalu penjelasan yang menjabarkan maksudnya. Contoh benar: "Asas Legalitas: hukuman hanya boleh dijatuhkan jika sudah diatur lebih dulu dalam undang-undang". Contoh SALAH (jangan begini): "Asas Legalitas" (tanpa penjelasan). Paragraf narasi dan poin-poin harus SALING MELENGKAPI (narasi = gambaran umum, poin = rincian), jangan mengulang kalimat yang sama.
 - "table": kalau ada data terstruktur/perbandingan/rincian yang cocok disusun tabel. field: title, headers (array 2-4 kolom), rows (array of array, isi tiap sel singkat maks 6 kata, 3-6 baris)
 - "chart": kalau ada data numerik/statistik/tren yang bisa divisualisasi. field: title, chart_type ("bar"|"pie"|"line"), series_name (label singkat data), categories (array label, 3-6 item), values (array angka, JUMLAH SAMA dengan categories)
 - "comparison": kalau ada 2 sisi yang dibandingkan (sebelum/sesudah, pro/kontra, A vs B). field: title, left_title, left_points (2-4 poin, format sama "Sub-judul: penjelasan singkat"), right_title, right_points (2-4 poin, format sama)
@@ -397,7 +385,7 @@ ATURAN WAJIB:
 - Total slide sesuai jumlah diminta, isi konten akurat & sesuai instruksi/dokumen
 
 BALAS HANYA JSON array valid, tanpa teks lain, tanpa markdown fence:
-[{"type":"title","title":"...","subtitle":"..."},{"type":"section","title":"..."},{"type":"content","title":"...","points":["...","..."]},{"type":"table","title":"...","headers":["...","..."],"rows":[["...","..."]]},{"type":"chart","title":"...","chart_type":"bar","series_name":"...","categories":["...","..."],"values":[10,20]},{"type":"comparison","title":"...","left_title":"...","left_points":["..."],"right_title":"...","right_points":["..."]},{"type":"stat","title":"...","stats":[{"number":"...","label":"..."}]},{"type":"quote","quote":"...","author":"..."},{"type":"image","title":"...","points":["..."],"image_query":"..."},{"type":"closing","title":"Terima Kasih","subtitle":"..."}]`;
+[{"type":"title","title":"...","subtitle":"..."},{"type":"section","title":"..."},{"type":"content","title":"...","narasi":"1 paragraf 2-3 kalimat penjelasan konteks","points":["...","..."]},{"type":"table","title":"...","headers":["...","..."],"rows":[["...","..."]]},{"type":"chart","title":"...","chart_type":"bar","series_name":"...","categories":["...","..."],"values":[10,20]},{"type":"comparison","title":"...","left_title":"...","left_points":["..."],"right_title":"...","right_points":["..."]},{"type":"stat","title":"...","stats":[{"number":"...","label":"..."}]},{"type":"quote","quote":"...","author":"..."},{"type":"image","title":"...","points":["..."],"image_query":"..."},{"type":"closing","title":"Terima Kasih","subtitle":"..."}]`;
 
   // Prompt desain — ini yang menghasilkan "template tak terbatas"
   const topikKonteks = instruksi || (referensiText ? referensiText.substring(0,500) : tujuan);
@@ -437,7 +425,7 @@ BALAS HANYA JSON (tanpa teks lain):
   "content_text": "warna hex teks poin",
   "content_accent": "warna hex elemen aksen (kotak nomor, ikon, garis)",
   "content_accent2": "warna hex aksen sekunder",
-  "content_layout": "numbered_cards | two_column | icon_rows | timeline | grid_boxes | callout_big",
+  "content_layout": "numbered_cards | icon_rows | timeline | grid_boxes | callout_big (JANGAN pernah pakai layout 2 kolom — semua isi teks harus 1 kolom penuh lebar slide)",
 
   "closing_bg": "warna hex latar slide penutup",
   "closing_text": "warna hex teks penutup",
@@ -447,6 +435,7 @@ BALAS HANYA JSON (tanpa teks lain):
 
   try{
     setProgress('🤖 AI merancang konten & desain secara bersamaan...');
+    if (typeof AkLoading !== 'undefined') AkLoading.show('AI sedang merancang konten & desain presentasi...');
     btnLabel.textContent = '⏳ Sedang diproses...';
 
     // Jalankan keduanya paralel
@@ -490,6 +479,7 @@ BALAS HANYA JSON (tanpa teks lain):
     btn.disabled=false;
     btnLabel.textContent='✨ Generate Presentasi AI';
     document.getElementById('progressInfo').style.display='none';
+    if (typeof AkLoading !== 'undefined') AkLoading.hide();
   }
 }
 
@@ -547,6 +537,7 @@ function renderSlides(s){
       body = `<div class="slide-point">🖼️ Foto: ${esc(sl.image_query)}</div>${(sl.points||[]).map(p=>`<div class="slide-point">${escPoint(p)}</div>`).join('')}`;
     } else {
       body = `${sl.subtitle?`<div class="slide-point" style="margin-top:2px;">${esc(sl.subtitle)}</div>`:''}
+      ${sl.narasi?`<div style="font-size:11px;color:#94A3B8;font-style:italic;margin:4px 0 6px;line-height:1.4;">${esc(sl.narasi)}</div>`:''}
       <div class="slide-points">${(sl.points||[]).map(p=>`<div class="slide-point">${escPoint(p)}</div>`).join('')}</div>`;
     }
 
@@ -569,7 +560,7 @@ function copyOutline(){
     else if(s.type==='stat') body = (s.stats||[]).map(st=>`${st.number} — ${st.label}`).join('\n');
     else if(s.type==='quote') body = `"${s.quote}"${s.author?' — '+s.author:''}`;
     else if(s.type==='image') body = `[Foto: ${s.image_query}]\n${(s.points||[]).map(p=>'• '+p).join('\n')}`;
-    else body = (s.points||[]).map(p=>'• '+p).join('\n');
+    else body = (s.narasi?s.narasi+'\n\n':'')+(s.points||[]).map(p=>'• '+p).join('\n');
     return `Slide ${i+1} (${s.type}): ${s.title||''}${s.subtitle?'\n'+s.subtitle:''}\n${body}`;
   }).join('\n\n');
   navigator.clipboard.writeText(text).then(()=>showToast('Outline disalin!'));
@@ -679,6 +670,7 @@ async function downloadPPTX(){
   const btnLabel = document.getElementById('btnDownloadPPTXLabel');
   const prevLabel = btnLabel.textContent;
   btnLabel.textContent = '⏳ Menyiapkan file...';
+  if (typeof AkLoading !== 'undefined') AkLoading.show('AI sedang menyusun file PPT...');
 
   try{
     const D = currentDesign;
@@ -707,7 +699,8 @@ async function downloadPPTX(){
       clo_acc:        safeHex(D.closing_accent, '2563EB'),
     };
     const FONT         = ['Arial','Calibri','Cambria'].includes(D.font)?D.font:'Calibri';
-    const LAYOUT       = D.content_layout  || 'numbered_cards';
+    let LAYOUT         = D.content_layout  || 'numbered_cards';
+    if(LAYOUT==='two_column') LAYOUT = 'numbered_cards'; // 1 kolom teks saja — tidak ada lagi layout 2 kolom
     const TITLE_SHAPE  = D.title_shape     || 'left_bar';
     const CLOSE_STYLE  = D.closing_style   || 'split_h';
     const SEC_STYLE    = D.section_style   || 'solid';
@@ -1002,8 +995,21 @@ async function downloadPPTX(){
       // CONTENT SLIDE — 6 LAYOUT BERBEDA
       // ══════════════════════════════════════════════
       else {
-        const { AREA_Y, AREA_H } = drawContentHeader();
+        let { AREA_Y, AREA_H } = drawContentHeader();
         const nPts    = Math.max(pts.length,1);
+
+        // ── paragraf narasi (penjelasan konteks sebelum poin) ──
+        if(s.narasi && String(s.narasi).trim()){
+          const narasiH = 1.0;
+          slide.addText(String(s.narasi).trim(), {
+            x:0.6, y:AREA_Y, w:W-1.2, h:narasiH,
+            fontSize:12.5, italic:true, color:C.body, fontFace:FONT,
+            valign:'top', lineSpacingMultiple:1.25, margin:2
+          });
+          AR(slide, 0.6, AREA_Y+narasiH-0.06, W-1.2, 0.018, C.acc, 55);
+          AREA_Y += narasiH + 0.16;
+          AREA_H -= narasiH + 0.16;
+        }
 
         // ── numbered_cards ──────────────────────────
         if(LAYOUT==='numbered_cards'){
@@ -1175,6 +1181,7 @@ async function downloadPPTX(){
     showToast('Gagal membuat file PPT: '+e.message);
   }finally{
     btnLabel.textContent = prevLabel;
+    if (typeof AkLoading !== 'undefined') AkLoading.hide();
   }
 }
 </script>

@@ -18,6 +18,7 @@
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
 <script src="quota-popup.js"></script>
+<script src="ai-loading.js"></script>
 <style>
 :root {
   --blue: #1A3DC2;
@@ -1019,6 +1020,7 @@ async function generateSkripsi() {
   hasilArea.classList.add('show');
   document.getElementById('loadingState').style.display = 'flex';
   document.getElementById('hasilContent').style.display = 'none';
+  if (typeof AkLoading !== 'undefined') AkLoading.show('AI sedang menyusun dokumen skripsi kamu...');
   document.getElementById('hasilLabel').textContent = `Hasil: ${jenisDokumen}`;
   const oldCard = document.getElementById('downloadReadyCard');
   if(oldCard) oldCard.innerHTML = '';
@@ -1202,6 +1204,7 @@ ATURAN PENULISAN PENTING:
 
     const data = await res.json();
     document.getElementById('loadingState').style.display = 'none';
+    if (typeof AkLoading !== 'undefined') AkLoading.hide();
     if (!res.ok) throw new Error(data.error || 'Gagal terhubung ke server');
 
     if (data.text) {
@@ -1228,6 +1231,7 @@ ATURAN PENULISAN PENTING:
     }
   } catch(e) {
     document.getElementById('loadingState').style.display = 'none';
+    if (typeof AkLoading !== 'undefined') AkLoading.hide(true);
     document.getElementById('hasilContent').style.display = 'block';
     document.getElementById('hasilText').innerHTML = '<p style="color:var(--red);text-align:center;padding:16px;">Gagal menghubungi AI. Pastikan koneksi internetmu aktif lalu coba lagi.</p>';
     setStep(1);

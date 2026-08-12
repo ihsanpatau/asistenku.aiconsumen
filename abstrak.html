@@ -14,6 +14,7 @@
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
 <script src="quota-popup.js"></script>
+<script src="ai-loading.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
@@ -145,6 +146,7 @@ async function generateAbstrak(){
   }
 
   btnLabel.textContent='AI sedang membuat abstrak...';
+  if (typeof AkLoading !== 'undefined') AkLoading.show('AI sedang membuat abstrak bilingual...');
   const prompt=`Kamu adalah asisten akademik. Berikut naskah penelitian (skripsi/jurnal/laporan) yang diupload penulis:
 
 === ISI NASKAH ===
@@ -193,6 +195,7 @@ Keywords: [keywords separated by commas]`;
     showToast('Gagal membuat abstrak: '+e.message);
   }finally{
     btn.disabled=false; btnLabel.textContent='Generate Abstrak Bilingual';
+    if (typeof AkLoading !== 'undefined') AkLoading.hide();
   }
 }
 
