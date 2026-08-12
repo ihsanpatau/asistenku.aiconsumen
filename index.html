@@ -347,6 +347,7 @@ section{padding:88px 0;}
 .price-card{
   background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg);
   padding:28px 22px;display:flex;flex-direction:column;gap:16px;position:relative;
+  transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s;
 }
 .price-card.featured{border-color:var(--brand);box-shadow:var(--shadow);transform:translateY(-8px);}
 .price-tag{
@@ -357,11 +358,34 @@ section{padding:88px 0;}
 .price-name{font-size:12.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);}
 .price-amt{font-family:"Fraunces",serif;font-size:30px;font-weight:600;}
 .price-amt span{font-size:13px;font-weight:500;color:var(--ink-soft);font-family:"Plus Jakarta Sans";}
+.price-amt .price-strike{font-size:12px;font-weight:600;text-decoration:line-through;opacity:.5;line-height:1.2;font-family:"Plus Jakarta Sans";}
 .price-list{list-style:none;display:flex;flex-direction:column;gap:10px;font-size:13.5px;color:var(--ink-soft);flex:1;}
 .price-list li{display:flex;gap:8px;align-items:flex-start;}
 .price-list svg{width:15px;height:15px;color:var(--green);flex-shrink:0;margin-top:2px;}
 @media (max-width:920px){.price-grid{grid-template-columns:repeat(2,1fr);}.price-card.featured{transform:none;}}
 @media (max-width:560px){.price-grid{grid-template-columns:1fr;}}
+
+/* ===== Border/warna paket — disamakan dengan skema warna di halaman upgrade.html ===== */
+.price-card.plan-gratis{background:linear-gradient(160deg,#F8F9FB 0%,#EDEFF3 100%);border-color:#E2E5EB;}
+.price-card.plan-standar{background:linear-gradient(160deg,#F2F6FF 0%,#DCE6FF 100%);border:1.5px solid #B7C9FF;box-shadow:0 8px 22px rgba(59,91,255,.14);}
+.price-card.plan-standar .price-name{color:var(--brand);}
+.price-card.plan-pro{border:none;background:linear-gradient(165deg,#FF5A5A 0%,#DC2626 55%,#8C0F0F 100%);color:#fff;box-shadow:0 16px 34px rgba(220,38,38,.35);}
+.price-card.plan-pro .price-name{color:rgba(255,255,255,.85);}
+.price-card.plan-pro .price-amt,.price-card.plan-pro .price-amt span{color:#fff;}
+.price-card.plan-pro .price-amt .price-strike{color:rgba(255,255,255,.75);opacity:.8;}
+.price-card.plan-pro .price-list{color:rgba(255,255,255,.92);}
+.price-card.plan-pro .price-list svg{color:#fff;}
+.price-card.plan-pro .price-tag{background:linear-gradient(90deg,#F5A623,#D97706);}
+.price-card.plan-pro .btn-primary{background:#fff;color:#B91C1C;box-shadow:0 8px 18px rgba(0,0,0,.2);}
+.price-card.plan-pro .btn-primary:hover{background:#FFF5F5;}
+.price-card.plan-lanjutan{border:1.5px solid #B8860B;background:linear-gradient(165deg,#1A1F2E 0%,#0B0E17 100%);color:#fff;box-shadow:0 16px 30px rgba(0,0,0,.32);}
+.price-card.plan-lanjutan .price-name{background:linear-gradient(90deg,#F5D061,#D4A017);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.price-card.plan-lanjutan .price-amt,.price-card.plan-lanjutan .price-amt span{color:#F5D061;}
+.price-card.plan-lanjutan .price-amt .price-strike{color:rgba(245,208,97,.6);opacity:1;}
+.price-card.plan-lanjutan .price-list{color:rgba(255,255,255,.82);}
+.price-card.plan-lanjutan .price-list svg{color:#F5D061;}
+.price-card.plan-lanjutan .btn-ghost{background:linear-gradient(90deg,#F5D061,#D4A017);color:#1A1F2E;border:none;box-shadow:0 8px 18px rgba(212,160,23,.35);}
+.price-card.plan-lanjutan .btn-ghost:hover{color:#1A1F2E;opacity:.9;}
 
 .faq{max-width:760px;margin:0 auto;}
 .faq-item{border-bottom:1px solid var(--line);}
@@ -676,7 +700,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 30px;background:var(--pap
             <div style="flex-shrink:0;text-align:center;">
               <a id="flashPromoBtnLanding" href="upgrade.html" style="background:#fff;color:#D97706;border:none;border-radius:14px;padding:12px 16px;font-size:12px;font-weight:900;cursor:pointer;display:block;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.15);text-decoration:none;line-height:1.3;">
                 <span style="font-size:10px;color:#aaa;display:block;font-weight:600;">TERBATAS</span>
-                Rp<span id="flashPromoHargaLanding">19.000</span>
+                $<span id="flashPromoHargaLanding">1.05</span>
                 <span style="font-size:9px;font-weight:600;color:#aaa;display:block;">Beli Sekarang</span>
               </a>
             </div>
@@ -691,9 +715,9 @@ footer{border-top:1px solid var(--line);padding:56px 0 30px;background:var(--pap
       <!-- ===== END PROMO KILAT BANNER ===== -->
 
       <div class="price-grid">
-        <div class="price-card">
+        <div class="price-card plan-gratis">
           <div class="price-name">Gratis</div>
-          <div class="price-amt" id="price_gratis">Rp0</div>
+          <div class="price-amt" id="price_gratis">$0</div>
           <ul class="price-list">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="hal_gratis">10</span> halaman / hari</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="pesan_gratis">50</span> chat DoktrAI / hari</li>
@@ -701,9 +725,9 @@ footer{border-top:1px solid var(--line);padding:56px 0 30px;background:var(--pap
           </ul>
           <a href="register.html" class="btn btn-ghost btn-block btn-sm">Daftar Gratis</a>
         </div>
-        <div class="price-card">
+        <div class="price-card plan-standar">
           <div class="price-name">Standar</div>
-          <div class="price-amt" id="price_standar">Rp20.000<span>/bulan</span></div>
+          <div class="price-amt" id="price_standar">$1.10<span>/bulan</span></div>
           <ul class="price-list">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="hal_standar">25</span> halaman / hari</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="pesan_standar">200</span> chat DoktrAI / hari</li>
@@ -711,10 +735,10 @@ footer{border-top:1px solid var(--line);padding:56px 0 30px;background:var(--pap
           </ul>
           <a href="upgrade.html" class="btn btn-ghost btn-block btn-sm">Pilih Standar</a>
         </div>
-        <div class="price-card featured">
+        <div class="price-card featured plan-pro">
           <div class="price-tag">Paling Populer</div>
           <div class="price-name">Pro</div>
-          <div class="price-amt" id="price_pro">Rp59.000<span>/bulan</span></div>
+          <div class="price-amt" id="price_pro">$3.26<span>/bulan</span></div>
           <ul class="price-list">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="hal_pro">40</span> halaman / hari</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="pesan_pro">500</span> chat DoktrAI / hari</li>
@@ -722,9 +746,9 @@ footer{border-top:1px solid var(--line);padding:56px 0 30px;background:var(--pap
           </ul>
           <a href="upgrade.html" class="btn btn-primary btn-block btn-sm">Pilih Pro</a>
         </div>
-        <div class="price-card">
+        <div class="price-card plan-lanjutan">
           <div class="price-name">Lanjutan</div>
-          <div class="price-amt" id="price_lanjutan">Rp99.000<span>/bulan</span></div>
+          <div class="price-amt" id="price_lanjutan">$5.47<span>/bulan</span></div>
           <ul class="price-list">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="hal_lanjutan">60</span> halaman / hari</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span id="pesan_lanjutan">Unlimited</span> chat DoktrAI</li>
@@ -832,9 +856,47 @@ footer{border-top:1px solid var(--line);padding:56px 0 30px;background:var(--pap
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="shared-config.js"></script>
 <script>
+/* ===== Kurs tampilan USD — HANYA untuk tampilan (display).
+   Harga asli/transaksi tetap dalam Rupiah (real_price / display_price di
+   database & saat checkout di upgrade.html tidak berubah).
+   Kurs diambil live dari API kurs gratis (open.er-api.com, update harian,
+   tanpa API key), di-cache 12 jam di sessionStorage supaya tidak fetch
+   berulang. Kalau API gagal diakses (mis. offline), otomatis pakai kurs
+   cadangan di bawah — jangan lupa update angka ini sesekali. ===== */
+const KURS_USD_FALLBACK_LANDING = 18100; // kurs cadangan Rp per 1 USD (per 12 Agu 2026)
+let kursUsdCacheLanding = null;
+async function ambilKursUsdLanding() {
+  if (kursUsdCacheLanding) return kursUsdCacheLanding;
+  try {
+    const cached = JSON.parse(sessionStorage.getItem('ak_kurs_usd') || 'null');
+    if (cached && cached.rate && (Date.now() - cached.ts) < 12 * 3600 * 1000) {
+      kursUsdCacheLanding = cached.rate;
+      return kursUsdCacheLanding;
+    }
+  } catch (e) {}
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    const data = await res.json();
+    const rate = data && data.rates && data.rates.IDR;
+    if (rate) {
+      kursUsdCacheLanding = rate;
+      try { sessionStorage.setItem('ak_kurs_usd', JSON.stringify({ rate, ts: Date.now() })); } catch (e) {}
+      return kursUsdCacheLanding;
+    }
+  } catch (e) { console.warn('Gagal ambil kurs USD live, pakai kurs cadangan:', e); }
+  kursUsdCacheLanding = KURS_USD_FALLBACK_LANDING;
+  return kursUsdCacheLanding;
+}
+function rpKeUsdLanding(rp, kurs) {
+  const n = Number(rp) || 0;
+  if (n === 0) return '$0';
+  return '$' + (n / kurs).toFixed(2);
+}
+
 async function muatHargaLanding() {
   try {
     if (typeof window.supabase === 'undefined' || typeof akCreateClient !== 'function') return;
+    const kurs = await ambilKursUsdLanding();
     const sb = akCreateClient();
     const { data: pkgs, error } = await sb
       .from('packages')
@@ -848,10 +910,10 @@ async function muatHargaLanding() {
       const priceEl = document.getElementById('price_' + key);
       if (priceEl) {
         const coret = p.strike_price
-          ? `<div style="font-size:12px;font-weight:600;text-decoration:line-through;opacity:.5;line-height:1.2;">Rp${Number(p.strike_price).toLocaleString('id-ID')}</div>`
+          ? `<div class="price-strike">${rpKeUsdLanding(p.strike_price, kurs)}</div>`
           : '';
         const sub = (key === 'gratis' || Number(p.display_price) === 0) ? '' : '<span>/bulan</span>';
-        priceEl.innerHTML = coret + '<div>Rp' + Number(p.display_price).toLocaleString('id-ID') + sub + '</div>';
+        priceEl.innerHTML = coret + '<div>' + rpKeUsdLanding(p.display_price, kurs) + sub + '</div>';
       }
 
       const halEl = document.getElementById('hal_' + key);
@@ -890,7 +952,7 @@ async function muatFlashPromoLanding() {
     document.getElementById('flashPromoDeskripsLanding').textContent = deskripsi;
     document.getElementById('flashPromoAksesLanding').textContent    =
       durasi === 1 ? '⏱️ Akses 1 hari penuh' : `⏱️ Akses ${durasi} hari`;
-    document.getElementById('flashPromoHargaLanding').textContent    = harga.toLocaleString('id-ID');
+    document.getElementById('flashPromoHargaLanding').textContent    = (harga / await ambilKursUsdLanding()).toFixed(2);
 
     // Countdown real-time sampai tengah malam
     const countdownEl = document.getElementById('flashCountdownLanding');

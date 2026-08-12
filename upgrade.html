@@ -217,7 +217,7 @@
           </div>
           <div style="flex-shrink:0;text-align:center;">
             <button id="flashPromoBtn" style="background:#fff;color:#D97706;border:none;border-radius:12px;padding:10px 12px;font-size:11px;font-weight:900;cursor:pointer;display:block;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,0.15);">
-              Rp<span id="flashPromoHarga">20.000</span><br><span style="font-size:9px;font-weight:600;color:#999;">Beli Sekarang</span>
+              $<span id="flashPromoHarga">1.10</span><br><span style="font-size:9px;font-weight:600;color:#999;">Beli Sekarang</span>
             </button>
           </div>
         </div>
@@ -236,7 +236,7 @@
   <div class="plan-card current">
     <div class="plan-mascot-ring"><div class="plan-mascot"><img src="cat-logo.png" alt="Maskot Gratis"></div></div>
     <div class="plan-name" style="color:var(--gray-500);">GRATIS</div>
-    <div class="plan-price" style="color:var(--dark);" id="price_gratis">Rp0</div>
+    <div class="plan-price" style="color:var(--dark);" id="price_gratis">$0</div>
     <ul class="plan-features" style="color:var(--gray-500);">
       <li><span class="feat-dot"><svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span><span id="hal_gratis">5</span> halaman / hari</li>
       <li><span class="feat-dot"><svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span><span id="pesan_gratis">5</span> Chat DoktrAI</li>
@@ -250,7 +250,7 @@
   <div class="plan-card standar">
     <div class="plan-mascot-ring"><div class="plan-mascot"><img src="cat-dokter-standar.png" alt="Maskot Standar - Kucing Dokter"></div></div>
     <div class="plan-name" style="color:var(--blue);">STANDAR</div>
-    <div class="plan-price" style="color:var(--blue);" id="price_standar">Rp20.000<span>/bulan</span></div>
+    <div class="plan-price" style="color:var(--blue);" id="price_standar">$1.10<span>/bulan</span></div>
     <ul class="plan-features" style="color:var(--gray-500);">
       <li><span class="feat-dot"><svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span><span id="hal_standar">10</span> halaman / hari</li>
       <li><span class="feat-dot"><svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span><span id="pesan_standar">20</span> Chat DoktrAI</li>
@@ -266,7 +266,7 @@
     <div class="best-badge">⭐ TERBAIK</div>
     <div class="plan-mascot-ring"><div class="plan-mascot"><img src="cat-doktrai.png" alt="Maskot Pro"></div></div>
     <div class="plan-name" style="color:#fff;">PRO</div>
-    <div class="plan-price" style="color:#fff;" id="price_pro">Rp59.000<span>/bulan</span></div>
+    <div class="plan-price" style="color:#fff;" id="price_pro">$3.26<span>/bulan</span></div>
     <ul class="plan-features" style="color:rgba(255,255,255,0.85);">
       <li><span class="feat-dot"><svg viewBox="0 0 24 24" fill="none" stroke="#A7F3D0" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span><span id="hal_pro">35</span> halaman / hari</li>
       <li><span class="feat-dot"><svg viewBox="0 0 24 24" fill="none" stroke="#A7F3D0" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span><span id="pesan_pro">50</span> Chat DoktrAI</li>
@@ -282,7 +282,7 @@
   <div class="plan-card lanjutan">
     <div class="plan-mascot-ring"><div class="plan-mascot"><img src="mascot-logo.png" alt="Maskot Lanjutan"></div></div>
     <div class="plan-name" style="color:#fff;">LANJUTAN</div>
-    <div class="plan-price" style="color:#fff;" id="price_lanjutan">Rp99.000<span>/bulan</span></div>
+    <div class="plan-price" style="color:#fff;" id="price_lanjutan">$5.47<span>/bulan</span></div>
     <ul class="plan-features" style="color:rgba(255,255,255,0.85);">
       <li><span class="feat-dot"><svg viewBox="0 0 24 24" fill="none" stroke="#FCD34D" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span><span id="hal_lanjutan">60</span> halaman / hari</li>
       <li><span class="feat-dot"><svg viewBox="0 0 24 24" fill="none" stroke="#FCD34D" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>Chat tanpa batas</li>
@@ -298,8 +298,47 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="shared-config.js"></script>
 <script>
+/* ===== Kurs tampilan USD — HANYA untuk tampilan (display) di kartu paket &
+   banner promo. Harga asli yang benar-benar ditagihkan (real_price, dan
+   angka yang muncul di modal konfirmasi/pembayaran Midtrans) TETAP dalam
+   Rupiah — tidak diubah oleh kurs ini.
+   Kurs diambil live dari API kurs gratis (open.er-api.com, update harian,
+   tanpa API key), di-cache 12 jam di sessionStorage (dipakai bersama
+   index.html supaya konsisten dalam 1 sesi browser). Kalau API gagal
+   diakses, otomatis pakai kurs cadangan di bawah. ===== */
+const KURS_USD_FALLBACK_UPGRADE = 18100; // kurs cadangan Rp per 1 USD (per 12 Agu 2026)
+let kursUsdCacheUpgrade = null;
+async function ambilKursUsdUpgrade() {
+  if (kursUsdCacheUpgrade) return kursUsdCacheUpgrade;
+  try {
+    const cached = JSON.parse(sessionStorage.getItem('ak_kurs_usd') || 'null');
+    if (cached && cached.rate && (Date.now() - cached.ts) < 12 * 3600 * 1000) {
+      kursUsdCacheUpgrade = cached.rate;
+      return kursUsdCacheUpgrade;
+    }
+  } catch (e) {}
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    const data = await res.json();
+    const rate = data && data.rates && data.rates.IDR;
+    if (rate) {
+      kursUsdCacheUpgrade = rate;
+      try { sessionStorage.setItem('ak_kurs_usd', JSON.stringify({ rate, ts: Date.now() })); } catch (e) {}
+      return kursUsdCacheUpgrade;
+    }
+  } catch (e) { console.warn('Gagal ambil kurs USD live, pakai kurs cadangan:', e); }
+  kursUsdCacheUpgrade = KURS_USD_FALLBACK_UPGRADE;
+  return kursUsdCacheUpgrade;
+}
+function rpKeUsdUpgrade(rp, kurs) {
+  const n = Number(rp) || 0;
+  if (n === 0) return '$0';
+  return '$' + (n / kurs).toFixed(2);
+}
+
 async function muatHargaTerbaru() {
   if (typeof window.supabase === 'undefined') return;
+  const kurs = await ambilKursUsdUpgrade();
   const sbPricing = akCreateClient();
   const { data: pkgs, error } = await sbPricing
     .from('packages')
@@ -310,9 +349,9 @@ async function muatHargaTerbaru() {
     p.key = (p.key || '').toLowerCase();
     const priceEl = document.getElementById('price_' + p.key);
     if (priceEl) {
-      const coret = p.strike_price ? `<div style="font-size:12px;font-weight:600;text-decoration:line-through;opacity:.5;line-height:1.2;">Rp${Number(p.strike_price).toLocaleString('id-ID')}</div>` : '';
+      const coret = p.strike_price ? `<div style="font-size:12px;font-weight:600;text-decoration:line-through;opacity:.5;line-height:1.2;">${rpKeUsdUpgrade(p.strike_price, kurs)}</div>` : '';
       const sub = p.key === 'gratis' ? '' : '<span>/bulan</span>';
-      priceEl.innerHTML = coret + '<div>Rp' + Number(p.display_price).toLocaleString('id-ID') + sub + '</div>';
+      priceEl.innerHTML = coret + '<div>' + rpKeUsdUpgrade(p.display_price, kurs) + sub + '</div>';
     }
     const halEl = document.getElementById('hal_' + p.key); if (halEl) halEl.textContent = p.halaman_limit;
     const pesanEl = document.getElementById('pesan_' + p.key); if (pesanEl) pesanEl.textContent = p.pesan_limit >= 99999 ? 'Unlimited' : p.pesan_limit;
@@ -353,7 +392,7 @@ async function muatFlashPromo() {
     document.getElementById('flashPromoDeskripsi').textContent = deskripsi;
     document.getElementById('flashPromoDurasi').textContent =
       durasi === 1 ? '⏱️ Akses 1 hari penuh' : `⏱️ Akses ${durasi} hari`;
-    document.getElementById('flashPromoHarga').textContent = harga.toLocaleString('id-ID');
+    document.getElementById('flashPromoHarga').textContent = (harga / await ambilKursUsdUpgrade()).toFixed(2);
     document.getElementById('flashPromoBtn').setAttribute(
       'onclick', `beliFlashPromo('${label.replace(/'/g,"\\'")}','${harga}','${durasi}')`
     );
