@@ -341,9 +341,10 @@ async function triggerRevisi(){
 2. Identifikasi SETIAP poin revisi yang diminta, baik yang tersurat di catatan dosen maupun instruksi mahasiswa. Beri label poin berurutan (Poin A, Poin B, dst) sesuai urutan kemunculan atau sesuai penomoran yang sudah ada di file.
 3. Untuk setiap poin, tuliskan: lokasi/bagian yang direvisi (misal Bab, sub-bab, paragraf ke berapa, atau nomor tabel), kutipan singkat teks ASLI/SEBELUM revisi yang bermasalah, dan teks HASIL REVISI lengkap yang sudah diperbaiki sesuai kaidah akademik Bahasa Indonesia yang benar.
 4. JANGAN menulis ulang seluruh dokumen. Hanya tampilkan bagian yang direvisi saja.
-5. Balas HANYA dalam format JSON valid (tanpa markdown code fence, tanpa teks lain di luar JSON) dengan struktur PERSIS seperti ini:
+5. PENTING: Balas HANYA dengan satu blok JSON valid. DILARANG KERAS menulis penjelasan, kalimat pembuka, kalimat penutup, atau teks apapun di luar JSON. DILARANG menggunakan markdown code fence (seperti \`\`\`json). Mulai respons langsung dengan karakter { dan akhiri dengan }.
+Format JSON yang WAJIB digunakan (ikuti persis):
 {"ringkasan":"ringkasan singkat 1-2 kalimat tentang revisi yang dilakukan","poin":[{"label":"Poin A","lokasi":"deskripsi lokasi revisi","sebelum":"kutipan/deskripsi teks sebelum direvisi","sesudah":"teks lengkap hasil revisi"}]}
-Jika tidak ada revisi yang bisa diidentifikasi, kembalikan poin sebagai array kosong dan jelaskan alasannya di ringkasan.`;
+Jika tidak ada revisi yang bisa diidentifikasi, kembalikan poin sebagai array kosong dan jelaskan alasannya di ringkasan. Tetap balas dengan JSON saja.`;
 
   try{
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({system:system,messages:[{role:'user',content:contentBlocks}]})});
@@ -355,12 +356,58 @@ Jika tidak ada revisi yang bisa diidentifikasi, kembalikan poin sebagai array ko
       return;
     }
     let raw=(data.text||'').trim();
-    raw=raw.replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+    // Langkah 1: bersihkan markdown code fence
+    raw=raw.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
     let parsed;
+    // Langkah 2: coba parse langsung
     try{ parsed=JSON.parse(raw); }
-    catch(e){
-      list.innerHTML=`<div style="color:var(--red,#DC2626);">⚠️ AI memberi jawaban yang tidak bisa diproses otomatis. Coba proses ulang.</div><div class="belajar-result" style="margin-top:8px;">${formatHasilAI(data.text||'')}</div>`;
-      return;
+    catch(e1){
+      // Langkah 3: coba ekstrak blok JSON pertama yang ditemukan di dalam teks
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if(jsonMatch){
+        try{ parsed=JSON.parse(jsonMatch[0]); }catch(e2){ parsed=null; }
+      }
+      // Langkah 4: jika masih gagal, konversi teks bebas AI jadi struktur JSON minimal
+      if(!parsed){
+        // Ambil baris-baris yang terlihat seperti poin revisi
+        const lines = raw.split('\n').filter(l=>l.trim());
+        const poinList = [];
+        let currentPoin = null;
+        let mode = null; // 'sebelum' | 'sesudah' | null
+        const labelPattern = /^(poin\s*[a-z0-9]+|[a-z]\.|[0-9]+\.|\*\*poin)/i;
+        const sebelumPattern = /sebelum[:\s]/i;
+        const sesudahPattern = /sesudah[:\s]|revisi[:\s]|perbaikan[:\s]/i;
+        lines.forEach(line=>{
+          const t = line.trim();
+          if(labelPattern.test(t)){
+            if(currentPoin) poinList.push(currentPoin);
+            currentPoin = {label: t.replace(/\*\*/g,'').slice(0,60), lokasi:'', sebelum:'', sesudah:''};
+            mode = null;
+          } else if(sebelumPattern.test(t) && currentPoin){
+            mode='sebelum';
+            currentPoin.sebelum += t.replace(sebelumPattern,'').trim() + ' ';
+          } else if(sesudahPattern.test(t) && currentPoin){
+            mode='sesudah';
+            currentPoin.sesudah += t.replace(sesudahPattern,'').trim() + ' ';
+          } else if(currentPoin && mode){
+            currentPoin[mode] += t + ' ';
+          }
+        });
+        if(currentPoin) poinList.push(currentPoin);
+        // Jika tidak ada poin terdeteksi, tampilkan seluruh teks sebagai 1 poin revisi
+        if(!poinList.length){
+          poinList.push({label:'Hasil Revisi', lokasi:'', sebelum:'(Lihat instruksi asli)', sesudah: raw});
+        }
+        parsed = {
+          ringkasan: 'Revisi berhasil diproses. Hasil ditampilkan di bawah.',
+          poin: poinList.map(p=>({
+            label: p.label.trim() || 'Poin',
+            lokasi: p.lokasi.trim(),
+            sebelum: p.sebelum.trim() || '-',
+            sesudah: p.sesudah.trim() || p.label
+          }))
+        };
+      }
     }
     revisiLastResult=parsed;
     renderRevisiResult(parsed);
