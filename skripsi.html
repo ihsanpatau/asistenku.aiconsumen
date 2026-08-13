@@ -1315,6 +1315,13 @@ ATURAN PENULISAN PENTING:
           'rumusan':'Rumusan Masalah','pustaka':'Daftar Pustaka'
         };
         const labelBagian = labelJenisMap[jenisDokumen] || jenisDokumen;
+        // PERBAIKAN: sebelumnya link dokumen di sini diarahkan ke 'skripsi.html' —
+        // yaitu halaman FORM GENERATE itu sendiri, bukan halaman hasil. Jadi kalau
+        // dokumen ini dibuka lagi dari Dokumen Saya/Riwayat, yang muncul cuma form
+        // kosong lagi (isi hasil generate sebelumnya tidak pernah tersimpan permanen).
+        // Sekarang link diarahkan ke hasil-skripsi.html (yang sudah bisa memuat isi
+        // lengkap dokumen dari penyimpanan permanen lewat ?id=...), dan isi lengkapnya
+        // ikut disimpan permanen di sini juga.
         RiwayatStore.tambah({
           id: skripsiItemId,
           judul: (judul || 'Skripsi') + ' — ' + labelBagian,
@@ -1323,8 +1330,15 @@ ATURAN PENULISAN PENTING:
           kataTerhitung: skripsiWc,
           halaman: skripsiHalamanCount,
           status: 'done',
-          link: 'skripsi.html'
+          link: 'hasil-skripsi.html'
         });
+        if (RiwayatStore.simpanKonten) {
+          RiwayatStore.simpanKonten(skripsiItemId, {
+            data: { judul, jenis, deskripsi, bidang, halaman, jenisDokumen },
+            outline: [],
+            hasil: result
+          });
+        }
       }
     } else {
       throw new Error('No content');
