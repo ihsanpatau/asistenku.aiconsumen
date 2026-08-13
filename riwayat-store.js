@@ -2,7 +2,12 @@
 const RiwayatStore = (function () {
   const KEY = "ak_riwayat_items";
 
-  function semua() {
+  // Dokumen & riwayat otomatis dihapus (beserta isi lengkapnya) setelah sekian hari,
+  // supaya localStorage browser pengguna tidak menumpuk/penuh tanpa batas. Dipakai juga
+  // oleh riwayat.html untuk menampilkan info ke pengguna.
+  const MASA_BERLAKU_HARI = 7;
+
+  function bacaMentah() {
     try {
       const raw = localStorage.getItem(KEY);
       const arr = raw ? JSON.parse(raw) : [];
@@ -10,6 +15,31 @@ const RiwayatStore = (function () {
     } catch (e) {
       return [];
     }
+  }
+
+  // Buang otomatis entri riwayat + KONTEN LENGKAPnya yang sudah lebih tua dari
+  // MASA_BERLAKU_HARI hari. Dipanggil otomatis setiap kali daftar riwayat dibaca
+  // (lewat semua()), jadi tidak perlu proses/cron terpisah — begitu ada entri yang
+  // sudah kedaluwarsa, otomatis lenyap sendiri saat halaman manapun dibuka.
+  function bersihkanKedaluwarsa() {
+    const list = bacaMentah();
+    const batas = Date.now() - MASA_BERLAKU_HARI * 24 * 60 * 60 * 1000;
+    const gugur = [];
+    const sisa = [];
+    list.forEach((x) => {
+      const t = new Date(x.waktu).getTime();
+      if (!isNaN(t) && t < batas) gugur.push(x);
+      else sisa.push(x);
+    });
+    if (gugur.length) {
+      simpan(sisa);
+      gugur.forEach((x) => hapusKonten(x.id));
+    }
+    return sisa;
+  }
+
+  function semua() {
+    return bersihkanKedaluwarsa();
   }
 
   function simpan(arr) {
@@ -138,6 +168,14 @@ const RiwayatStore = (function () {
     return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
   }
 
+  // Berapa hari lagi sebuah item akan otomatis dihapus (dipakai buat info di riwayat.html).
+  function hariTersisa(iso) {
+    const t = new Date(iso).getTime();
+    if (isNaN(t)) return null;
+    const sisaMs = t + MASA_BERLAKU_HARI * 24 * 60 * 60 * 1000 - Date.now();
+    return Math.max(0, Math.ceil(sisaMs / (24 * 60 * 60 * 1000)));
+  }
+
   return {
     semua,
     tambah,
@@ -149,5 +187,7 @@ const RiwayatStore = (function () {
     ambilKonten,
     hapusKonten,
     tautan,
+    hariTersisa,
+    masaBerlakuHari: MASA_BERLAKU_HARI,
   };
 })();
