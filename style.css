@@ -146,7 +146,8 @@ body {
 /* ── App Shell ── */
 .app {
   width: 100%;
-  max-width: 430px;
+  /* Fluid: lebar mengikuti persentase layar asli tiap device (bukan 1 angka tetap utk semua HP/tablet), dibatasi ambang bawah & atas supaya tetap wajar */
+  max-width: clamp(360px, 96vw, 760px);
   height: 100vh;
   height: 100dvh;
   min-height: 100vh;
@@ -434,7 +435,8 @@ body {
 }
 
 .hero-title {
-  font-size: 20px;
+  /* Fluid: skala mengikuti lebar layar asli, bukan lompat per breakpoint */
+  font-size: clamp(18px, 4.2vw, 26px);
   font-weight: 800;
   line-height: 1.2;
 }
@@ -2567,37 +2569,73 @@ body {
 }
 
 /* ── Responsif: Tablet ── */
-/* Layar 641px–1024px (tablet potrait/landscape, HP besar rebahan) */
+/* Layar 641px–1024px (tablet potrait/landscape, HP besar rebahan) — lebar sudah fluid lewat clamp() di .app, di sini cukup atur jumlah kolom grid supaya tetap proporsional */
 @media (min-width: 641px) and (max-width: 1024px) {
-  .app {
-    max-width: 760px;
-  }
   .menu-cards {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
   .doc-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 }
 
 /* ── Responsif: Laptop / Desktop ── */
-/* Layar di atas 1024px: layout khas aplikasi desktop, bukan kartu HP yang diperbesar */
+/* Layar di atas 1024px: manfaatkan ruang lebih lega. Berlaku untuk SEMUA layar lebar
+   (termasuk iPad landscape yang disentuh), TANPA mengubah posisi navigasi. */
 @media (min-width: 1025px) {
   body {
     background: var(--gray-100);
-    justify-content: flex-start;
   }
 
   .app {
-    margin-left: 96px;
-    width: calc(100% - 96px);
-    max-width: 1180px;
+    /* Fluid juga di desktop: laptop 13" dan monitor ultra-wide dapat proporsi beda, bukan 1 angka tetap */
+    max-width: clamp(760px, 88vw, 1320px);
     height: 100vh;
     height: 100dvh;
     min-height: 100vh;
     min-height: 100dvh;
     border-radius: 0;
     box-shadow: none;
+  }
+
+  /* Grid yang lebih longgar supaya memanfaatkan ruang layar lebar */
+  .menu-cards {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+    padding: 0 24px;
+  }
+  .doc-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    padding: 0 24px;
+  }
+  .stats-row {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+  .score-grid,
+  .sec-header,
+  .section-header {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .hero-banner {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+}
+
+/* ── Sidebar kiri: KHUSUS perangkat dengan mouse/trackpad (laptop, PC) ──
+   iPad & tablet layar lebar yang dioperasikan dengan jari TETAP pakai bottom nav
+   (lebih nyaman dijangkau jempol, dan label tidak dipaksa muat di kolom sempit). */
+@media (min-width: 1025px) and (pointer: fine) and (hover: hover) {
+  body {
+    justify-content: flex-start;
+  }
+
+  .app {
+    margin-left: 96px;
+    width: calc(100% - 96px);
   }
 
   /* Bottom nav berubah jadi sidebar tetap di kiri layar */
@@ -2630,38 +2668,5 @@ body {
   }
   .nav-item.active:hover {
     color: var(--brand-light);
-  }
-
-  /* Grid yang lebih longgar supaya memanfaatkan ruang layar lebar */
-  .menu-cards {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 14px;
-    padding: 0 24px;
-  }
-  .doc-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 14px;
-    padding: 0 24px;
-  }
-  .stats-row {
-    margin-left: 24px;
-    margin-right: 24px;
-  }
-  .score-grid,
-  .sec-header,
-  .section-header {
-    padding-left: 24px;
-    padding-right: 24px;
-  }
-  .hero-banner {
-    margin-left: 24px;
-    margin-right: 24px;
-  }
-}
-
-/* Layar sangat lebar: batasi biar konten nggak melebar berlebihan */
-@media (min-width: 1600px) {
-  .app {
-    max-width: 1320px;
   }
 }

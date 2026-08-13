@@ -362,17 +362,22 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-/* ── Layar lebar (≥1025px): samakan dengan halaman lain — nav jadi sidebar kiri,
-   konten diberi ruang napas, tidak nempel di 430px & tidak melebar penuh ── */
+/* ── Layar lebar (≥1025px): kasih ruang napas untuk SEMUA layar lebar (termasuk iPad disentuh) ── */
 @media (min-width: 1025px) {
   body { background: #EEF1F8; }
 
   .app {
     max-width: 720px;
-    margin: 0 auto 0 132px;
+    margin: 0 auto;
     box-shadow: 0 0 40px rgba(20,30,80,0.08);
     min-height: 100vh;
   }
+}
+
+/* ── Sidebar kiri: KHUSUS perangkat mouse/trackpad (laptop, PC) ──
+   iPad & tablet sentuh tetap pakai bottom nav, konsisten dengan halaman lain ── */
+@media (min-width: 1025px) and (pointer: fine) and (hover: hover) {
+  .app { margin: 0 auto 0 132px; }
 
   .bottom-nav {
     position: fixed;
