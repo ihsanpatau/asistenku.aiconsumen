@@ -220,7 +220,7 @@
 
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
          ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
-      <input type="file" id="fileInput" accept=".docx,.pdf,.txt" style="display:none" onchange="onFileSelected(this)">
+      <input type="file" id="fileInput" accept=".docx" style="display:none" onchange="onFileSelected(this)">
       <div class="drop-zone-icon" id="dzIcon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="#1a3dc2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -229,7 +229,7 @@
         </svg>
       </div>
       <div class="drop-zone-label" id="dzLabel">Pilih atau seret file skripsi di sini</div>
-      <div class="drop-zone-sub" id="dzSub">Format: .docx, .pdf, .txt — Maks. 15MB</div>
+      <div class="drop-zone-sub" id="dzSub">Format: Word (.docx) — Maks. 15MB — AI akan edit langsung di file</div>
     </div>
 
     <div style="background:#EFF6FF;border-radius:12px;padding:11px 14px;font-size:11.5px;color:#1E40AF;line-height:1.55;margin-top:12px;">
@@ -357,7 +357,7 @@ function onFileSelected(input){ if(input.files[0]) handleFile(input.files[0]); }
 function handleFile(file){
   if(file.size > 15*1024*1024){ showToast('Ukuran file maksimal 15MB'); return; }
   const ext = file.name.split('.').pop().toLowerCase();
-  if(!['docx','pdf','txt'].includes(ext)){ showToast('Format harus .docx, .pdf, atau .txt'); return; }
+  if(ext !== 'docx'){ showToast('Hanya file Word (.docx) yang didukung'); return; }
   uploadedFile = file;
   const dz = document.getElementById('dropZone');
   dz.classList.add('filled');
@@ -371,27 +371,26 @@ async function startRevisi(){
   if(!uploadedFile){ showToast('Pilih file skripsi terlebih dahulu'); return; }
   showLoading('Membaca dokumen...', 'AI sedang membaca isi skripsimu');
   try {
+    // Wajib .docx
     const ext = uploadedFile.name.split('.').pop().toLowerCase();
-    const arrayBuffer = await uploadedFile.arrayBuffer();
+    if(ext !== 'docx'){ throw new Error('Hanya file Word (.docx) yang didukung'); }
 
-    if(ext === 'docx'){
-      originalDocxBuffer = arrayBuffer.slice(0);
-      currentDocxBuffer = arrayBuffer.slice(0);
-      // Ekstrak teks pakai mammoth
-      const result = await window.mammoth.convertToHtml({ arrayBuffer: arrayBuffer.slice(0) });
-      renderDocumentFromHtml(result.value);
-      // Juga simpan raw text
-      const rawResult = await window.mammoth.extractRawText({ arrayBuffer: arrayBuffer.slice(0) });
-      docRawText = rawResult.value;
-    } else if(ext === 'txt'){
-      const text = await uploadedFile.text();
-      docRawText = text;
-      renderDocumentFromText(text);
-    } else if(ext === 'pdf'){
-      const text = await extractPdfText(arrayBuffer);
-      docRawText = text;
-      renderDocumentFromText(text);
-    }
+    // Cek mammoth tersedia
+    if(!window.mammoth){ throw new Error('Library pembaca Word belum siap, refresh halaman lalu coba lagi'); }
+
+    const arrayBuffer = await uploadedFile.arrayBuffer();
+    originalDocxBuffer = arrayBuffer.slice(0);
+    currentDocxBuffer = arrayBuffer.slice(0);
+
+    // Ekstrak HTML untuk tampilan
+    const htmlResult = await window.mammoth.convertToHtml({ arrayBuffer: arrayBuffer.slice(0) });
+    if(!htmlResult || !htmlResult.value){ throw new Error('File Word tidak bisa dibaca. Pastikan file tidak terproteksi password.'); }
+    renderDocumentFromHtml(htmlResult.value);
+
+    // Ekstrak raw text untuk konteks AI
+    const rawResult = await window.mammoth.extractRawText({ arrayBuffer: arrayBuffer.slice(0) });
+    docRawText = rawResult.value || '';
+    if(!docRawText.trim()){ throw new Error('Isi dokumen kosong atau tidak bisa dibaca.'); }
 
     document.getElementById('editorFilename').textContent = uploadedFile.name;
     switchToEditor();

@@ -226,9 +226,9 @@
            onclick="document.getElementById('edFileInput').click()"
            ondragover="edDragOver(event)" ondragleave="edDragLeave()" ondrop="edOnDrop(event)">
         <div style="font-size:28px;margin-bottom:8px;" id="edDropIcon">📄</div>
-        <div style="font-size:13px;font-weight:700;color:var(--dark);" id="edDropLabel">Pilih atau seret file skripsi</div>
-        <div style="font-size:11px;color:var(--gray-500);margin-top:4px;" id="edDropSub">Format: .docx, .pdf, .txt — Maks. 15MB</div>
-        <input type="file" id="edFileInput" accept=".docx,.pdf,.txt" style="display:none" onchange="edOnFileSelected(this)">
+        <div style="font-size:13px;font-weight:700;color:var(--dark);" id="edDropLabel">Pilih file Word (.docx) skripsi</div>
+        <div style="font-size:11px;color:var(--gray-500);margin-top:4px;" id="edDropSub">Hanya Word (.docx) — Maks. 15MB — AI edit langsung di file</div>
+        <input type="file" id="edFileInput" accept=".docx" style="display:none" onchange="edOnFileSelected(this)">
       </div>
       <div style="background:#EFF6FF;border-radius:12px;padding:10px 13px;font-size:11px;color:#1E40AF;line-height:1.6;margin-top:12px;">
         💡 <b>Cara pakai:</b> Upload skripsi → Klik <b>Mulai Edit</b> → Ketik perintah di panel kanan
@@ -350,7 +350,12 @@ function switchMode(mode){
   document.getElementById('tabEditor').classList.toggle('active',mode==='editor');
   document.getElementById('tabBelajar').classList.toggle('active',mode==='belajar');
 }
-switchMode('revisi');
+// Auto-switch tab berdasarkan URL hash (dari link beranda)
+(function(){
+  const hash = window.location.hash;
+  if(hash === '#editor') switchMode('editor');
+  else switchMode('revisi');
+})();
 
 /* ═══════════════════════════════════════════════════════════
    EDITOR AI — Split-View dengan Track Changes
@@ -370,7 +375,7 @@ function edOnFileSelected(inp){ if(inp.files[0]) edHandleFile(inp.files[0]); }
 function edHandleFile(file){
   if(file.size > 15*1024*1024){ showToast('Ukuran file maksimal 15MB'); return; }
   const ext = file.name.split('.').pop().toLowerCase();
-  if(!['docx','pdf','txt'].includes(ext)){ showToast('Format harus .docx, .pdf, atau .txt'); return; }
+  if(ext !== 'docx'){ showToast('Hanya file Word (.docx) yang didukung di Editor AI'); return; }
   edFile = file;
   const dz = document.getElementById('edDrop');
   dz.classList.add('filled');
@@ -386,19 +391,16 @@ async function edStartEditor(){
   btn.disabled = true; btn.textContent = 'Membaca file...';
   try {
     const ext = edFile.name.split('.').pop().toLowerCase();
-    if(ext === 'docx'){
-      const buf = await edFile.arrayBuffer();
-      const result = await mammoth.convertToHtml({ arrayBuffer: buf.slice(0) });
-      edRenderFromHtml(result.value);
-      const raw = await mammoth.extractRawText({ arrayBuffer: buf.slice(0) });
-      edRawText = raw.value;
-    } else if(ext === 'txt'){
-      edRawText = await edFile.text();
-      edRenderFromText(edRawText);
-    } else if(ext === 'pdf'){
-      edRawText = await edReadPdf(edFile);
-      edRenderFromText(edRawText);
-    }
+    if(ext !== 'docx'){ throw new Error('Hanya file Word (.docx) yang didukung'); }
+    if(!window.mammoth){ throw new Error('Library pembaca Word belum siap, refresh halaman'); }
+
+    const buf = await edFile.arrayBuffer();
+    const htmlResult = await mammoth.convertToHtml({ arrayBuffer: buf.slice(0) });
+    if(!htmlResult || !htmlResult.value) throw new Error('File Word tidak bisa dibaca atau terproteksi password');
+    edRenderFromHtml(htmlResult.value);
+    const rawResult = await mammoth.extractRawText({ arrayBuffer: buf.slice(0) });
+    edRawText = rawResult.value || '';
+    if(!edRawText.trim()) throw new Error('Isi dokumen kosong');
     document.getElementById('edFnameLbl').textContent = edFile.name;
     document.getElementById('editorUploadPhase').style.display = 'none';
     const sv = document.getElementById('editorSplitView');
