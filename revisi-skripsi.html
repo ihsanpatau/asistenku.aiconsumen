@@ -549,10 +549,6 @@ Jika perintah tidak jelas atau bagian tidak ditemukan, kembalikan:
 
     const userPrompt = `Dokumen skripsi (bagian yang relevan):\n\n${relevantContext}\n\n---\n\nPerintah revisi dari mahasiswa: "${cmd}"\n\nLakukan revisi sesuai perintah. Ingat: pertahankan gaya penulisan akademik formal yang sudah ada.`;
 
-    // Ambil konteks relevan
-    const currentText = getDocCurrentText();
-    const relevantContext = extractRelevantContext(currentText, cmd);
-
     const response = await fetch('/api/revisi-skripsi', {
       method: 'POST',
       headers: {
