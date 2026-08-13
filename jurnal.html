@@ -83,11 +83,21 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">2. Upload File Template Jurnal (Opsional, disarankan)</label>
+          <label class="form-label">2. Upload File Template Jurnal <span style="font-weight:400;color:var(--gray-500)">(Opsional, disarankan)</span></label>
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <button id="btnModeDocx" class="type-pill active" onclick="setTemplateMode('docx')" style="font-size:11px;">&#128196; Template .docx (Terbaik)</button>
+            <button id="btnModePdf" class="type-pill" onclick="setTemplateMode('pdf')" style="font-size:11px;">&#128213; PDF/TXT (Referensi)</button>
+          </div>
           <div id="slotTemplate" class="file-slot" onclick="document.getElementById('fileTemplate').click()">
             <div class="file-slot-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-            <div class="file-slot-text"><div class="file-slot-title" id="titleTemplate">Pilih file template jurnal (PDF/DOCX/TXT)</div><div class="file-slot-sub" id="subTemplate">AI akan meniru struktur & format bagian dari file ini</div></div>
-            <input type="file" id="fileTemplate" accept=".pdf,.docx,.txt" style="display:none" onchange="onPickFile(this,'template')">
+            <div class="file-slot-text"><div class="file-slot-title" id="titleTemplate">Pilih file template jurnal (.docx)</div><div class="file-slot-sub" id="subTemplate">AI akan menulis langsung di file ini — font &amp; layout terjaga</div></div>
+            <input type="file" id="fileTemplate" accept=".docx" style="display:none" onchange="onPickFile(this,'template')">
+          </div>
+          <div id="infoTemplateDocx" style="background:#EFF6FF;border-radius:10px;padding:9px 12px;font-size:11px;color:#1E40AF;line-height:1.5;margin-top:6px;">
+            &#10024; <b>Mode Terbaik:</b> AI membaca skripsimu lalu mengetik ulang kontennya langsung ke dalam file template .docx — font, margin, kolom, dan layout jurnal tetap persis seperti aslinya.
+          </div>
+          <div id="infoTemplatePdf" style="display:none;background:#FFF7ED;border-radius:10px;padding:9px 12px;font-size:11px;color:#92400E;line-height:1.5;margin-top:6px;">
+            &#128203; <b>Mode Referensi:</b> AI membaca struktur file ini sebagai panduan format, lalu menghasilkan jurnal baru dalam format Word/PDF/Teks.
           </div>
         </div>
         <div class="form-group"><label class="form-label">Catatan / Instruksi Tambahan (Opsional)</label><textarea id="catatanTambahan" class="form-textarea" rows="3" placeholder="Contoh: buat sekitar 8 halaman, fokus ke bagian metode dan hasil, gaya penulisan lebih ringkas, atau target jurnal tertentu (mis. Jurnal Manajemen Indonesia)"></textarea></div>
@@ -171,12 +181,39 @@ function switchMode(btn,mode){document.querySelectorAll('.tab-btn').forEach(b=>b
 // ===== File handling (skripsi & template) =====
 const filesState={ skripsi:null, template:null };
 
+let templateMode = 'docx'; // 'docx' = inject ke template | 'pdf' = referensi teks saja
+
+function setTemplateMode(mode){
+  templateMode = mode;
+  const fileInput = document.getElementById('fileTemplate');
+  const title = document.getElementById('titleTemplate');
+  const sub = document.getElementById('subTemplate');
+  const infoDocx = document.getElementById('infoTemplateDocx');
+  const infoPdf = document.getElementById('infoTemplatePdf');
+  document.getElementById('btnModeDocx').classList.toggle('active', mode==='docx');
+  document.getElementById('btnModePdf').classList.toggle('active', mode==='pdf');
+  if(mode==='docx'){
+    fileInput.accept='.docx';
+    title.textContent='Pilih file template jurnal (.docx)';
+    sub.textContent='AI akan menulis langsung di file ini — font & layout terjaga';
+    infoDocx.style.display='block'; infoPdf.style.display='none';
+  } else {
+    fileInput.accept='.pdf,.docx,.txt';
+    title.textContent='Pilih file template jurnal (PDF/DOCX/TXT)';
+    sub.textContent='AI akan meniru struktur & format bagian dari file ini';
+    infoDocx.style.display='none'; infoPdf.style.display='block';
+  }
+  // Reset file jika ada yang sudah dipilih agar tidak mismatch
+  if(filesState.template){ filesState.template=null; document.getElementById('slotTemplate').classList.remove('filled'); title.textContent=(mode==='docx'?'Pilih file template jurnal (.docx)':'Pilih file template jurnal (PDF/DOCX/TXT)'); }
+}
+
 function onPickFile(input, slot){
   const file=input.files[0];
   if(!file)return;
   if(file.size>10*1024*1024){ showToast('Ukuran file maksimal 10MB'); input.value=''; return; }
   const ext=file.name.split('.').pop().toLowerCase();
-  if(!['pdf','docx','txt'].includes(ext)){ showToast('Format harus PDF, DOCX, atau TXT'); input.value=''; return; }
+  if(slot==='template' && templateMode==='docx' && ext!=='docx'){ showToast('Untuk mode inject, pilih file .docx saja'); input.value=''; return; }
+  if(slot==='skripsi' && !['pdf','docx','txt'].includes(ext)){ showToast('Format harus PDF, DOCX, atau TXT'); input.value=''; return; }
   filesState[slot]=file;
   const wrap=document.getElementById(slot==='skripsi'?'slotSkripsi':'slotTemplate');
   const title=document.getElementById(slot==='skripsi'?'titleSkripsi':'titleTemplate');
@@ -248,12 +285,27 @@ async function generate(){
   if(isKonversi){
     if(!filesState.skripsi){ showToast('Upload file skripsi/naskah terlebih dahulu'); return; }
     btn.disabled=true; btnLabel.textContent='Membaca file...';
-    let skripsiText, templateText='';
+
+    // Cek apakah mode inject ke template .docx (Opsi B + fallback A)
+    const useDocxInject = templateMode==='docx' && filesState.template && filesState.template.name.endsWith('.docx');
+
+    let skripsiText, templateText='', templateDocxB64='';
     try{
       skripsiText=await extractFileText(filesState.skripsi);
       if(!skripsiText || skripsiText.trim().length<30){ throw new Error('Isi file skripsi tidak terbaca atau kosong. Coba format lain (PDF/DOCX/TXT).'); }
       if(filesState.template){
-        templateText=await extractFileText(filesState.template);
+        if(useDocxInject){
+          // Untuk mode inject: simpan base64 file .docx template ke localStorage
+          // (akan dikirim ke endpoint /api/jurnal-template di hasil-tugas.html)
+          const ab = await filesState.template.arrayBuffer();
+          const bytes = new Uint8Array(ab);
+          let bin=''; bytes.forEach(b=>bin+=String.fromCharCode(b));
+          templateDocxB64 = btoa(bin);
+          // Juga ekstrak teks template untuk AI bisa baca strukturnya
+          templateText = await extractFileText(filesState.template);
+        } else {
+          templateText=await extractFileText(filesState.template);
+        }
       }
     }catch(e){
       showToast(e.message||'Gagal membaca file');
@@ -283,9 +335,34 @@ ${TARGET_PANJANG_JURNAL_TEXT}${CHART_TABLE_INSTRUCTION}`;
     localStorage.setItem('task_output_format', formatJurnalTerpilih);
     localStorage.setItem('task_prompt', catatanTambahan || 'Jurnal dari Skripsi');
     localStorage.setItem('task_full_prompt', prompt);
-    // PERBAIKAN: simpan target kata supaya hasil-tugas.html bisa menghitung max_tokens
-    // yang cukup, dan tidak lagi terpotong sebelum Daftar Pustaka selesai.
     localStorage.setItem('task_target_kata', String(targetKataJurnal));
+
+    // Simpan flag & data docx inject mode
+    if(useDocxInject && templateDocxB64){
+      localStorage.setItem('jurnal_template_inject','1');
+      // Simpan nama file template untuk tampilan
+      localStorage.setItem('jurnal_template_filename', filesState.template.name);
+      try {
+        // Batasi ukuran: docx base64 bisa besar, cek dulu
+        if(templateDocxB64.length < 5*1024*1024) { // maks ~3.7MB original
+          localStorage.setItem('jurnal_template_docx_b64', templateDocxB64);
+        } else {
+          showToast('File template terlalu besar untuk mode inject, beralih ke mode referensi');
+          localStorage.removeItem('jurnal_template_inject');
+          localStorage.removeItem('jurnal_template_docx_b64');
+        }
+      } catch(e) {
+        // localStorage penuh
+        localStorage.removeItem('jurnal_template_inject');
+        localStorage.removeItem('jurnal_template_docx_b64');
+        showToast('Penyimpanan penuh, beralih ke mode referensi');
+      }
+    } else {
+      localStorage.removeItem('jurnal_template_inject');
+      localStorage.removeItem('jurnal_template_docx_b64');
+      localStorage.removeItem('jurnal_template_filename');
+    }
+
     btnLabel.textContent='Memproses dengan AI...';
     showToast('Memproses jurnal dengan AI...');
     setTimeout(()=>window.location.href='hasil-tugas.html',400);
