@@ -60,6 +60,80 @@
 .revisi-format-chip{border:1.5px solid var(--gray-200);background:var(--white);color:var(--dark);border-radius:20px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
 .revisi-format-chip.active{border-color:var(--blue);background:var(--blue-pale);color:var(--blue);}
 .spin-dot{width:14px;height:14px;border:2px solid var(--gray-200);border-top-color:var(--blue-light);border-radius:50%;animation:spin .8s linear infinite;}
+
+/* ── Editor AI (Tab Ketiga) ─────────────────────── */
+#editorMode { display:none; flex-direction:column; flex:1; overflow:hidden; height:calc(100vh - 96px); }
+.editor-split { display:flex; flex:1; overflow:hidden; }
+
+/* Kolom Kiri: Dokumen */
+.editor-doc-panel { flex:1; overflow-y:auto; background:#F8F9FA; border-right:1px solid var(--gray-200); }
+.editor-doc-paper {
+  background:#fff; max-width:100%; margin:0;
+  padding:24px 20px; font-family:'Times New Roman',serif;
+  font-size:11.5pt; line-height:1.8; color:#1a1a1a; min-height:100%;
+}
+.editor-doc-paper h1{font-size:13pt;font-weight:700;text-align:center;margin-bottom:8px;}
+.editor-doc-paper h2{font-size:12.5pt;font-weight:700;margin:14px 0 4px;}
+.editor-doc-paper h3{font-size:12pt;font-weight:700;margin:10px 0 4px;}
+.editor-doc-paper p{margin:0 0 8px;text-align:justify;}
+
+/* Track changes */
+.tc-del{background:#FEE2E2;color:#991B1B;text-decoration:line-through;border-radius:2px;padding:0 2px;}
+.tc-ins{background:#DCFCE7;color:#166534;border-radius:2px;padding:0 2px;}
+.tc-del-block{border-left:3px solid #DC2626;padding:6px 10px;margin:4px 0;background:#FEF2F2;font-style:italic;opacity:.8;}
+.tc-ins-block{border-left:3px solid #16A34A;padding:6px 10px;margin:4px 0;background:#F0FDF4;}
+.tc-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:20px;margin-right:5px;font-family:sans-serif;vertical-align:middle;}
+.tc-badge.sebelum{background:#FEE2E2;color:#DC2626;}
+.tc-badge.sesudah{background:#DCFCE7;color:#16A34A;}
+.tc-badge.baru{background:#DCFCE7;color:#16A34A;}
+.tc-badge.edit{background:#FEF9C3;color:#92400E;}
+.tc-table{border-collapse:collapse;width:100%;margin:8px 0;font-size:10.5pt;}
+.tc-table th{background:#1A3DC2;color:#fff;padding:5px 8px;text-align:left;font-size:10pt;}
+.tc-table td{border:1px solid #E5E7EB;padding:5px 8px;}
+
+/* Toolbar */
+.editor-toolbar {
+  display:flex; align-items:center; gap:6px; padding:8px 12px;
+  border-bottom:1px solid var(--gray-200); background:#fff;
+  flex-shrink:0; flex-wrap:wrap;
+}
+.editor-toolbar .fname-lbl{font-size:12px;font-weight:700;color:var(--dark);flex:1;
+  min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.view-btn{padding:5px 10px;border-radius:20px;border:1.5px solid var(--gray-200);
+  font-size:10.5px;font-weight:700;cursor:pointer;background:#fff;color:var(--gray-600);white-space:nowrap;}
+.view-btn.active{border-color:var(--blue);background:var(--blue-pale);color:var(--blue);}
+.dl-btn{padding:6px 12px;border-radius:20px;border:none;background:var(--green,#16A34A);
+  color:#fff;font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+
+/* Upload phase dalam tab editor */
+.editor-upload-phase{padding:20px 16px;}
+.editor-drop-zone{border:2px dashed var(--gray-200);border-radius:16px;padding:28px 16px;
+  text-align:center;cursor:pointer;transition:.15s;background:var(--gray-50,#F9FAFB);}
+.editor-drop-zone:hover,.editor-drop-zone.drag-over{border-color:var(--blue-light);background:var(--blue-pale);}
+.editor-drop-zone.filled{border-style:solid;border-color:var(--green,#16A34A);background:#ECFDF5;}
+
+/* Kolom Kanan: Chat */
+.editor-chat-panel{width:300px;flex-shrink:0;display:flex;flex-direction:column;background:#fff;}
+.editor-chat-head{padding:10px 12px 8px;border-bottom:1px solid var(--gray-100);flex-shrink:0;}
+.editor-chat-head .title{font-size:12px;font-weight:800;color:var(--dark);}
+.editor-chat-head .sub{font-size:10px;color:var(--gray-500);margin-top:2px;}
+.editor-msgs{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+.em{border-radius:12px;padding:8px 10px;font-size:11.5px;line-height:1.5;}
+.em-user{background:var(--blue);color:#fff;align-self:flex-end;border-radius:12px 12px 3px 12px;}
+.em-ai{background:var(--gray-100,#F3F4F6);color:var(--dark);align-self:flex-start;border-radius:12px 12px 12px 3px;}
+.em-sys{background:#FEF9C3;color:#92400E;font-size:10.5px;border-radius:10px;padding:7px 10px;}
+.editor-hints{padding:0 12px 8px;display:flex;flex-wrap:wrap;gap:5px;flex-shrink:0;}
+.hint-c{border:1.5px solid var(--blue-pale,#EEF2FF);background:var(--blue-pale);border-radius:20px;
+  padding:4px 9px;font-size:10px;font-weight:600;color:var(--blue);cursor:pointer;white-space:nowrap;}
+.hint-c:hover{background:var(--blue);color:#fff;}
+.editor-input-row{padding:8px 10px;border-top:1px solid var(--gray-100);display:flex;gap:6px;align-items:flex-end;flex-shrink:0;}
+.editor-input-row textarea{flex:1;resize:none;border:1.5px solid var(--gray-200);border-radius:10px;
+  padding:8px 10px;font-size:11.5px;font-family:inherit;line-height:1.5;min-height:38px;max-height:100px;
+  overflow-y:auto;background:var(--gray-50,#F9FAFB);color:var(--dark);outline:none;}
+.editor-input-row textarea:focus{border-color:var(--blue-light);}
+.editor-send-btn{width:36px;height:36px;border-radius:9px;border:none;background:var(--blue);
+  color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.editor-send-btn:disabled{opacity:.4;cursor:not-allowed;}
 </style>
 </head>
 <body>
@@ -75,7 +149,11 @@
   <div class="mode-tabs">
     <button class="mode-tab active" id="tabRevisi" onclick="switchMode('revisi')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
-      Revisi Skripsi
+      Revisi Cepat
+    </button>
+    <button class="mode-tab" id="tabEditor" onclick="switchMode('editor')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+      Editor AI
     </button>
     <button class="mode-tab" id="tabBelajar" onclick="switchMode('belajar')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M12 20h9"/><path d="M4 19h4l10.5-10.5a2.121 2.121 0 0 0-3-3L5 16v3"/><path d="M14.5 3.5l4.5 4.5"/></svg>
@@ -136,6 +214,79 @@
     </div>
   </div>
 
+  <!-- Editor AI Mode (Tab Ketiga) -->
+  <div id="editorMode">
+    <!-- Upload Phase -->
+    <div class="editor-upload-phase" id="editorUploadPhase">
+      <div style="background:linear-gradient(135deg,#EEF2FF,#C7D5FF);border-radius:16px;padding:16px;margin-bottom:14px;">
+        <div style="font-size:15px;font-weight:800;color:var(--blue);">✏️ Editor AI — Skripsi Interaktif</div>
+        <div style="font-size:11.5px;color:#3B5BFF;margin-top:4px;">Upload skripsimu → AI edit langsung + lihat track changes</div>
+      </div>
+      <div class="editor-drop-zone" id="edDrop"
+           onclick="document.getElementById('edFileInput').click()"
+           ondragover="edDragOver(event)" ondragleave="edDragLeave()" ondrop="edOnDrop(event)">
+        <div style="font-size:28px;margin-bottom:8px;" id="edDropIcon">📄</div>
+        <div style="font-size:13px;font-weight:700;color:var(--dark);" id="edDropLabel">Pilih atau seret file skripsi</div>
+        <div style="font-size:11px;color:var(--gray-500);margin-top:4px;" id="edDropSub">Format: .docx, .pdf, .txt — Maks. 15MB</div>
+        <input type="file" id="edFileInput" accept=".docx,.pdf,.txt" style="display:none" onchange="edOnFileSelected(this)">
+      </div>
+      <div style="background:#EFF6FF;border-radius:12px;padding:10px 13px;font-size:11px;color:#1E40AF;line-height:1.6;margin-top:12px;">
+        💡 <b>Cara pakai:</b> Upload skripsi → Klik <b>Mulai Edit</b> → Ketik perintah di panel kanan
+        (contoh: <i>"Perbaiki rumusan masalah"</i>, <i>"Tambah tabel di Bab 2"</i>) → Lihat perubahan di kiri dengan highlight hijau/merah
+      </div>
+      <button class="btn btn-primary" id="edStartBtn" onclick="edStartEditor()" disabled style="width:100%;margin-top:14px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Mulai Edit
+      </button>
+    </div>
+
+    <!-- Split-View Editor Phase (muncul setelah upload) -->
+    <div id="editorSplitView" style="display:none;flex-direction:column;flex:1;overflow:hidden;height:calc(100vh - 96px);">
+      <!-- Toolbar -->
+      <div class="editor-toolbar">
+        <button onclick="edBackToUpload()" style="background:none;border:none;cursor:pointer;padding:3px;border-radius:7px;display:flex;align-items:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <span class="fname-lbl" id="edFnameLbl">skripsi.docx</span>
+        <button class="view-btn active" id="edBtnTrack" onclick="edSetView('track')">📝 Perubahan</button>
+        <button class="view-btn" id="edBtnFinal" onclick="edSetView('final')">✅ Final</button>
+        <button class="dl-btn" onclick="edDownload()">⬇ Unduh</button>
+      </div>
+      <!-- Split body -->
+      <div class="editor-split">
+        <!-- Kiri: Dokumen -->
+        <div class="editor-doc-panel" id="edDocPanel">
+          <div class="editor-doc-paper" id="edDocPaper">
+            <p style="color:var(--gray-400);font-style:italic;">Memuat dokumen...</p>
+          </div>
+        </div>
+        <!-- Kanan: Chat -->
+        <div class="editor-chat-panel">
+          <div class="editor-chat-head">
+            <div class="title">✏️ Perintah Revisi</div>
+            <div class="sub">Ketik instruksi → AI edit dokumen di kiri</div>
+          </div>
+          <div class="editor-msgs" id="edMsgs">
+            <div class="em em-sys">Dokumen dimuat. Beri perintah seperti:<br><b>"Perbaiki latar belakang Bab 1"</b><br><b>"Tambah tabel perbandingan"</b></div>
+          </div>
+          <div class="editor-hints" id="edHints">
+            <div class="hint-c" onclick="edUseHint(this)">Perbaiki latar belakang</div>
+            <div class="hint-c" onclick="edUseHint(this)">Perjelas rumusan masalah</div>
+            <div class="hint-c" onclick="edUseHint(this)">Tambah tabel Bab 2</div>
+            <div class="hint-c" onclick="edUseHint(this)">Perbaiki kesimpulan</div>
+            <div class="hint-c" onclick="edUseHint(this)">Tambah grafik data</div>
+          </div>
+          <div class="editor-input-row">
+            <textarea id="edChatInput" placeholder="Contoh: Ubah rumusan masalah paragraf 1..." rows="2" onkeydown="edChatKey(event)"></textarea>
+            <button class="editor-send-btn" id="edSendBtn" onclick="edSendRevision()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Belajar Mode -->
   <div id="belajarMode" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
     <div class="belajar-area" id="belajarContent">
@@ -193,11 +344,379 @@ if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
 
 function switchMode(mode){
   document.getElementById('revisiMode').style.display=mode==='revisi'?'flex':'none';
+  document.getElementById('editorMode').style.display=mode==='editor'?'flex':'none';
   document.getElementById('belajarMode').style.display=mode==='belajar'?'flex':'none';
   document.getElementById('tabRevisi').classList.toggle('active',mode==='revisi');
+  document.getElementById('tabEditor').classList.toggle('active',mode==='editor');
   document.getElementById('tabBelajar').classList.toggle('active',mode==='belajar');
 }
 switchMode('revisi');
+
+/* ═══════════════════════════════════════════════════════════
+   EDITOR AI — Split-View dengan Track Changes
+   ═══════════════════════════════════════════════════════════ */
+let edFile = null;
+let edRawText = '';
+let edViewMode = 'track'; // 'track' | 'final'
+let edProcessing = false;
+let edRevisionHistory = [];
+
+// ── Upload handlers ──────────────────────────────────────────
+function edDragOver(e){ e.preventDefault(); document.getElementById('edDrop').classList.add('drag-over'); }
+function edDragLeave(){ document.getElementById('edDrop').classList.remove('drag-over'); }
+function edOnDrop(e){ e.preventDefault(); edDragLeave(); if(e.dataTransfer.files[0]) edHandleFile(e.dataTransfer.files[0]); }
+function edOnFileSelected(inp){ if(inp.files[0]) edHandleFile(inp.files[0]); }
+
+function edHandleFile(file){
+  if(file.size > 15*1024*1024){ showToast('Ukuran file maksimal 15MB'); return; }
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(!['docx','pdf','txt'].includes(ext)){ showToast('Format harus .docx, .pdf, atau .txt'); return; }
+  edFile = file;
+  const dz = document.getElementById('edDrop');
+  dz.classList.add('filled');
+  document.getElementById('edDropIcon').textContent = '✅';
+  document.getElementById('edDropLabel').textContent = file.name;
+  document.getElementById('edDropSub').textContent = (file.size/1024/1024).toFixed(2) + ' MB — siap diproses';
+  document.getElementById('edStartBtn').disabled = false;
+}
+
+async function edStartEditor(){
+  if(!edFile){ showToast('Pilih file terlebih dahulu'); return; }
+  const btn = document.getElementById('edStartBtn');
+  btn.disabled = true; btn.textContent = 'Membaca file...';
+  try {
+    const ext = edFile.name.split('.').pop().toLowerCase();
+    if(ext === 'docx'){
+      const buf = await edFile.arrayBuffer();
+      const result = await mammoth.convertToHtml({ arrayBuffer: buf.slice(0) });
+      edRenderFromHtml(result.value);
+      const raw = await mammoth.extractRawText({ arrayBuffer: buf.slice(0) });
+      edRawText = raw.value;
+    } else if(ext === 'txt'){
+      edRawText = await edFile.text();
+      edRenderFromText(edRawText);
+    } else if(ext === 'pdf'){
+      edRawText = await edReadPdf(edFile);
+      edRenderFromText(edRawText);
+    }
+    document.getElementById('edFnameLbl').textContent = edFile.name;
+    document.getElementById('editorUploadPhase').style.display = 'none';
+    const sv = document.getElementById('editorSplitView');
+    sv.style.display = 'flex'; sv.style.flexDirection = 'column';
+    showToast('Dokumen berhasil dimuat ✅');
+  } catch(e){
+    showToast('Gagal membaca file: ' + e.message);
+    btn.disabled = false; btn.textContent = 'Mulai Edit';
+  }
+}
+
+async function edReadPdf(file){
+  if(!window.pdfjsLib) throw new Error('Pembaca PDF belum siap');
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+  let text = '';
+  const maxPg = Math.min(pdf.numPages, 60);
+  for(let i=1;i<=maxPg;i++){
+    const page = await pdf.getPage(i);
+    const c = await page.getTextContent();
+    text += c.items.map(it=>it.str).join(' ') + '
+';
+  }
+  return text;
+}
+
+function edRenderFromHtml(html){
+  const paper = document.getElementById('edDocPaper');
+  paper.innerHTML = html;
+  let idx = 0;
+  paper.querySelectorAll('p,h1,h2,h3,h4,li').forEach(el => {
+    el.dataset.secId = 'sec-'+idx++;
+    el.dataset.origText = el.textContent.trim();
+  });
+}
+
+function edRenderFromText(text){
+  const paper = document.getElementById('edDocPaper');
+  const lines = text.split('
+').filter(l=>l.trim());
+  let html = ''; let idx = 0;
+  lines.forEach(line => {
+    const t = line.trim();
+    const isBab = /^(BAB\s+[IVX\d]+|DAFTAR\s+PUSTAKA|ABSTRAK|KATA\s+PENGANTAR)/i.test(t);
+    const isSub = !isBab && (/^\d+\.\d+/.test(t) || (/^[A-Z][A-Z\s]{4,}$/.test(t) && t.length<80));
+    const esc = t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    if(isBab) html += `<h2 data-sec-id="sec-${idx++}" data-orig-text="${esc}">${esc}</h2>`;
+    else if(isSub && t.length<80) html += `<h3 data-sec-id="sec-${idx++}" data-orig-text="${esc}">${esc}</h3>`;
+    else html += `<p data-sec-id="sec-${idx++}" data-orig-text="${esc}">${esc}</p>`;
+  });
+  paper.innerHTML = html || '<p>Dokumen tidak bisa dibaca.</p>';
+}
+
+function edBackToUpload(){
+  document.getElementById('editorSplitView').style.display = 'none';
+  document.getElementById('editorUploadPhase').style.display = 'block';
+}
+
+// ── View mode ────────────────────────────────────────────────
+function edSetView(mode){
+  edViewMode = mode;
+  document.getElementById('edBtnTrack').classList.toggle('active', mode==='track');
+  document.getElementById('edBtnFinal').classList.toggle('active', mode==='final');
+  edApplyView();
+}
+function edApplyView(){
+  const paper = document.getElementById('edDocPaper');
+  if(edViewMode === 'final'){
+    paper.querySelectorAll('.tc-del,.tc-del-block').forEach(el=>el.style.display='none');
+    paper.querySelectorAll('.tc-ins,.tc-ins-block').forEach(el=>{el.style.background='';el.style.color='';el.style.borderLeft='';});
+    paper.querySelectorAll('.tc-badge').forEach(el=>el.style.display='none');
+  } else {
+    paper.querySelectorAll('.tc-del,.tc-del-block').forEach(el=>el.style.display='');
+    paper.querySelectorAll('.tc-ins').forEach(el=>{el.style.background='#DCFCE7';el.style.color='#166534';});
+    paper.querySelectorAll('.tc-ins-block').forEach(el=>{el.style.background='#F0FDF4';el.style.borderLeft='3px solid #16A34A';});
+    paper.querySelectorAll('.tc-del-block').forEach(el=>{el.style.background='#FEF2F2';el.style.borderLeft='3px solid #DC2626';});
+    paper.querySelectorAll('.tc-badge').forEach(el=>el.style.display='');
+  }
+}
+
+// ── Chat ─────────────────────────────────────────────────────
+function edChatKey(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();edSendRevision();} }
+function edUseHint(el){ document.getElementById('edChatInput').value=el.textContent; document.getElementById('edChatInput').focus(); }
+
+function edAddMsg(text, type, id){
+  const msgs = document.getElementById('edMsgs');
+  const div = document.createElement('div');
+  div.className = 'em em-'+type;
+  if(id) div.id = id;
+  div.innerHTML = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function edGetCurrentText(){
+  const paper = document.getElementById('edDocPaper');
+  const clone = paper.cloneNode(true);
+  clone.querySelectorAll('.tc-del,.tc-del-block').forEach(el=>el.remove());
+  return clone.innerText || clone.textContent || '';
+}
+
+function edExtractContext(fullText, cmd){
+  const lines = fullText.split('
+').filter(l=>l.trim());
+  const keywords = cmd.split(/\s+/).filter(w=>w.length>3);
+  const babMatch = cmd.match(/bab\s*([1-9ivx]+)/i);
+  let scored = lines.map((line,i)=>{
+    let score=0;
+    keywords.forEach(kw=>{ if(line.toLowerCase().includes(kw.toLowerCase())) score+=2; });
+    if(babMatch){ const bn=babMatch[1]; if(line.toLowerCase().includes('bab '+bn)||line.toLowerCase().includes('bab'+bn)) score+=5; }
+    return {line,i,score};
+  });
+  scored.sort((a,b)=>b.score-a.score);
+  const idxSet = new Set();
+  scored.slice(0,8).forEach(({i})=>{ for(let j=Math.max(0,i-3);j<=Math.min(lines.length-1,i+8);j++) idxSet.add(j); });
+  const result = [...idxSet].sort((a,b)=>a-b).map(i=>lines[i]).join('
+');
+  return (result.length<400 ? fullText.substring(0,5000) : result).substring(0,5500);
+}
+
+async function edSendRevision(){
+  if(edProcessing) return;
+  const input = document.getElementById('edChatInput');
+  const cmd = input.value.trim();
+  if(!cmd){ showToast('Ketik perintah revisi'); return; }
+  if(!edRawText){ showToast('Dokumen belum dimuat'); return; }
+
+  // Cek kuota
+  if(typeof AkAccount !== 'undefined'){
+    const cek = AkAccount.cekKuotaPesan(1);
+    if(!cek.ok){ AkQuotaPopup.show(cek.pesan); return; }
+  }
+
+  input.value = '';
+  edProcessing = true;
+  document.getElementById('edSendBtn').disabled = true;
+
+  edAddMsg(cmd.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'), 'user');
+  const aiEl = edAddMsg('⏳ AI sedang merevisi...', 'ai', 'edAiProcessing');
+
+  try {
+    const token = await AkAccount.getValidToken();
+    const ctx = edExtractContext(edGetCurrentText(), cmd);
+
+    const res = await fetch('/api/revisi-skripsi', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+token },
+      body: JSON.stringify({
+        docContext: ctx,
+        command: cmd,
+        revisionHistory: edRevisionHistory.slice(-4)
+      })
+    });
+
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Gagal merevisi');
+
+    if(data.error){
+      aiEl.className = 'em em-ai';
+      aiEl.innerHTML = '⚠️ ' + data.error.replace(/</g,'&lt;');
+    } else {
+      const applied = edApplyChange(data);
+      aiEl.className = 'em em-ai';
+      const jenis = data.jenis_perubahan || 'edit';
+      const ikonMap = {edit:'✏️',tambah:'➕',hapus:'🗑️',tabel:'📊',chart:'📈'};
+      const ikon = ikonMap[jenis] || '✅';
+      if(applied){
+        aiEl.innerHTML = `${ikon} <b>Diterapkan</b><br>
+          <span style="font-size:10.5px;color:var(--gray-500);">${(data.bagian_direvisi||'').replace(/</g,'&lt;')}</span><br>
+          <span style="font-size:10.5px;margin-top:3px;display:block;">${(data.penjelasan||'').replace(/</g,'&lt;')}</span>`;
+        edRevisionHistory.push({ cmd, bagian: data.bagian_direvisi });
+      } else {
+        aiEl.innerHTML = `⚠️ Teks tidak ditemukan persis di dokumen.<br>
+          <span style="font-size:10.5px;">Hasil revisi ditambahkan sebagai blok baru ↓</span>`;
+        edAppendBlock(data);
+      }
+      edApplyView();
+      AkAccount.catatPesan(1);
+    }
+  } catch(e){
+    aiEl.className = 'em em-ai';
+    aiEl.innerHTML = '❌ ' + (e.message||'Gagal').replace(/</g,'&lt;');
+  }
+
+  edProcessing = false;
+  document.getElementById('edSendBtn').disabled = false;
+}
+
+// ── Terapkan perubahan ke DOM ─────────────────────────────────
+function edApplyChange(data){
+  const paper = document.getElementById('edDocPaper');
+  const before = (data.teks_sebelum||'').trim();
+  const after  = (data.teks_sesudah||'').trim();
+  const jenis  = data.jenis_perubahan || 'edit';
+  if(!before || !after) return false;
+
+  const elements = paper.querySelectorAll('p,h1,h2,h3,h4,li');
+  for(const el of elements){
+    const elTxt = (el.dataset.origText || el.innerText || el.textContent || '').trim();
+    const match = elTxt.includes(before.substring(0,70)) || before.includes(elTxt.substring(0,70));
+    if(match){
+      if(jenis === 'tabel' || (after.includes('|') && after.includes('---'))){
+        const tblWrap = document.createElement('div');
+        tblWrap.className = 'tc-ins-block';
+        tblWrap.innerHTML = '<span class="tc-badge baru">TABEL BARU</span>' + edMdTable(after);
+        el.insertAdjacentElement('afterend', tblWrap);
+      } else if(jenis === 'chart'){
+        const chartWrap = document.createElement('div');
+        chartWrap.className = 'tc-ins-block';
+        chartWrap.innerHTML = '<span class="tc-badge baru">GRAFIK BARU</span>';
+        chartWrap.appendChild(edMakeChart(after));
+        el.insertAdjacentElement('afterend', chartWrap);
+      } else {
+        // Standar: hapus lama (del-block), ganti dengan baru (ins)
+        const esc_orig = (el.innerText||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const esc_new  = after.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const delDiv = document.createElement('div');
+        delDiv.className = 'tc-del-block';
+        delDiv.dataset.isTrackDel = '1';
+        delDiv.innerHTML = '<span class="tc-badge sebelum">SEBELUM</span>' + esc_orig;
+        el.parentNode.insertBefore(delDiv, el);
+        el.innerHTML = '<span class="tc-badge edit">SESUDAH</span><span class="tc-ins">'+esc_new+'</span>';
+        el.dataset.revisedText = after;
+      }
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      return true;
+    }
+  }
+  return false;
+}
+
+function edAppendBlock(data){
+  const paper = document.getElementById('edDocPaper');
+  const wrap = document.createElement('div');
+  wrap.className = 'tc-ins-block';
+  wrap.style.marginTop = '14px';
+  const esc = (data.teks_sesudah||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  wrap.innerHTML = '<span class="tc-badge baru">REVISI BARU — '+(data.bagian_direvisi||'').replace(/</g,'&lt;')+'</span><p style="margin:6px 0 0;">'+esc+'</p>';
+  paper.appendChild(wrap);
+  wrap.scrollIntoView({behavior:'smooth',block:'end'});
+}
+
+function edMdTable(md){
+  const rows = md.split('
+').filter(l=>l.trim()&&l.includes('|')&&!/^[\s|:-]+$/.test(l));
+  if(rows.length<2) return '<p>'+md.replace(/</g,'&lt;')+'</p>';
+  let html='<table class="tc-table">';
+  rows.forEach((row,i)=>{
+    const cells=row.split('|').map(c=>c.trim()).filter(Boolean);
+    const tag=i===0?'th':'td';
+    html+='<tr>'+cells.map(c=>`<${tag}>${c.replace(/</g,'&lt;')}</${tag}>`).join('')+'</tr>';
+  });
+  return html+'</table>';
+}
+
+function edMakeChart(jsonStr){
+  const canvas = document.createElement('canvas');
+  canvas.width=340; canvas.height=200; canvas.style.maxWidth='100%';
+  const ctx = canvas.getContext('2d');
+  let data={labels:[],datasets:[{data:[]}]};
+  try{ const m=jsonStr.match(/```chart\s*([\s\S]*?)```/); if(m) data=JSON.parse(m[1]); }catch(e){}
+  const vals=(data.datasets&&data.datasets[0]&&data.datasets[0].data)||[];
+  const labels=data.labels||vals.map((_,i)=>'Item '+(i+1));
+  const colors=['#1a3dc2','#16a34a','#dc2626','#d97706','#7c3aed'];
+  const max=Math.max(...vals,1);
+  ctx.fillStyle='#F8F9FA'; ctx.fillRect(0,0,340,200);
+  ctx.fillStyle='#1a1a1a'; ctx.font='bold 10px sans-serif'; ctx.textAlign='center';
+  ctx.fillText(data.title||'Grafik',170,16);
+  const pad=30, barW=Math.floor((340-pad*2)/(labels.length||1))-6;
+  vals.forEach((v,i)=>{
+    const x=pad+i*(barW+6);
+    const bh=Math.round((v/max)*(200-50));
+    ctx.fillStyle=colors[i%colors.length];
+    ctx.fillRect(x,200-30-bh,barW,bh);
+    ctx.fillStyle='#1a1a1a'; ctx.font='9px sans-serif';
+    ctx.fillText(String(v),x+barW/2,200-32-bh);
+    ctx.fillStyle='#555';
+    ctx.fillText((labels[i]||'').substring(0,10),x+barW/2,200-14);
+  });
+  return canvas;
+}
+
+// ── Download hasil revisi ─────────────────────────────────────
+async function edDownload(){
+  try {
+    const finalText = edGetCurrentText();
+    const filename = (edFile?edFile.name.replace(/\.[^.]+$/,''):'skripsi')+'_revisi.docx';
+    if(typeof docx !== 'undefined'){
+      const {Document,Packer,Paragraph,TextRun,AlignmentType} = docx;
+      const lines = finalText.split('
+').filter(l=>l.trim());
+      const children = lines.map(line=>{
+        const t=line.trim();
+        const isBab=/^(BAB\s+[IVX\d]+|DAFTAR PUSTAKA|ABSTRAK|KATA PENGANTAR)/i.test(t);
+        return new Paragraph({
+          alignment: isBab ? AlignmentType.CENTER : AlignmentType.JUSTIFIED,
+          spacing:{line:480,after:120},
+          children:[new TextRun({text:t,bold:isBab,font:'Times New Roman',size:24})]
+        });
+      });
+      const doc2 = new Document({sections:[{properties:{},children}]});
+      const blob = await Packer.toBlob(doc2);
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;a.download=filename;a.click();
+      URL.revokeObjectURL(url);
+      showToast('File .docx berhasil diunduh ✅');
+    } else {
+      const blob=new Blob([finalText],{type:'text/plain;charset=utf-8'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;a.download=filename.replace('.docx','.txt');a.click();
+      URL.revokeObjectURL(url);
+      showToast('Diunduh sebagai .txt');
+    }
+  } catch(e){ showToast('Gagal unduh: '+e.message); }
+}
 
 /* ---------- File reading helper (shared, dokumen teks) ---------- */
 const MAX_FILE_CHARS = 15000;
