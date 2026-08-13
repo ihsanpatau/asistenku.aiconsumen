@@ -163,7 +163,9 @@
 
   <!-- Revisi Skripsi Mode -->
   <div id="revisiMode" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
-    <div class="belajar-area" id="revisiArea">
+
+    <!-- Upload Phase -->
+    <div class="belajar-area" id="revisiUploadPhase">
 
       <div class="upload-box" id="revisiUploadBox" onclick="document.getElementById('revisiFileInput').click()">
         <div class="icon">🖼️</div>
@@ -192,26 +194,51 @@
         Proses Revisi
       </button>
 
-      <div id="revisiResultWrap" style="display:none;">
-        <div style="font-size:14px;font-weight:700;color:var(--dark);margin:18px 0 10px;">Hasil Revisi:</div>
-        <div id="revisiResultList"></div>
-        <div id="revisiDownloadWrap" style="display:none;margin-top:6px;">
-          <button class="btn btn-primary" id="revisiDownloadBtn" onclick="downloadRevisiSelected()" style="width:100%;"></button>
-          <div style="text-align:center;margin-top:8px;">
-            <span id="revisiChangeFormatLink" style="font-size:12px;color:var(--blue-light);cursor:pointer;text-decoration:underline;" onclick="toggleRevisiFormatSwitcher()">Ubah format unduhan</span>
-          </div>
-          <div id="revisiFormatSwitcher" style="display:none;margin-top:8px;flex-wrap:wrap;gap:8px;">
-            <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('word')">📄 Word (.docx)</button>
-            <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('pdf')">🧾 PDF</button>
-            <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('txt')">📝 Teks (.txt)</button>
+    </div>
+
+    <!-- Split-View Result Phase (muncul setelah revisi selesai) — sama seperti tab Editor AI -->
+    <div id="revisiSplitView" style="display:none;flex-direction:column;flex:1;overflow:hidden;height:calc(100vh - 96px);">
+      <!-- Toolbar -->
+      <div class="editor-toolbar">
+        <button onclick="revisiBackToUpload()" style="background:none;border:none;cursor:pointer;padding:3px;border-radius:7px;display:flex;align-items:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <span class="fname-lbl" id="revisiFnameLbl">Hasil Revisi</span>
+        <button class="view-btn active" id="revisiBtnTrack" onclick="revisiSetView('track')">📝 Perubahan</button>
+        <button class="view-btn" id="revisiBtnFinal" onclick="revisiSetView('final')">✅ Final</button>
+        <button class="dl-btn" onclick="downloadRevisiSelected()">⬇ Unduh</button>
+      </div>
+      <!-- Split body -->
+      <div class="editor-split">
+        <!-- Kiri: Dokumen hasil revisi (before/after per poin) -->
+        <div class="editor-doc-panel" id="revisiDocPanel">
+          <div class="editor-doc-paper" id="revisiDocPaper">
+            <p style="color:var(--gray-400);font-style:italic;">Memuat hasil revisi...</p>
           </div>
         </div>
-        <div style="margin-top:10px;">
-          <button class="btn btn-secondary btn-sm" onclick="resetRevisi()" style="width:100%;">Revisi Lagi</button>
+        <!-- Kanan: Ringkasan + daftar poin + unduhan -->
+        <div class="editor-chat-panel">
+          <div class="editor-chat-head">
+            <div class="title">📋 Ringkasan Revisi</div>
+            <div class="sub">Ketuk poin untuk lompat ke bagian di kiri</div>
+          </div>
+          <div class="editor-msgs" id="revisiSideMsgs" style="flex:1;"></div>
+          <div style="padding:10px 12px;border-top:1px solid var(--gray-100);flex-shrink:0;">
+            <button class="btn btn-primary btn-sm" id="revisiDownloadBtn" onclick="downloadRevisiSelected()" style="width:100%;"></button>
+            <div style="text-align:center;margin-top:6px;">
+              <span id="revisiChangeFormatLink" style="font-size:11px;color:var(--blue-light);cursor:pointer;text-decoration:underline;" onclick="toggleRevisiFormatSwitcher()">Ubah format unduhan</span>
+            </div>
+            <div id="revisiFormatSwitcher" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;">
+              <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('word')">📄 Word</button>
+              <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('pdf')">🧾 PDF</button>
+              <button class="btn btn-secondary btn-sm" onclick="downloadRevisi('txt')">📝 Teks</button>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="resetRevisi()" style="width:100%;margin-top:8px;">Revisi Lagi</button>
+          </div>
         </div>
       </div>
-
     </div>
+
   </div>
 
   <!-- Editor AI Mode (Tab Ketiga) -->
@@ -421,8 +448,7 @@ async function edReadPdf(file){
   for(let i=1;i<=maxPg;i++){
     const page = await pdf.getPage(i);
     const c = await page.getTextContent();
-    text += c.items.map(it=>it.str).join(' ') + '
-';
+    text += c.items.map(it=>it.str).join(' ') + '\n';
   }
   return text;
 }
@@ -439,8 +465,7 @@ function edRenderFromHtml(html){
 
 function edRenderFromText(text){
   const paper = document.getElementById('edDocPaper');
-  const lines = text.split('
-').filter(l=>l.trim());
+  const lines = text.split('\n').filter(l=>l.trim());
   let html = ''; let idx = 0;
   lines.forEach(line => {
     const t = line.trim();
@@ -504,8 +529,7 @@ function edGetCurrentText(){
 }
 
 function edExtractContext(fullText, cmd){
-  const lines = fullText.split('
-').filter(l=>l.trim());
+  const lines = fullText.split('\n').filter(l=>l.trim());
   const keywords = cmd.split(/\s+/).filter(w=>w.length>3);
   const babMatch = cmd.match(/bab\s*([1-9ivx]+)/i);
   let scored = lines.map((line,i)=>{
@@ -517,8 +541,7 @@ function edExtractContext(fullText, cmd){
   scored.sort((a,b)=>b.score-a.score);
   const idxSet = new Set();
   scored.slice(0,8).forEach(({i})=>{ for(let j=Math.max(0,i-3);j<=Math.min(lines.length-1,i+8);j++) idxSet.add(j); });
-  const result = [...idxSet].sort((a,b)=>a-b).map(i=>lines[i]).join('
-');
+  const result = [...idxSet].sort((a,b)=>a-b).map(i=>lines[i]).join('\n');
   return (result.length<400 ? fullText.substring(0,5000) : result).substring(0,5500);
 }
 
@@ -645,8 +668,7 @@ function edAppendBlock(data){
 }
 
 function edMdTable(md){
-  const rows = md.split('
-').filter(l=>l.trim()&&l.includes('|')&&!/^[\s|:-]+$/.test(l));
+  const rows = md.split('\n').filter(l=>l.trim()&&l.includes('|')&&!/^[\s|:-]+$/.test(l));
   if(rows.length<2) return '<p>'+md.replace(/</g,'&lt;')+'</p>';
   let html='<table class="tc-table">';
   rows.forEach((row,i)=>{
@@ -691,8 +713,7 @@ async function edDownload(){
     const filename = (edFile?edFile.name.replace(/\.[^.]+$/,''):'skripsi')+'_revisi.docx';
     if(typeof docx !== 'undefined'){
       const {Document,Packer,Paragraph,TextRun,AlignmentType} = docx;
-      const lines = finalText.split('
-').filter(l=>l.trim());
+      const lines = finalText.split('\n').filter(l=>l.trim());
       const children = lines.map(line=>{
         const t=line.trim();
         const isBab=/^(BAB\s+[IVX\d]+|DAFTAR PUSTAKA|ABSTRAK|KATA PENGANTAR)/i.test(t);
@@ -883,15 +904,8 @@ async function triggerRevisi(){
 
   const genBtn=document.getElementById('revisiGenerateBtn');
   genBtn.disabled=true;
-  const wrap=document.getElementById('revisiResultWrap');
-  const list=document.getElementById('revisiResultList');
-  const downloadWrap=document.getElementById('revisiDownloadWrap');
-  const formatSwitcher=document.getElementById('revisiFormatSwitcher');
-  downloadWrap.style.display='none'; // tombol unduh baru muncul setelah hasil benar-benar siap, bukan saat masih loading
-  formatSwitcher.style.display='none';
-  wrap.style.display='block';
-  list.innerHTML='<div style="display:flex;align-items:center;gap:8px;color:var(--gray-500);"><div class="spin-dot"></div>Menganalisis file & menyusun revisi, mohon tunggu...</div>';
-  wrap.scrollIntoView({behavior:'smooth'});
+  const genBtnOrigHtml=genBtn.innerHTML;
+  genBtn.innerHTML='<div class="spin-dot" style="border-color:rgba(255,255,255,.4);border-top-color:#fff;"></div> Menganalisis file & menyusun revisi...';
 
   let textFilesCombined='';
   revisiFiles.filter(f=>f.type==='text').forEach(f=>{textFilesCombined+=`\n\n[File: ${f.name}]\n${f.text}`;});
@@ -919,9 +933,9 @@ Jika tidak ada revisi yang bisa diidentifikasi, kembalikan poin sebagai array ko
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(await AkAccount.getValidToken())},body:JSON.stringify({system:system,messages:[{role:'user',content:contentBlocks}]})});
     const data=await res.json().catch(()=>({}));
     genBtn.disabled=false;
+    genBtn.innerHTML=genBtnOrigHtml;
     if(!res.ok){
-      list.innerHTML=`<div style="color:var(--red,#DC2626);">⚠️ Gagal memproses: ${data.error||('Server merespons dengan status '+res.status)}</div>`;
-      showToast(data.error||'Gagal terhubung ke server');
+      showToast(data.error||'Gagal terhubung ke server',4000);
       return;
     }
     let raw=(data.text||'').trim();
@@ -979,12 +993,10 @@ Jika tidak ada revisi yang bisa diidentifikasi, kembalikan poin sebagai array ko
       }
     }
     revisiLastResult=parsed;
-    renderRevisiResult(parsed);
-    if(parsed.poin && parsed.poin.length){
-      const downloadBtn=document.getElementById('revisiDownloadBtn');
-      downloadBtn.textContent='⬇️ Unduh Hasil Revisi ('+(REVISI_FORMAT_LABEL[revisiSelectedFormat]||revisiSelectedFormat)+')';
-      document.getElementById('revisiDownloadWrap').style.display='block';
-    }
+    renderRevisiSplitView(parsed);
+    switchToRevisiSplitView();
+    const downloadBtn=document.getElementById('revisiDownloadBtn');
+    downloadBtn.textContent='⬇️ Unduh Hasil Revisi ('+(REVISI_FORMAT_LABEL[revisiSelectedFormat]||revisiSelectedFormat)+')';
     AkAccount.catatPesan(1);
     // PERBAIKAN BUG: catat ke Riwayat supaya hasil revisi muncul di
     // Riwayat, Dokumen, dan notifikasi "Dokumen berhasil dibuat"
@@ -1003,27 +1015,82 @@ Jika tidak ada revisi yang bisa diidentifikasi, kembalikan poin sebagai array ko
     showToast('Revisi selesai! ✓');
   }catch(e){
     genBtn.disabled=false;
-    list.innerHTML='<div style="color:var(--red,#DC2626);">⚠️ Gagal terhubung ke server. Periksa koneksi internet Anda lalu coba lagi.</div>';
-    showToast('Gagal. Coba lagi.');
+    genBtn.innerHTML=genBtnOrigHtml;
+    showToast('Gagal terhubung ke server. Periksa koneksi internet Anda lalu coba lagi.',4000);
   }
 }
 
-function renderRevisiResult(parsed){
-  const list=document.getElementById('revisiResultList');
+/* ── Split-view rendering (sama gaya visual dengan tab Editor AI) ── */
+let revisiViewMode='track'; // 'track' | 'final'
+
+function switchToRevisiSplitView(){
+  document.getElementById('revisiUploadPhase').style.display='none';
+  document.getElementById('revisiSplitView').style.display='flex';
+}
+function revisiBackToUpload(){
+  document.getElementById('revisiSplitView').style.display='none';
+  document.getElementById('revisiUploadPhase').style.display='block';
+}
+
+function renderRevisiSplitView(parsed){
   const poin=parsed.poin||[];
-  let html=`<div class="revisi-ringkasan"><strong>Ringkasan:</strong> ${escapeHtml(parsed.ringkasan||'-')}</div>`;
+  const paper=document.getElementById('revisiDocPaper');
+  const side=document.getElementById('revisiSideMsgs');
+
+  document.getElementById('revisiFnameLbl').textContent =
+    (revisiFiles[0] && revisiFiles[0].name) ? revisiFiles[0].name : 'Hasil Revisi';
+
   if(!poin.length){
-    list.innerHTML=html;
-    return;
+    paper.innerHTML = `<p style="color:var(--gray-400);font-style:italic;">Tidak ada poin revisi yang terdeteksi.</p>`;
+  } else {
+    // Kiri: setiap poin ditampilkan sebagai blok "sebelum" (merah/coret) diikuti "sesudah" (hijau)
+    paper.innerHTML = poin.map((p,i)=>`
+      <div style="margin-bottom:18px;">
+        <div style="font-size:11px;font-weight:800;color:var(--blue);margin-bottom:4px;">
+          ${escapeHtml(p.label||('Poin '+(i+1)))}${p.lokasi?' · '+escapeHtml(p.lokasi):''}
+        </div>
+        <div class="tc-del-block"><span class="tc-badge sebelum">SEBELUM</span>${escapeHtml(p.sebelum||'-')}</div>
+        <div class="tc-ins-block"><span class="tc-badge sesudah">SESUDAH</span>${escapeHtml(p.sesudah||'-')}</div>
+      </div>`).join('');
   }
-  poin.forEach(p=>{
-    html+=`<div class="revisi-card">
-      <div class="revisi-card-head">${escapeHtml(p.label||'Poin')}${p.lokasi?' · '+escapeHtml(p.lokasi):''}</div>
-      <div class="revisi-block sebelum"><span class="tag tag-red">Sebelum</span>${formatHasilAI(p.sebelum||'-')}</div>
-      <div class="revisi-block sesudah"><span class="tag tag-green">Sesudah</span>${formatHasilAI(p.sesudah||'-')}</div>
+
+  // Kanan: ringkasan + daftar poin yang bisa diketuk untuk lompat ke bagian terkait
+  let sideHtml = `<div class="em em-sys">${escapeHtml(parsed.ringkasan||'Revisi selesai diproses.')}</div>`;
+  poin.forEach((p,i)=>{
+    sideHtml += `<div class="em em-ai" style="cursor:pointer;" onclick="revisiScrollToPoin(${i})">
+      <b>${escapeHtml(p.label||('Poin '+(i+1)))}</b>${p.lokasi?'<br><span style="font-size:10px;color:var(--gray-500);">'+escapeHtml(p.lokasi)+'</span>':''}
     </div>`;
   });
-  list.innerHTML=html;
+  side.innerHTML = sideHtml;
+
+  revisiViewMode='track';
+  document.getElementById('revisiBtnTrack').classList.add('active');
+  document.getElementById('revisiBtnFinal').classList.remove('active');
+  revisiApplyView();
+}
+
+function revisiScrollToPoin(i){
+  const blocks=document.querySelectorAll('#revisiDocPaper > div');
+  if(blocks[i]) blocks[i].scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function revisiSetView(mode){
+  revisiViewMode=mode;
+  document.getElementById('revisiBtnTrack').classList.toggle('active', mode==='track');
+  document.getElementById('revisiBtnFinal').classList.toggle('active', mode==='final');
+  revisiApplyView();
+}
+function revisiApplyView(){
+  const paper=document.getElementById('revisiDocPaper');
+  if(revisiViewMode==='final'){
+    paper.querySelectorAll('.tc-del-block').forEach(el=>el.style.display='none');
+    paper.querySelectorAll('.tc-ins-block').forEach(el=>{el.style.background='';el.style.borderLeft='';});
+    paper.querySelectorAll('.tc-badge').forEach(el=>el.style.display='none');
+  } else {
+    paper.querySelectorAll('.tc-del-block').forEach(el=>el.style.display='');
+    paper.querySelectorAll('.tc-ins-block').forEach(el=>{el.style.background='#F0FDF4';el.style.borderLeft='3px solid #16A34A';});
+    paper.querySelectorAll('.tc-badge').forEach(el=>el.style.display='');
+  }
 }
 
 // Bangun potongan HTML isi (dipakai bareng oleh versi PDF & sebagai acuan versi Word/TXT)
@@ -1128,8 +1195,7 @@ blockquote{margin:0;padding:10px 12px;background:#FEF2F2;border-left:3px solid #
 }
 
 function resetRevisi(){
-  document.getElementById('revisiResultWrap').style.display='none';
-  document.getElementById('revisiDownloadWrap').style.display='none';
+  revisiBackToUpload();
   document.getElementById('revisiFormatSwitcher').style.display='none';
   document.getElementById('revisiInstruction').value='';
   revisiFiles=[];
