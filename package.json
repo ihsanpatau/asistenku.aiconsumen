@@ -2,8 +2,6 @@
   "name": "asistenku-aiconsumen",
   "private": true,
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.0",
-    "jszip": "^3.10.1",
-    "@xmldom/xmldom": "^0.8.10"
+    "@supabase/supabase-js": "^2.45.0"
   }
 }
