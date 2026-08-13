@@ -15,6 +15,11 @@
 <script src="i18n.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="shared-config.js"></script>
+<!-- PERBAIKAN BUG: riwayat-store.js sebelumnya tidak dimuat di halaman ini,
+     jadi hasil skripsi/tesis/disertasi yang berhasil dibuat di sini tidak
+     pernah tercatat di Riwayat, Dokumen, notifikasi "Dokumen berhasil
+     dibuat", MAUPUN sisa kuota harian (lihat catatHalaman di bawah). -->
+<script src="riwayat-store.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
 <script src="quota-popup.js"></script>
@@ -1291,6 +1296,36 @@ ATURAN PENULISAN PENTING:
         halaman,
         jenisDokumen
       }));
+
+      // PERBAIKAN BUG: sebelumnya generate di halaman ini TIDAK PERNAH
+      // dicatat ke kuota harian maupun ke Riwayat/Dokumen/notifikasi —
+      // padahal gerbang kuota di atas (cekKuotaHalaman) sudah mengecek batas,
+      // tapi pemakaiannya tidak pernah benar-benar ditambahkan. Sekarang
+      // dicatat dengan id unik per generate, dan halaman dihitung dari
+      // jumlah kata hasil AI supaya sesuai pemakaian nyata.
+      const skripsiWc = result.trim().split(/\s+/).filter(Boolean).length;
+      const skripsiHalamanCount = Math.max(1, Math.round(skripsiWc / (AkAccount.getPlan().wordsPerPage || 300)));
+      const skripsiItemId = 'skripsi_' + (judul || jenisDokumen || 'x').substring(0,40).replace(/\s+/g,'_') + '_' + jenisDokumen.replace(/\s+/g,'_') + '_' + Date.now();
+      if (typeof AkAccount !== 'undefined') {
+        AkAccount.catatHalaman(skripsiItemId, skripsiHalamanCount);
+      }
+      if (typeof RiwayatStore !== 'undefined') {
+        const labelJenisMap = {
+          'judul':'5 Opsi Judul','outline':'Outline Lengkap','abstrak':'Abstrak',
+          'rumusan':'Rumusan Masalah','pustaka':'Daftar Pustaka'
+        };
+        const labelBagian = labelJenisMap[jenisDokumen] || jenisDokumen;
+        RiwayatStore.tambah({
+          id: skripsiItemId,
+          judul: (judul || 'Skripsi') + ' — ' + labelBagian,
+          kategori: 'skripsi',
+          kategoriLabel: 'Skripsi',
+          kataTerhitung: skripsiWc,
+          halaman: skripsiHalamanCount,
+          status: 'done',
+          link: 'skripsi.html'
+        });
+      }
     } else {
       throw new Error('No content');
     }
