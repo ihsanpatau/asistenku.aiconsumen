@@ -36,7 +36,7 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color: var(--dark); }
-.app { max-width: 430px; margin: 0 auto; background: #F0F4FF; min-height: 100vh; padding-bottom: 90px; }
+.app { max-width: clamp(360px, 96vw, 760px); margin: 0 auto; background: #F0F4FF; min-height: 100vh; padding-bottom: 90px; }
 
 /* TOPNAV */
 .backnav {
@@ -317,7 +317,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
 .modal-overlay.open { display: flex; }
 .modal-sheet {
   background: #fff; border-radius: 24px 24px 0 0;
-  padding: 20px 20px 30px; width: 100%; max-width: 430px;
+  padding: 20px 20px 30px; width: 100%; max-width: clamp(360px, 96vw, 760px);
   max-height: 80vh; overflow-y: auto;
 }
 .modal-handle { width: 40px; height: 4px; background: var(--gray-200); border-radius: 2px; margin: 0 auto 16px; }
@@ -335,7 +335,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
 /* BOTTOM NAV */
 .bottom-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 430px;
+  width: 100%; max-width: clamp(360px, 96vw, 760px);
   background: #fff; border-top: 1px solid var(--gray-200);
   display: flex; justify-content: space-around;
   padding: 8px 0 12px; z-index: 100;
@@ -362,32 +362,53 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-/* ── Layar lebar (≥1025px): kasih ruang napas untuk SEMUA layar lebar (termasuk iPad disentuh) ── */
+/* ── Tablet (641px – 1024px) ── */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .app {
+    max-width: clamp(480px, 92vw, 760px);
+  }
+  .bottom-nav {
+    max-width: clamp(480px, 92vw, 760px);
+  }
+  .skripsi-hero h2 { font-size: 20px; }
+  .card { padding: 20px; }
+}
+
+/* ── Laptop / Desktop (≥1025px): berlaku untuk SEMUA layar lebar termasuk iPad landscape ── */
 @media (min-width: 1025px) {
   body { background: #EEF1F8; }
 
   .app {
-    max-width: 720px;
+    max-width: clamp(760px, 88vw, 1100px);
     margin: 0 auto;
     box-shadow: 0 0 40px rgba(20,30,80,0.08);
     min-height: 100vh;
   }
 
-  /* Nav mengambang HARUS ikut selebar .app, supaya menempel rapi (bukan pil kecil di tengah layar lebar) */
   .bottom-nav {
-    max-width: 720px;
+    max-width: clamp(760px, 88vw, 1100px);
   }
+
+  .skripsi-hero { margin: 20px 24px 0; padding: 24px 28px; }
+  .skripsi-hero h2 { font-size: 22px; }
+  .skripsi-hero p { font-size: 13px; }
+  .skripsi-hero-img { width: 160px; height: 160px; }
+  .card { margin: 14px 24px 0; padding: 22px; }
+  .hasil-area { margin: 14px 24px 0; }
+  .steps { padding: 20px 24px 10px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
 }
 
 /* ── Sidebar kiri: KHUSUS perangkat mouse/trackpad (laptop, PC) ──
    iPad & tablet sentuh tetap pakai bottom nav, konsisten dengan halaman lain ── */
 @media (min-width: 1025px) and (pointer: fine) and (hover: hover) {
-  .app { margin: 0 auto 0 132px; }
+  .app { margin: 0 auto 0 96px; }
 
   .bottom-nav {
     position: fixed;
     left: 0;
     top: 0;
+    bottom: auto;
     transform: none;
     max-width: none;
     width: 96px;
@@ -401,7 +422,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0F4FF; color:
     box-shadow: none;
     padding: 0;
   }
-  .nav-item { padding: 10px 4px; border-radius: 12px; }
+  .nav-item { padding: 10px 4px; border-radius: 12px; flex: none; }
   .nav-item:hover { background: var(--gray-100); }
 }
 </style>
