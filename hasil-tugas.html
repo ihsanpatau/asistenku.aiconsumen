@@ -565,13 +565,51 @@ function buildMakalahParts(doc, meta){
     <div style="font-size:13px;font-weight:700;">${escapeHtml(penulis)}</div>
   </div>`;
 
-  let daftarIsiHtml = '<div style="font-weight:700;font-size:14px;text-align:center;margin-bottom:14px;">DAFTAR ISI</div><div style="line-height:2.1;font-size:12px;">';
-  daftarIsiHtml += `<div>Kata Pengantar</div>`;
-  babDefs.forEach(b=>{
-    daftarIsiHtml += `<div style="margin-top:8px;font-weight:700;">${b.nomor} ${escapeHtml(b.judul)}</div>`;
-    (b.sub||[]).forEach(s=> daftarIsiHtml += `<div style="padding-left:18px;">${escapeHtml(s.judul)}</div>`);
+  // --- DAFTAR ISI dengan dot leaders dan nomor halaman estimasi ---
+  // Halaman estimasi: Sampul=i (tidak ditampilkan), Daftar Isi=ii, Kata Pengantar=iii
+  // BAB I mulai halaman 1, setiap bab ±2 halaman per sub-bab (estimasi sederhana)
+  const tocDotLeader = `
+    <style>
+      .toc-row { display:flex; align-items:baseline; font-size:12px; line-height:2.1; }
+      .toc-row .toc-label { flex:0 0 auto; max-width:75%; }
+      .toc-row .toc-dots { flex:1 1 auto; overflow:hidden; white-space:nowrap; margin:0 4px; letter-spacing:1px; color:#555; }
+      .toc-row .toc-page { flex:0 0 auto; }
+      .toc-bab { font-weight:700; margin-top:8px; }
+      .toc-sub { padding-left:22px; }
+      .toc-header { font-weight:700; font-size:14px; text-align:center; margin-bottom:14px; }
+    </style>
+  `;
+  function makeTocRow(label, page, isBab, isSub) {
+    const cls = isBab ? 'toc-row toc-bab' : (isSub ? 'toc-row toc-sub' : 'toc-row');
+    const dots = '.........................................................................................................................................................................................................';
+    return `<div class="${cls}"><span class="toc-label">${label}</span><span class="toc-dots">${dots}</span><span class="toc-page">${page}</span></div>`;
+  }
+  let estPage = 1; // BAB I mulai halaman 1
+  // Hitung estimasi total halaman: Kata Pengantar=i, Daftar Isi=ii
+  // Untuk tiap bab: cover bab 1 hal + sub-bab masing-masing 2 hal (estimasi)
+  const babPageStarts = [];
+  const subPageStarts = [];
+  let pg = 1;
+  babDefs.forEach((b,bi)=>{
+    babPageStarts.push(pg);
+    pg++; // halaman judul bab
+    const subs = subPageStarts[bi] = [];
+    (b.sub||[]).forEach(s=>{ subs.push(pg); pg += 2; });
   });
-  daftarIsiHtml += `<div style="margin-top:8px;">Daftar Pustaka</div></div>`;
+  const pustakaPage = pg;
+
+  let daftarIsiHtml = tocDotLeader + '<div class="toc-header">DAFTAR ISI</div><div>';
+  daftarIsiHtml += '<div style="font-size:12px;line-height:1.6;margin-bottom:4px;text-align:right;font-weight:600;">Halaman</div>';
+  daftarIsiHtml += makeTocRow('Kata Pengantar', 'i', false, false);
+  daftarIsiHtml += makeTocRow('Daftar Isi', 'ii', false, false);
+  babDefs.forEach((b,bi)=>{
+    daftarIsiHtml += makeTocRow(`${b.nomor}&nbsp;&nbsp;${escapeHtml(b.judul)}`, babPageStarts[bi], true, false);
+    (b.sub||[]).forEach((s,si)=>{
+      daftarIsiHtml += makeTocRow(escapeHtml(s.judul), subPageStarts[bi][si], false, true);
+    });
+  });
+  daftarIsiHtml += makeTocRow('Daftar Pustaka', pustakaPage, false, false);
+  daftarIsiHtml += '</div>';
 
   const kataPengantarHtml = `<div style="margin-top:6px;"><div style="font-weight:700;font-size:14px;text-align:center;margin-bottom:14px;">KATA PENGANTAR</div>${paragraphize(doc.kata_pengantar)}</div>`;
 
@@ -598,9 +636,24 @@ function buildMakalahParts(doc, meta){
   // supaya sampul, daftar isi, kata pengantar, tiap BAB, dan daftar pustaka masing-masing
   // mulai di halaman baru (sebelumnya semua nyambung jadi satu aliran teks tanpa pemisah).
   let plain = `${judul}\n\nMAKALAH\n${bidang?bidang+'\n':''}\nDisusun oleh: ${penulis}\n\n@@PAGEBREAK@@\n`;
-  plain += 'DAFTAR ISI\n\nKata Pengantar\n';
-  babDefs.forEach(b=>{ plain+=`${b.nomor} ${b.judul}\n`; (b.sub||[]).forEach(s=>plain+='  '+s.judul+'\n'); });
-  plain += 'Daftar Pustaka\n\n@@PAGEBREAK@@\n';
+  plain += 'DAFTAR ISI\n\n';
+  plain += 'Halaman\n\n';
+  plain += 'Kata Pengantar ............................................................. i\n';
+  plain += 'Daftar Isi .....................................................................ii\n';
+  babDefs.forEach((b,bi)=>{
+    plain += `${b.nomor} ${b.judul} `;
+    plain += '.'.repeat(Math.max(5, 55 - `${b.nomor} ${b.judul}`.length));
+    plain += ` ${babPageStarts[bi]}\n`;
+    (b.sub||[]).forEach((s,si)=>{
+      const label = '    ' + s.judul;
+      plain += label;
+      plain += ' ' + '.'.repeat(Math.max(5, 55 - label.length));
+      plain += ` ${subPageStarts[bi][si]}\n`;
+    });
+  });
+  plain += `Daftar Pustaka `;
+  plain += '.'.repeat(Math.max(5, 55 - 'Daftar Pustaka'.length));
+  plain += ` ${pustakaPage}\n\n@@PAGEBREAK@@\n`;
   plain += 'KATA PENGANTAR\n'+(doc.kata_pengantar||'')+'\n\n@@PAGEBREAK@@\n';
   babDefs.forEach(b=>{
     plain += `${b.nomor}\n${b.judul}\n\n`;
