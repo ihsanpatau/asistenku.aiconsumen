@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="cat-logo.png">
+<link rel="apple-touch-icon" href="cat-logo.png">
+<title>Revisi Skripsi – asistenku.pro</title>
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+<script src="i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="shared-config.js"></script>
+<script src="account.js"></script>
+<script src="sync-plan.js"></script>
+<script src="quota-popup.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+/* ─── Upload Phase ─────────────────────────────── */
+#uploadPhase { padding: 16px; }
+.upload-hero {
+  background: linear-gradient(135deg, #EEF2FF, #C7D5FF);
+  border-radius: 20px; padding: 20px 16px 0; margin-bottom: 16px;
+  position: relative; overflow: hidden; min-height: 110px;
+}
+.upload-hero h2 { font-size: 18px; font-weight: 800; color: var(--brand); max-width: 200px; line-height: 1.25; }
+.upload-hero p  { font-size: 12px; color: var(--gray-500); margin-top: 4px; max-width: 200px; }
+.upload-hero .hero-icon { position: absolute; right: 12px; bottom: 0; width: 80px; opacity: .85; }
+
+.drop-zone {
+  border: 2px dashed var(--gray-300); border-radius: 16px;
+  padding: 32px 16px; text-align: center; cursor: pointer;
+  transition: .15s; background: var(--gray-50);
+}
+.drop-zone:hover, .drop-zone.drag-over { border-color: var(--brand-light); background: var(--brand-50); }
+.drop-zone.filled { border-style: solid; border-color: var(--green); background: #ECFDF5; }
+.drop-zone-icon { width: 48px; height: 48px; border-radius: 14px; background: var(--brand-50);
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+.drop-zone.filled .drop-zone-icon { background: var(--green); color: #fff; }
+.drop-zone-label { font-size: 14px; font-weight: 700; color: var(--dark); }
+.drop-zone-sub   { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
+
+.btn-revisi {
+  width: 100%; padding: 14px; border-radius: 14px;
+  background: var(--brand); color: #fff; border: none;
+  font-size: 15px; font-weight: 800; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: .15s; margin-top: 14px;
+}
+.btn-revisi:hover { background: var(--brand-dark); }
+.btn-revisi:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ─── Editor Phase ─────────────────────────────── */
+#editorPhase { display: none; flex-direction: column; height: 100vh; }
+
+.editor-topbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-bottom: 1px solid var(--gray-200);
+  background: #fff; flex-shrink: 0; flex-wrap: wrap; gap: 8px;
+}
+.editor-filename { font-size: 13px; font-weight: 700; color: var(--dark); flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.toggle-view-btn {
+  padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--gray-200);
+  font-size: 11px; font-weight: 700; cursor: pointer; background: #fff;
+  color: var(--gray-600); white-space: nowrap; transition: .15s;
+}
+.toggle-view-btn.active { border-color: var(--brand); background: var(--brand-50); color: var(--brand); }
+.btn-download-top {
+  padding: 7px 14px; border-radius: 20px; border: none;
+  background: var(--green); color: #fff; font-size: 11px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap;
+}
+
+.editor-body { display: flex; flex: 1; overflow: hidden; }
+
+/* ─── Kolom Kiri: Dokumen ──────────────────────── */
+.doc-panel {
+  flex: 1; overflow-y: auto; background: #F8F9FA;
+  border-right: 1px solid var(--gray-200);
+}
+.doc-paper {
+  background: #fff; max-width: 720px; margin: 16px auto;
+  padding: 40px 44px; border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  font-family: "Times New Roman", serif; font-size: 12pt;
+  line-height: 1.8; color: #1a1a1a; min-height: 600px;
+}
+.doc-paper h1 { font-size: 14pt; font-weight: 700; text-align: center; margin-bottom: 6px; }
+.doc-paper h2 { font-size: 13pt; font-weight: 700; margin: 18px 0 6px; }
+.doc-paper h3 { font-size: 12pt; font-weight: 700; margin: 14px 0 4px; }
+.doc-paper p  { margin: 0 0 10px; text-align: justify; }
+
+/* Track changes marks */
+.ins { background: #DCFCE7; color: #166534; border-radius: 2px; }
+.del { background: #FEE2E2; color: #991B1B; text-decoration: line-through; border-radius: 2px; }
+.ins-block { border-left: 3px solid #16A34A; padding-left: 8px; margin: 4px 0; background: #F0FDF4; }
+.del-block { border-left: 3px solid #DC2626; padding-left: 8px; margin: 4px 0; background: #FEF2F2;
+  text-decoration: line-through; opacity: .7; }
+
+/* Change badge */
+.change-badge {
+  display: inline-block; font-size: 9px; font-weight: 700; padding: 1px 5px;
+  border-radius: 10px; margin-left: 6px; vertical-align: middle; font-family: sans-serif;
+}
+.change-badge.add  { background: #DCFCE7; color: #166534; }
+.change-badge.edit { background: #FEF9C3; color: #854D0E; }
+.change-badge.del  { background: #FEE2E2; color: #991B1B; }
+
+/* ─── Kolom Kanan: Chat ────────────────────────── */
+.chat-panel {
+  width: 340px; flex-shrink: 0; display: flex; flex-direction: column;
+  background: #fff; overflow: hidden;
+}
+.chat-panel-header {
+  padding: 12px 14px 10px; border-bottom: 1px solid var(--gray-100);
+  font-size: 13px; font-weight: 800; color: var(--dark); flex-shrink: 0;
+}
+.chat-panel-header p { font-size: 11px; font-weight: 400; color: var(--gray-500); margin-top: 2px; }
+
+.chat-messages { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+
+.msg { border-radius: 14px; padding: 10px 12px; font-size: 12px; line-height: 1.55; max-width: 100%; }
+.msg-user { background: var(--brand); color: #fff; align-self: flex-end; border-radius: 14px 14px 4px 14px; }
+.msg-ai   { background: var(--gray-100); color: var(--dark); align-self: flex-start; border-radius: 14px 14px 14px 4px; }
+.msg-ai.processing { font-style: italic; color: var(--gray-500); }
+.msg-system { background: #FEF9C3; color: #92400E; font-size: 11px; border-radius: 10px; padding: 8px 10px; }
+
+.chat-quick-hints { padding: 0 14px 10px; display: flex; flex-wrap: wrap; gap: 6px; flex-shrink: 0; }
+.hint-chip {
+  border: 1.5px solid var(--brand-100); background: var(--brand-50);
+  border-radius: 20px; padding: 5px 10px; font-size: 10.5px; font-weight: 600;
+  color: var(--brand); cursor: pointer; transition: .12s; white-space: nowrap;
+}
+.hint-chip:hover { background: var(--brand); color: #fff; }
+
+.chat-input-row {
+  padding: 10px 12px; border-top: 1px solid var(--gray-100);
+  display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0;
+}
+.chat-input-row textarea {
+  flex: 1; resize: none; border: 1.5px solid var(--gray-200);
+  border-radius: 12px; padding: 9px 12px; font-size: 12px; font-family: inherit;
+  line-height: 1.5; min-height: 40px; max-height: 120px; overflow-y: auto;
+  background: var(--gray-50); color: var(--dark); outline: none; transition: .15s;
+}
+.chat-input-row textarea:focus { border-color: var(--brand-light); background: #fff; }
+.chat-send-btn {
+  width: 38px; height: 38px; border-radius: 10px; border: none;
+  background: var(--brand); color: #fff; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; transition: .15s;
+}
+.chat-send-btn:hover { background: var(--brand-dark); }
+.chat-send-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ─── Loading overlay ──────────────────────────── */
+.doc-loading {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999; flex-direction: column; gap: 14px;
+}
+.doc-loading-box { background: #fff; border-radius: 20px; padding: 28px 32px; text-align: center; max-width: 280px; }
+.doc-loading-box .spin { width: 40px; height: 40px; border: 3px solid var(--brand-100);
+  border-top-color: var(--brand); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.doc-loading-box p { font-size: 13px; font-weight: 700; color: var(--dark); }
+.doc-loading-box small { font-size: 11px; color: var(--gray-500); }
+
+/* Responsive: mobile stacks vertically */
+@media(max-width: 640px) {
+  .chat-panel { width: 100%; height: 45vh; border-right: none; border-top: 1px solid var(--gray-200); }
+  .editor-body { flex-direction: column-reverse; }
+  .doc-panel { min-height: 55vh; }
+  .doc-paper { padding: 20px 16px; margin: 8px; }
+}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--gray-800);color:#fff;padding:9px 18px;border-radius:20px;font-size:13px;
+  font-weight:600;opacity:0;transition:.25s;pointer-events:none;z-index:9999;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app" id="app" style="min-height:100vh;">
+
+  <!-- ═══════════════ UPLOAD PHASE ═══════════════ -->
+  <div id="uploadPhase">
+    <div class="backnav">
+      <div class="backnav-left">
+        <button class="back-btn" onclick="history.back()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div>
+          <div class="backnav-title">Revisi Skripsi</div>
+          <div class="backnav-sub">Editor AI dengan track changes</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="upload-hero">
+      <h2>Revisi Skripsi dengan AI</h2>
+      <p>Upload skripsimu, lalu beri perintah revisi — AI akan mengedit langsung di dokumenmu.</p>
+      <div class="hero-icon">
+        <svg viewBox="0 0 100 110" fill="none">
+          <rect x="10" y="10" width="80" height="90" rx="8" fill="#1a3dc2" opacity=".12"/>
+          <rect x="16" y="16" width="68" height="78" rx="6" fill="#fff"/>
+          <rect x="24" y="28" width="52" height="4" rx="2" fill="#1a3dc2" opacity=".7"/>
+          <rect x="24" y="38" width="40" height="3" rx="1.5" fill="#c7d5ff"/>
+          <rect x="24" y="46" width="48" height="3" rx="1.5" fill="#c7d5ff"/>
+          <rect x="24" y="54" width="36" height="3" rx="1.5" fill="#c7d5ff"/>
+          <rect x="24" y="66" width="52" height="3" rx="1.5" fill="#c7d5ff"/>
+          <rect x="24" y="74" width="44" height="3" rx="1.5" fill="#c7d5ff"/>
+          <!-- pen icon -->
+          <circle cx="75" cy="75" r="18" fill="#1a3dc2"/>
+          <path d="M69 81l8-8 4 4-8 8-5 1 1-5z" fill="#fff"/>
+          <rect x="74" y="68" width="3" height="10" rx="1.5" fill="#fff" transform="rotate(45 74 68)"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
+         ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+      <input type="file" id="fileInput" accept=".docx,.pdf,.txt" style="display:none" onchange="onFileSelected(this)">
+      <div class="drop-zone-icon" id="dzIcon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="#1a3dc2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
+        </svg>
+      </div>
+      <div class="drop-zone-label" id="dzLabel">Pilih atau seret file skripsi di sini</div>
+      <div class="drop-zone-sub" id="dzSub">Format: .docx, .pdf, .txt — Maks. 15MB</div>
+    </div>
+
+    <div style="background:#EFF6FF;border-radius:12px;padding:11px 14px;font-size:11.5px;color:#1E40AF;line-height:1.55;margin-top:12px;">
+      <b>💡 Cara pakai:</b> Upload skripsi → Klik <b>Mulai Revisi</b> → Beri perintah di kolom chat kanan
+      (contoh: <i>"Perbaiki rumusan masalah di Bab 1"</i>, <i>"Tambah tabel perbandingan di Bab 2"</i>,
+      <i>"Perjelas kesimpulan"</i>) → Lihat perubahan langsung di kolom kiri.
+    </div>
+
+    <button class="btn-revisi" id="btnRevisi" onclick="startRevisi()" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+      <span id="btnRevisiLabel">Mulai Revisi</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════ EDITOR PHASE ═══════════════ -->
+  <div id="editorPhase">
+
+    <!-- Top bar -->
+    <div class="editor-topbar">
+      <button onclick="backToUpload()" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;display:flex;align-items:center;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <span class="editor-filename" id="editorFilename">skripsi.docx</span>
+      <button class="toggle-view-btn active" id="btnTrack" onclick="setViewMode('track')">📝 Lihat Perubahan</button>
+      <button class="toggle-view-btn" id="btnFinal" onclick="setViewMode('final')">✅ Lihat Final</button>
+      <button class="btn-download-top" onclick="downloadDocx()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Unduh .docx
+      </button>
+    </div>
+
+    <!-- Split body -->
+    <div class="editor-body">
+
+      <!-- Kolom Kiri: Dokumen -->
+      <div class="doc-panel" id="docPanel">
+        <div class="doc-paper" id="docPaper">
+          <p style="color:var(--gray-400);font-style:italic;text-align:center;">Memuat dokumen...</p>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Chat -->
+      <div class="chat-panel">
+        <div class="chat-panel-header">
+          <div>✏️ Perintah Revisi</div>
+          <p>Beri instruksi — AI akan mengedit dokumen di sebelah kiri</p>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <div class="msg msg-system">
+            Dokumen berhasil dimuat. Beri perintah revisi di bawah, misalnya:<br>
+            <b>"Perbaiki rumusan masalah"</b> atau <b>"Tambah tabel di Bab 2"</b>
+          </div>
+        </div>
+
+        <div class="chat-quick-hints" id="quickHints">
+          <div class="hint-chip" onclick="useHint(this)">Perbaiki latar belakang</div>
+          <div class="hint-chip" onclick="useHint(this)">Tambah tabel perbandingan</div>
+          <div class="hint-chip" onclick="useHint(this)">Perjelas rumusan masalah</div>
+          <div class="hint-chip" onclick="useHint(this)">Perbaiki kesimpulan</div>
+          <div class="hint-chip" onclick="useHint(this)">Tambah grafik data</div>
+          <div class="hint-chip" onclick="useHint(this)">Perkuat argumen Bab 2</div>
+        </div>
+
+        <div class="chat-input-row">
+          <textarea id="chatInput" placeholder="Contoh: Ubah rumusan masalah di paragraf pertama Bab 1..."
+            rows="2" onkeydown="onChatKey(event)"></textarea>
+          <button class="chat-send-btn" id="sendBtn" onclick="sendRevision()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="doc-loading" id="loadingOverlay" style="display:none;">
+    <div class="doc-loading-box">
+      <div class="spin"></div>
+      <p id="loadingMsg">Memproses...</p>
+      <small id="loadingSub">Mohon tunggu sebentar</small>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+if(!localStorage.getItem('ak_token')){ window.location.href='login.html'; }
+if(window.pdfjsLib){ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; }
+
+// ─── State ──────────────────────────────────────────────────────────────────
+let uploadedFile = null;
+let originalDocxBuffer = null;    // ArrayBuffer file .docx asli
+let currentDocxBuffer = null;     // ArrayBuffer .docx yang paling baru (setelah revisi)
+let docTextSections = [];         // Array of {id, heading, content} — struktur dokumen
+let docRawText = '';              // Full text dokumen asli
+let revisionHistory = [];         // [{cmd, before, after}] semua revisi
+let viewMode = 'track';           // 'track' | 'final'
+let isProcessing = false;
+
+// ─── Toast ──────────────────────────────────────────────────────────────────
+function showToast(msg, d=2800){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),d);
+}
+
+// ─── Upload Phase ────────────────────────────────────────────────────────────
+function onDragOver(e){ e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
+function onDragLeave(){ document.getElementById('dropZone').classList.remove('drag-over'); }
+function onDrop(e){
+  e.preventDefault();
+  onDragLeave();
+  const file = e.dataTransfer.files[0];
+  if(file) handleFile(file);
+}
+function onFileSelected(input){ if(input.files[0]) handleFile(input.files[0]); }
+
+function handleFile(file){
+  if(file.size > 15*1024*1024){ showToast('Ukuran file maksimal 15MB'); return; }
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(!['docx','pdf','txt'].includes(ext)){ showToast('Format harus .docx, .pdf, atau .txt'); return; }
+  uploadedFile = file;
+  const dz = document.getElementById('dropZone');
+  dz.classList.add('filled');
+  document.getElementById('dzIcon').innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+  document.getElementById('dzLabel').textContent = file.name;
+  document.getElementById('dzSub').textContent = (file.size/1024/1024).toFixed(2)+' MB • siap diproses';
+  document.getElementById('btnRevisi').disabled = false;
+}
+
+async function startRevisi(){
+  if(!uploadedFile){ showToast('Pilih file skripsi terlebih dahulu'); return; }
+  showLoading('Membaca dokumen...', 'AI sedang membaca isi skripsimu');
+  try {
+    const ext = uploadedFile.name.split('.').pop().toLowerCase();
+    const arrayBuffer = await uploadedFile.arrayBuffer();
+
+    if(ext === 'docx'){
+      originalDocxBuffer = arrayBuffer.slice(0);
+      currentDocxBuffer = arrayBuffer.slice(0);
+      // Ekstrak teks pakai mammoth
+      const result = await window.mammoth.convertToHtml({ arrayBuffer: arrayBuffer.slice(0) });
+      renderDocumentFromHtml(result.value);
+      // Juga simpan raw text
+      const rawResult = await window.mammoth.extractRawText({ arrayBuffer: arrayBuffer.slice(0) });
+      docRawText = rawResult.value;
+    } else if(ext === 'txt'){
+      const text = await uploadedFile.text();
+      docRawText = text;
+      renderDocumentFromText(text);
+    } else if(ext === 'pdf'){
+      const text = await extractPdfText(arrayBuffer);
+      docRawText = text;
+      renderDocumentFromText(text);
+    }
+
+    document.getElementById('editorFilename').textContent = uploadedFile.name;
+    switchToEditor();
+    hideLoading();
+    showToast('Dokumen berhasil dimuat ✅');
+  } catch(e){
+    hideLoading();
+    showToast('Gagal membaca dokumen: ' + e.message);
+  }
+}
+
+async function extractPdfText(arrayBuffer){
+  const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+  let text = '';
+  const max = Math.min(pdf.numPages, 80);
+  for(let i=1;i<=max;i++){
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(it=>it.str).join(' ') + '\n';
+  }
+  return text;
+}
+
+// ─── Render dokumen ──────────────────────────────────────────────────────────
+function renderDocumentFromHtml(html){
+  // Sanitasi dasar, lalu render
+  const paper = document.getElementById('docPaper');
+  paper.innerHTML = html;
+  // Tandai setiap paragraf/heading dengan id untuk tracking
+  let idx = 0;
+  paper.querySelectorAll('p, h1, h2, h3, h4, li').forEach(el => {
+    el.dataset.secId = 'sec-' + (idx++);
+    el.dataset.originalText = el.textContent;
+  });
+}
+
+function renderDocumentFromText(text){
+  const paper = document.getElementById('docPaper');
+  const lines = text.split('\n').filter(l => l.trim());
+  let html = '';
+  let idx = 0;
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    const isBabHeading = /^(BAB\s+[IVX\d]+|DAFTAR\s+PUSTAKA|ABSTRAK|KATA\s+PENGANTAR)/i.test(trimmed);
+    const isSubHeading = /^\d+\.\d+/.test(trimmed) || /^[A-Z][A-Z\s]{4,}$/.test(trimmed);
+    if(isBabHeading){
+      html += `<h2 data-sec-id="sec-${idx++}" data-original-text="${escHtml(trimmed)}">${escHtml(trimmed)}</h2>`;
+    } else if(isSubHeading && trimmed.length < 80){
+      html += `<h3 data-sec-id="sec-${idx++}" data-original-text="${escHtml(trimmed)}">${escHtml(trimmed)}</h3>`;
+    } else {
+      html += `<p data-sec-id="sec-${idx++}" data-original-text="${escHtml(trimmed)}">${escHtml(trimmed)}</p>`;
+    }
+  });
+  document.getElementById('docPaper').innerHTML = html || '<p>Dokumen kosong atau tidak bisa dibaca.</p>';
+}
+
+function escHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ─── Switch phase ─────────────────────────────────────────────────────────────
+function switchToEditor(){
+  document.getElementById('uploadPhase').style.display = 'none';
+  const ep = document.getElementById('editorPhase');
+  ep.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  document.getElementById('app').style.minHeight = 'unset';
+}
+
+function backToUpload(){
+  document.getElementById('editorPhase').style.display = 'none';
+  document.getElementById('uploadPhase').style.display = 'block';
+  document.body.style.overflow = '';
+  document.getElementById('app').style.minHeight = '100vh';
+}
+
+// ─── View mode toggle ────────────────────────────────────────────────────────
+function setViewMode(mode){
+  viewMode = mode;
+  document.getElementById('btnTrack').classList.toggle('active', mode==='track');
+  document.getElementById('btnFinal').classList.toggle('active', mode==='final');
+  applyViewMode();
+}
+
+function applyViewMode(){
+  const paper = document.getElementById('docPaper');
+  if(viewMode === 'final'){
+    // Sembunyikan del, tampilkan ins tanpa highlight
+    paper.querySelectorAll('.del, .del-block').forEach(el => el.style.display='none');
+    paper.querySelectorAll('.ins, .ins-block').forEach(el => { el.style.background=''; el.style.color=''; el.style.borderLeft=''; });
+    paper.querySelectorAll('.change-badge').forEach(el => el.style.display='none');
+  } else {
+    // Tampilkan semua dengan highlight
+    paper.querySelectorAll('.del, .del-block').forEach(el => el.style.display='');
+    paper.querySelectorAll('.ins').forEach(el => { el.style.background='#DCFCE7'; el.style.color='#166534'; });
+    paper.querySelectorAll('.ins-block').forEach(el => { el.style.background='#F0FDF4'; el.style.borderLeft='3px solid #16A34A'; el.style.color=''; });
+    paper.querySelectorAll('.del-block').forEach(el => { el.style.background='#FEF2F2'; el.style.borderLeft='3px solid #DC2626'; });
+    paper.querySelectorAll('.change-badge').forEach(el => el.style.display='');
+  }
+}
+
+// ─── Chat ────────────────────────────────────────────────────────────────────
+function onChatKey(e){
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendRevision(); }
+}
+function useHint(el){ document.getElementById('chatInput').value = el.textContent; document.getElementById('chatInput').focus(); }
+
+function addMsg(text, type, id){
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg msg-' + type;
+  if(id) div.id = id;
+  div.innerHTML = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+async function sendRevision(){
+  if(isProcessing) return;
+  const input = document.getElementById('chatInput');
+  const cmd = input.value.trim();
+  if(!cmd){ showToast('Ketik perintah revisi terlebih dahulu'); return; }
+  if(!docRawText){ showToast('Dokumen belum dimuat'); return; }
+
+  input.value = '';
+  isProcessing = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  addMsg(escHtml(cmd), 'user');
+  const aiMsgEl = addMsg('⏳ AI sedang merevisi dokumen...', 'ai processing', 'aiProcessingMsg');
+
+  try {
+    const token = await AkAccount.getValidToken();
+    // Ambil isi dokumen saat ini (teks dari docPaper, versi final tanpa del)
+    const currentText = getDocCurrentText();
+
+    const systemPrompt = `Kamu adalah editor skripsi akademik profesional untuk mahasiswa Indonesia. Kamu bertugas merevisi bagian tertentu dari skripsi berdasarkan perintah pengguna.
+
+ATURAN PENTING:
+1. Pertahankan GAYA PENULISAN ASLI — formal, akademik, bahasa Indonesia baku.
+2. Pertahankan STRUKTUR dokumen (urutan bab, sub-bab, paragraf).
+3. Jika diminta menambah tabel, buat tabel markdown standar (| kolom | kolom |).
+4. Jika diminta menambah grafik/chart, gunakan format JSON chart: \`\`\`chart\n{"type":"bar","title":"...","labels":[...],"datasets":[{"label":"...","data":[...]}]}\n\`\`\`
+5. Balas HANYA dengan JSON valid tanpa backtick luar, format:
+{
+  "bagian_direvisi": "nama bagian/paragraf yang diubah",
+  "teks_sebelum": "teks asli yang direvisi (kutip persis dari dokumen, maks 500 karakter)",
+  "teks_sesudah": "teks hasil revisi yang sudah diperbaiki",
+  "penjelasan": "penjelasan singkat apa yang diubah dan mengapa"
+}
+
+Jika perintah tidak jelas atau bagian tidak ditemukan, kembalikan:
+{"error": "Bagian tidak ditemukan. Mohon sebutkan lebih spesifik (misal: Bab 1 paragraf 2, atau kutip awal kalimatnya)."}`;
+
+    // Ambil konteks relevan dari dokumen berdasarkan kata kunci perintah
+    const relevantContext = extractRelevantContext(currentText, cmd);
+
+    const userPrompt = `Dokumen skripsi (bagian yang relevan):\n\n${relevantContext}\n\n---\n\nPerintah revisi dari mahasiswa: "${cmd}"\n\nLakukan revisi sesuai perintah. Ingat: pertahankan gaya penulisan akademik formal yang sudah ada.`;
+
+    // Ambil konteks relevan
+    const currentText = getDocCurrentText();
+    const relevantContext = extractRelevantContext(currentText, cmd);
+
+    const response = await fetch('/api/revisi-skripsi', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        docContext: relevantContext,
+        fullDocText: currentText.substring(0, 2000),
+        command: cmd,
+        revisionHistory: revisionHistory.slice(-5)
+      })
+    });
+
+    const data = await response.json();
+    if(!response.ok) throw new Error(data.error || 'Gagal merevisi');
+    const result = data;
+
+    if(result.error){
+      aiMsgEl.className = 'msg msg-ai';
+      aiMsgEl.innerHTML = '⚠️ ' + escHtml(result.error);
+    } else {
+      // Terapkan perubahan ke dokumen
+      const applied = applyChange(result);
+      aiMsgEl.className = 'msg msg-ai';
+      if(applied){
+        aiMsgEl.innerHTML = `✅ <b>Revisi diterapkan</b><br>
+          <span style="font-size:11px;color:var(--gray-500);">Bagian: ${escHtml(result.bagian_direvisi)}</span><br>
+          <span style="font-size:11px;margin-top:4px;display:block;">${escHtml(result.penjelasan)}</span>`;
+        revisionHistory.push({ cmd, before: result.teks_sebelum, after: result.teks_sesudah, bagian: result.bagian_direvisi });
+        applyViewMode();
+      } else {
+        aiMsgEl.innerHTML = `⚠️ Tidak bisa menemukan teks yang persis di dokumen.<br>
+          <span style="font-size:11px;">Teks hasil revisi AI:<br><i>${escHtml((result.teks_sesudah||'').substring(0,200))}</i></span>`;
+        // Tampilkan hasil revisi sebagai blok baru di bawah
+        appendNewBlock(result);
+        applyViewMode();
+      }
+    }
+
+  } catch(e){
+    aiMsgEl.className = 'msg msg-ai';
+    aiMsgEl.innerHTML = '❌ ' + escHtml(e.message);
+  }
+
+  isProcessing = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+// ─── Ambil teks dokumen saat ini (versi final, tanpa del) ────────────────────
+function getDocCurrentText(){
+  const paper = document.getElementById('docPaper');
+  // Clone sementara, hapus el del
+  const clone = paper.cloneNode(true);
+  clone.querySelectorAll('.del, .del-block').forEach(el => el.remove());
+  return clone.innerText || clone.textContent || '';
+}
+
+// ─── Ambil konteks relevan berdasarkan kata kunci ────────────────────────────
+function extractRelevantContext(fullText, cmd){
+  const cmdLower = cmd.toLowerCase();
+  const lines = fullText.split('\n').filter(l => l.trim());
+
+  // Cari bab/bagian yang disebutkan
+  const babMatch = cmdLower.match(/bab\s*([1-9ivx]+)/i);
+  const keywords = cmd.split(/\s+/).filter(w => w.length > 4);
+
+  let scored = lines.map((line, i) => {
+    let score = 0;
+    keywords.forEach(kw => { if(line.toLowerCase().includes(kw.toLowerCase())) score += 2; });
+    if(babMatch){
+      const babNum = babMatch[1];
+      if(line.toLowerCase().includes('bab ' + babNum) || line.toLowerCase().includes('bab' + babNum)) score += 5;
+    }
+    return { line, i, score };
+  });
+
+  scored.sort((a,b) => b.score - a.score);
+  // Ambil 30 baris paling relevan + konteks sekitarnya
+  const relevantIdx = new Set();
+  scored.slice(0, 8).forEach(({i}) => {
+    for(let j = Math.max(0, i-3); j <= Math.min(lines.length-1, i+8); j++) relevantIdx.add(j);
+  });
+
+  const relevantLines = [...relevantIdx].sort((a,b)=>a-b).map(i => lines[i]);
+  const result = relevantLines.join('\n');
+
+  // Jika konteks terlalu pendek, ambil awal dokumen juga
+  if(result.length < 500) return fullText.substring(0, 6000);
+  return result.substring(0, 6000);
+}
+
+// ─── Terapkan perubahan ke DOM dengan track changes ──────────────────────────
+function applyChange(result){
+  const paper = document.getElementById('docPaper');
+  const before = (result.teks_sebelum || '').trim();
+  const after  = (result.teks_sesudah  || '').trim();
+  if(!before || !after) return false;
+
+  // Cari elemen yang mengandung teks sebelum
+  const elements = paper.querySelectorAll('p, h1, h2, h3, h4, li');
+  let found = false;
+
+  for(const el of elements){
+    const elText = (el.dataset.originalText || el.innerText || el.textContent || '').trim();
+    // Cek apakah teks sebelum ada di elemen ini (partial match)
+    const beforeShort = before.substring(0, 80);
+    if(elText.includes(beforeShort) || before.includes(elText.substring(0, 80))){
+      // Terapkan track change di elemen ini
+      injectTrackChange(el, before, after, result.bagian_direvisi);
+      found = true;
+      // Scroll ke elemen
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      break;
+    }
+  }
+
+  return found;
+}
+
+function injectTrackChange(el, before, after, bagian){
+  // Cek apakah after berisi tabel markdown
+  if(after.includes('|') && after.includes('---')){
+    // Tambah tabel setelah elemen
+    const tableHtml = markdownTableToHtml(after);
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ins-block';
+    wrapper.innerHTML = `<span class="change-badge add">BARU</span> ${tableHtml}`;
+    el.insertAdjacentElement('afterend', wrapper);
+    return;
+  }
+
+  // Cek apakah after berisi JSON chart
+  const chartMatch = after.match(/```chart\s*([\s\S]*?)```/);
+  if(chartMatch){
+    try {
+      const chartData = JSON.parse(chartMatch[1]);
+      const chartEl = document.createElement('div');
+      chartEl.className = 'ins-block';
+      chartEl.innerHTML = `<span class="change-badge add">CHART BARU</span>`;
+      chartEl.appendChild(createSimpleChart(chartData));
+      el.insertAdjacentElement('afterend', chartEl);
+      const textPart = after.replace(/```chart[\s\S]*?```/g,'').trim();
+      if(textPart) applyTextChange(el, before, textPart, bagian);
+      return;
+    } catch(e) {}
+  }
+
+  // Perubahan teks biasa
+  applyTextChange(el, before, after, bagian);
+}
+
+function applyTextChange(el, before, after, bagian){
+  const badge = `<span class="change-badge edit">DIREVISI</span>`;
+
+  // Buat elemen del (teks lama)
+  const delEl = document.createElement('div');
+  delEl.className = 'del-block';
+  delEl.dataset.isTrackDel = '1';
+  delEl.innerHTML = `<span class="change-badge del">SEBELUM</span> ${escHtml(el.innerText || el.textContent)}`;
+
+  // Ganti konten elemen dengan versi baru
+  const tagName = el.tagName.toLowerCase();
+  if(tagName === 'h1' || tagName === 'h2' || tagName === 'h3'){
+    el.innerHTML = badge + ' ' + escHtml(after);
+  } else {
+    el.innerHTML = badge + ' <span class="ins">' + escHtml(after) + '</span>';
+  }
+  el.dataset.revisedText = after;
+
+  // Insert del sebelum elemen
+  el.parentNode.insertBefore(delEl, el);
+}
+
+// ─── Tabel markdown → HTML ───────────────────────────────────────────────────
+function markdownTableToHtml(md){
+  const lines = md.split('\n').filter(l => l.trim() && l.includes('|'));
+  if(lines.length < 2) return `<p>${escHtml(md)}</p>`;
+
+  const rows = lines.filter(l => !l.match(/^[\s|:-]+$/));
+  let html = '<table style="border-collapse:collapse;width:100%;font-size:11pt;margin:10px 0;">';
+  rows.forEach((row, i) => {
+    const cells = row.split('|').map(c=>c.trim()).filter(Boolean);
+    const tag = i===0 ? 'th' : 'td';
+    const style = i===0
+      ? 'style="background:#1a3dc2;color:#fff;padding:6px 10px;text-align:left;font-weight:700;"'
+      : 'style="border:1px solid #e5e7eb;padding:6px 10px;"';
+    html += '<tr>' + cells.map(c=>`<${tag} ${style}>${escHtml(c)}</${tag}>`).join('') + '</tr>';
+  });
+  html += '</table>';
+  return html;
+}
+
+// ─── Chart sederhana pakai canvas ────────────────────────────────────────────
+function createSimpleChart(data){
+  const canvas = document.createElement('canvas');
+  canvas.width = 400; canvas.height = 220;
+  canvas.style.maxWidth = '100%';
+  const ctx = canvas.getContext('2d');
+  const colors = ['#1a3dc2','#16a34a','#dc2626','#d97706','#7c3aed','#0891b2'];
+  const vals = (data.datasets && data.datasets[0] && data.datasets[0].data) || [];
+  const labels = data.labels || vals.map((_,i)=>'Item '+(i+1));
+  const max = Math.max(...vals, 1);
+  const pad = 40; const barW = Math.floor((canvas.width - pad*2) / (labels.length || 1)) - 8;
+
+  ctx.fillStyle = '#f8f9fa'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#1a1a1a'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign='center';
+  ctx.fillText(data.title || 'Grafik', canvas.width/2, 18);
+
+  vals.forEach((v, i) => {
+    const x = pad + i*(barW+8);
+    const barH = Math.round((v/max) * (canvas.height - 60));
+    const y = canvas.height - 30 - barH;
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fillRect(x, y, barW, barH);
+    ctx.fillStyle = '#1a1a1a'; ctx.font = '10px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(String(v), x+barW/2, y-4);
+    ctx.fillStyle = '#555';
+    const lbl = (labels[i]||'').substring(0,12);
+    ctx.fillText(lbl, x+barW/2, canvas.height-14);
+  });
+
+  return canvas;
+}
+
+// ─── Tambah blok baru (jika tidak bisa match) ────────────────────────────────
+function appendNewBlock(result){
+  const paper = document.getElementById('docPaper');
+  const wrap = document.createElement('div');
+  wrap.className = 'ins-block';
+  wrap.style.marginTop = '16px';
+  wrap.innerHTML = `<span class="change-badge add">KONTEN BARU — ${escHtml(result.bagian_direvisi||'Revisi')}</span><br>
+    <p style="margin:6px 0 0;">${escHtml(result.teks_sesudah||'')}</p>`;
+  paper.appendChild(wrap);
+  wrap.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+
+// ─── Download .docx ──────────────────────────────────────────────────────────
+async function downloadDocx(){
+  showLoading('Menyiapkan file...', 'Membuat .docx dengan hasil revisi');
+  try {
+    // Buat konten teks final dari dokumen (versi final tanpa del)
+    const finalText = getDocCurrentText();
+    const filename = (uploadedFile ? uploadedFile.name.replace(/\.[^.]+$/,'') : 'skripsi') + '_revisi.docx';
+
+    // Buat docx sederhana dari teks final dengan JSZip (client-side)
+    const docxBlob = await buildSimpleDocx(finalText, filename);
+    const url = URL.createObjectURL(docxBlob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+    hideLoading();
+    showToast('File berhasil diunduh ✅');
+  } catch(e){
+    hideLoading();
+    showToast('Gagal membuat file: ' + e.message);
+  }
+}
+
+// Buat .docx minimal dari teks (client-side, menggunakan JSZip via CDN)
+async function buildSimpleDocx(text, filename){
+  // Gunakan endpoint generate untuk buat docx yang lebih proper
+  // dengan mengirim teks ke server
+  const token = await AkAccount.getValidToken();
+  const response = await fetch('/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({
+      system: 'Kamu adalah formatter dokumen. Format teks berikut menjadi dokumen akademik yang rapi. Pertahankan semua isi, struktur bab, dan tabel yang ada. Jangan ubah isi, hanya rapikan formatnya.',
+      academicMode: true,
+      max_tokens: 100,
+      messages: [{ role: 'user', content: 'OK' }]
+    })
+  });
+  // Buat docx client-side sebagai fallback sederhana
+  return buildClientDocx(text);
+}
+
+function buildClientDocx(text){
+  // Buat .docx minimal valid menggunakan raw XML (tanpa library besar)
+  const lines = text.split('\n').filter(l=>l.trim());
+  let bodyXml = '';
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    const isBab = /^(BAB\s+[IVX\d]+|DAFTAR PUSTAKA|ABSTRAK|KATA PENGANTAR)/i.test(trimmed);
+    const esc = trimmed.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    if(isBab){
+      bodyXml += `<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="28"/><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/></w:rPr><w:t>${esc}</w:t></w:r></w:p>`;
+    } else if(trimmed.includes('|') && trimmed.split('|').length > 2){
+      // Baris tabel sederhana — skip (terlalu kompleks untuk docx minimal)
+      bodyXml += `<w:p><w:r><w:rPr><w:rFonts w:ascii="Courier New" w:hAnsi="Courier New"/><w:sz w:val="18"/></w:rPr><w:t xml:space="preserve">${esc}</w:t></w:r></w:p>`;
+    } else {
+      bodyXml += `<w:p><w:pPr><w:jc w:val="both"/><w:spacing w:line="360" w:lineRule="auto"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="24"/></w:rPr><w:t xml:space="preserve">${esc}</w:t></w:r></w:p>`;
+    }
+  });
+
+  const docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:body>${bodyXml}
+<w:sectPr><w:pgSz w:w="12240" w:h="15840"/>
+<w:pgMar w:top="1800" w:right="1440" w:bottom="1800" w:left="1800" w:header="720" w:footer="720"/>
+</w:sectPr></w:body></w:document>`;
+
+  const contentTypes = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`;
+
+  const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+
+  const wordRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+</Relationships>`;
+
+  // Manual zip tanpa library — gunakan teknik sederhana
+  // Encode ke Blob dengan mime yang benar
+  // Fallback: kirim sebagai text blob jika JSZip tidak tersedia
+  return buildDocxZipBlob(docXml, contentTypes, rels, wordRels);
+}
+
+async function buildDocxZipBlob(docXml, contentTypes, rels, wordRels){
+  // Coba pakai JSZip jika tersedia (dimuat via CDN di bawah)
+  if(window.JSZip){
+    const zip = new JSZip();
+    zip.file('[Content_Types].xml', contentTypes);
+    zip.file('_rels/.rels', rels);
+    zip.file('word/document.xml', docXml);
+    zip.file('word/_rels/document.xml.rels', wordRels);
+    return await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  }
+  // Tanpa JSZip: kembalikan sebagai .txt (degraded)
+  return new Blob([docXml], { type: 'application/octet-stream' });
+}
+
+// ─── Loading overlay ──────────────────────────────────────────────────────────
+function showLoading(msg, sub){
+  document.getElementById('loadingMsg').textContent = msg || 'Memproses...';
+  document.getElementById('loadingSub').textContent = sub || '';
+  document.getElementById('loadingOverlay').style.display = 'flex';
+}
+function hideLoading(){ document.getElementById('loadingOverlay').style.display = 'none'; }
+</script>
+
+<!-- JSZip untuk buat .docx di browser -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+</body>
+</html>
