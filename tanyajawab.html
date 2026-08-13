@@ -14,6 +14,10 @@
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="shared-config.js"></script>
+<!-- PERBAIKAN BUG: riwayat-store.js sebelumnya tidak dimuat di halaman ini,
+     jadi hasil Revisi & Belajar yang berhasil dibuat tidak pernah tercatat
+     di Riwayat, Dokumen, maupun notifikasi "Dokumen berhasil dibuat". -->
+<script src="riwayat-store.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
 <script src="quota-popup.js"></script>
@@ -461,6 +465,20 @@ Jika tidak ada revisi yang bisa diidentifikasi, kembalikan poin sebagai array ko
       document.getElementById('revisiDownloadWrap').style.display='block';
     }
     AkAccount.catatPesan(1);
+    // PERBAIKAN BUG: catat ke Riwayat supaya hasil revisi muncul di
+    // Riwayat, Dokumen, dan notifikasi "Dokumen berhasil dibuat"
+    // (sebelumnya tidak pernah dicatat sama sekali).
+    if (typeof RiwayatStore !== 'undefined') {
+      const namaFileRevisi = (revisiFiles[0] && revisiFiles[0].name) ? revisiFiles[0].name.replace(/\.[^.]+$/, '') : 'Naskah';
+      RiwayatStore.tambah({
+        id: 'revisi_'+Date.now(),
+        judul: 'Revisi: ' + namaFileRevisi,
+        kategori: 'tanyajawab',
+        kategoriLabel: 'Revisi Skripsi',
+        status: 'done',
+        link: 'tanyajawab.html'
+      });
+    }
     showToast('Revisi selesai! ✓');
   }catch(e){
     genBtn.disabled=false;
@@ -679,6 +697,21 @@ async function doBelajar(instruction, btn){
     }
     box.innerHTML=formatHasilAI(result);
     AkAccount.catatPesan(1);
+    // PERBAIKAN BUG: catat ke Riwayat supaya hasil Belajar muncul di
+    // Riwayat, Dokumen, dan notifikasi "Dokumen berhasil dibuat"
+    // (sebelumnya tidak pernah dicatat sama sekali).
+    if (typeof RiwayatStore !== 'undefined') {
+      const genreAktif = document.querySelector('#genreGrid .genre-chip.active');
+      const genreLabel = genreAktif ? genreAktif.textContent.trim() : 'Belajar';
+      RiwayatStore.tambah({
+        id: 'belajar_'+Date.now(),
+        judul: genreLabel + ': ' + (belajarFileName || 'File').replace(/\.[^.]+$/, ''),
+        kategori: 'tanyajawab',
+        kategoriLabel: 'Belajar',
+        status: 'done',
+        link: 'tanyajawab.html'
+      });
+    }
     showToast('Selesai! ✓');
   }catch(e){
     document.querySelectorAll('#genreGrid .genre-chip').forEach(c=>c.disabled=false);

@@ -2147,6 +2147,11 @@ body {
   height: 16px;
 }
 .notif-badge {
+  display: none; /* PERBAIKAN BUG: sebelumnya tidak ada default 'none', jadi titik
+    notifikasi selalu tampil sejak halaman dimuat (walau tidak ada notifikasi
+    yang belum dibaca) sampai notif.js selesai menghitung ulang secara async.
+    JS (notif.js updateBadges()) yang akan menampilkannya (style.display='')
+    hanya saat memang ada notifikasi yang belum dibaca. */
   position: absolute;
   top: 7px;
   right: 8px;

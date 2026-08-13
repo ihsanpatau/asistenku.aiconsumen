@@ -11,6 +11,10 @@
 <script src="i18n.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="shared-config.js"></script>
+<!-- PERBAIKAN BUG: riwayat-store.js sebelumnya tidak dimuat di halaman ini,
+     jadi abstrak yang berhasil dibuat tidak pernah tercatat di Riwayat,
+     Dokumen, maupun notifikasi "Dokumen berhasil dibuat". -->
+<script src="riwayat-store.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
 <script src="quota-popup.js"></script>
@@ -188,7 +192,22 @@ Keywords: [keywords separated by commas]`;
     document.getElementById('abstrakIndo').textContent = indoText || '(tidak tersedia)';
     document.getElementById('abstrakEng').textContent = engText || '(tidak tersedia)';
     document.getElementById('resultArea').style.display='block';
-    if (typeof AkAccount !== 'undefined') AkAccount.catatHalaman('abstrak_'+Date.now(), 0.5);
+    const abstrakId = 'abstrak_'+Date.now();
+    if (typeof AkAccount !== 'undefined') AkAccount.catatHalaman(abstrakId, 0.5);
+    // PERBAIKAN BUG: catat ke Riwayat supaya abstrak yang berhasil dibuat
+    // muncul di Riwayat, Dokumen, dan notifikasi "Dokumen berhasil dibuat"
+    // (sebelumnya tidak pernah dicatat sama sekali).
+    if (typeof RiwayatStore !== 'undefined') {
+      const namaFileAsli = (abstrakFileState && abstrakFileState.name) ? abstrakFileState.name.replace(/\.[^.]+$/, '') : 'Naskah';
+      RiwayatStore.tambah({
+        id: abstrakId,
+        judul: 'Abstrak: ' + namaFileAsli,
+        kategori: 'abstrak',
+        kategoriLabel: 'Abstrak',
+        status: 'done',
+        link: 'abstrak.html'
+      });
+    }
     document.getElementById('resultArea').scrollIntoView({behavior:'smooth'});
     showToast('Abstrak berhasil dibuat! ✓');
   }catch(e){

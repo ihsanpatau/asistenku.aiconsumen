@@ -11,6 +11,10 @@
 <script src="i18n.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="shared-config.js"></script>
+<!-- PERBAIKAN BUG: riwayat-store.js sebelumnya tidak dimuat di halaman ini,
+     jadi presentasi yang berhasil dibuat tidak pernah tercatat di Riwayat,
+     Dokumen, maupun notifikasi "Dokumen berhasil dibuat". -->
+<script src="riwayat-store.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
 <script src="quota-popup.js"></script>
@@ -427,8 +431,23 @@ BALAS HANYA JSON (tanpa teks lain):
     renderDesignPreview(currentDesign);
     renderSlides(slides);
     showToast('✓ Konten + desain unik berhasil dibuat!');
+    const pptId = 'ppt_'+Date.now();
     if (typeof AkAccount !== 'undefined') {
-      AkAccount.catatHalaman('ppt_'+Date.now(), Math.max(1, Math.round((slides.length||estimasiSlide) / 3)));
+      AkAccount.catatHalaman(pptId, Math.max(1, Math.round((slides.length||estimasiSlide) / 3)));
+    }
+    // PERBAIKAN BUG: catat ke Riwayat supaya presentasi yang berhasil dibuat
+    // muncul di Riwayat, Dokumen, dan notifikasi "Dokumen berhasil dibuat"
+    // (sebelumnya tidak pernah dicatat sama sekali).
+    if (typeof RiwayatStore !== 'undefined') {
+      const judulPpt = (slides.find(s=>s.type==='title')||{}).title || instruksi.substring(0,60) || 'Presentasi';
+      RiwayatStore.tambah({
+        id: pptId,
+        judul: judulPpt,
+        kategori: 'presentasi',
+        kategoriLabel: 'Presentasi',
+        status: 'done',
+        link: 'presentasi.html'
+      });
     }
 
   }catch(e){
