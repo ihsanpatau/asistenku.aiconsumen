@@ -157,8 +157,13 @@ function renderDokumen(){
   grid.innerHTML=items.map(it=>{
     const meta=docIconMap[it.kategori]||docIconMap.tugas;
     const halaman=it.halaman||(it.kataTerhitung?Math.max(1,Math.round(it.kataTerhitung/275)):0);
+    // Pakai RiwayatStore.tautan() supaya dokumen yang diklik membawa ?id=... —
+    // ini yang membuat halaman hasil bisa memuat isi LENGKAP dokumen ini dari
+    // penyimpanan permanen (bisa dibuka/diunduh ulang kapan saja), bukan cuma
+    // isi dokumen paling terakhir yang sempat digenerate di sesi ini.
+    const tautanDok = (typeof RiwayatStore!=='undefined' && RiwayatStore.tautan) ? RiwayatStore.tautan(it) : (it.link||'');
     return `
-      <div class="doc-card" onclick="${it.link?`window.location.href='${it.link}'`:''}">
+      <div class="doc-card" onclick="${tautanDok?`window.location.href='${tautanDok}'`:''}">
         <div class="doc-card-top">
           <div class="doc-card-icon" style="background:${meta.bg};"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${docIconSvg}</svg></div>
           <div class="doc-card-badge" style="background:${meta.badgeBg};color:${meta.badgeColor};">${it.kategoriLabel||meta.badgeLabel}</div>

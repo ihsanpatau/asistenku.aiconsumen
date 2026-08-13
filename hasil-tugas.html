@@ -330,9 +330,28 @@ function renderHasilHTML(rawText) {
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
 const now=new Date();
 document.getElementById('hasilTanggalTugas').textContent=`${now.getDate()} ${['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'][now.getMonth()]} ${now.getFullYear()}, ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} WIB`;
-const prompt=localStorage.getItem('task_prompt');
+let prompt=localStorage.getItem('task_prompt');
 const fullPromptOverride=localStorage.getItem('task_full_prompt');
-const taskType=localStorage.getItem('task_type')||'umum';
+let taskType=localStorage.getItem('task_type')||'umum';
+
+// ===== PERBAIKAN: buka dokumen LAMA dari "Dokumen Saya" / Riwayat =====
+// Sebelumnya halaman ini SELALU mengandalkan slot localStorage tunggal
+// (task_prompt/task_type/task_result/task_result_structured) yang ketimpa tiap kali
+// ada generate tugas/makalah/jurnal baru. Jadi kalau lupa download lalu buka lagi
+// dokumen LAMA dari Dokumen Saya, yang muncul isi dokumen TERBARU (salah) — atau AI
+// generate ulang dari task_prompt yang juga sudah bukan milik dokumen ini lagi
+// (terasa seperti "diarahkan ke halaman generate lagi"). Sekarang: kalau dibuka lewat
+// tautan berisi ?id=..., ambil isi lengkapnya dari penyimpanan permanen per-dokumen
+// (RiwayatStore.ambilKonten) dan render langsung TANPA memanggil AI lagi.
+const paramsHasilTugas=new URLSearchParams(location.search);
+const idTugasDibuka=paramsHasilTugas.get('id');
+const kontenTersimpanTugas=(idTugasDibuka && typeof RiwayatStore!=='undefined' && RiwayatStore.ambilKonten) ? RiwayatStore.ambilKonten(idTugasDibuka) : null;
+let __loadedFromRiwayatTugas=false;
+if(kontenTersimpanTugas){
+  __loadedFromRiwayatTugas=true;
+  taskType = kontenTersimpanTugas.taskType || taskType;
+  prompt = kontenTersimpanTugas.prompt || prompt;
+}
 
 // ===== PERBAIKAN: gaya penulisan akademik + max_tokens dinamis =====
 // Sebelumnya halaman ini SELALU memanggil /api/generate tanpa system prompt sendiri,
@@ -382,10 +401,14 @@ if(prompt){
   }
 })();
 function simpanRiwayatHasil(judulOverride, kataTerhitung){
+  // Dokumen ini sedang cuma DIBUKA ULANG dari riwayat/dokumen lama (bukan generate baru) —
+  // sudah pernah dicatat & dihitung kuotanya sebelumnya, jadi jangan diproses ulang di sini.
+  if(__loadedFromRiwayatTugas) return;
   const kategoriAsli = taskType==='umum' ? 'tugas' : taskType;
   const kategoriLabelMap = { tugas:'Tugas & Project', makalah:'Makalah', jurnal:'Jurnal' };
+  const taskId = localStorage.getItem('task_id');
   RiwayatStore.tambah({
-    id: localStorage.getItem('task_id'),
+    id: taskId,
     judul: (judulOverride || prompt || 'Tugas').substring(0,80),
     kategori: kategoriAsli,
     kategoriLabel: kategoriLabelMap[kategoriAsli] || 'Tugas & Project',
@@ -394,14 +417,27 @@ function simpanRiwayatHasil(judulOverride, kataTerhitung){
     status: 'done',
     link: 'hasil-tugas.html'
   });
+  // Simpan isi lengkap dokumen ini secara permanen per-id, supaya kapan pun nanti dibuka
+  // lagi dari Dokumen Saya / Riwayat (walau sudah generate tugas lain setelahnya), isinya
+  // tetap bisa dimuat & diunduh ulang dengan benar — bukan cuma slot generate terakhir.
+  if(RiwayatStore.simpanKonten){
+    RiwayatStore.simpanKonten(taskId, {
+      taskType: taskType,
+      prompt: prompt,
+      format: window.__formatUtama,
+      hasilStructured: taskType==='makalah' ? localStorage.getItem('task_result_structured') : null,
+      makalahMeta: taskType==='makalah' ? localStorage.getItem('makalah_meta') : null,
+      hasilText: taskType!=='makalah' ? localStorage.getItem('task_result') : null
+    });
+  }
   const halamanEstimasi = Math.max(1, Math.round((kataTerhitung || 0) / 275));
-  AkAccount.catatHalaman(localStorage.getItem('task_id'), halamanEstimasi);
+  AkAccount.catatHalaman(taskId, halamanEstimasi);
 }
 
 let hasilTugasFull = '';
 let makalahParts = null;
 const formatLabelMap = { word:{label:'Word (.docx)', icon:'📄'}, pdf:{label:'PDF', icon:'📕'}, teks:{label:'Teks (.txt)', icon:'📝'} };
-window.__formatUtama = localStorage.getItem('task_output_format') || 'word';
+window.__formatUtama = (kontenTersimpanTugas && kontenTersimpanTugas.format) || localStorage.getItem('task_output_format') || 'word';
 (function setupFormatUtama(){
   const f = window.__formatUtama;
   const info = formatLabelMap[f] || formatLabelMap.word;
@@ -719,7 +755,32 @@ async function generateContent(){
     setLoadingUI(false, 'Gagal menghasilkan tugas: '+e.message+' Cek koneksi internet, atau pastikan API key sudah diatur di server, lalu klik "Coba Lagi".');
   }
 }
-generateContent();
+// Kalau dibuka dari Dokumen Saya / Riwayat (?id=...), muat isi yang sudah tersimpan
+// permanen langsung — TANPA memanggil AI lagi. Kalau dokumen lama ini ternyata dibuat
+// sebelum pembaruan penyimpanan (isinya belum sempat tersimpan), tampilkan pesan yang
+// jelas alih-alih diam-diam memanggil generate ulang dengan data yang salah.
+if(__loadedFromRiwayatTugas){
+  try{
+    setLoadingUI(true, null);
+    if(taskType==='makalah' && kontenTersimpanTugas.hasilStructured){
+      renderMakalah(JSON.parse(kontenTersimpanTugas.hasilStructured), JSON.parse(kontenTersimpanTugas.makalahMeta||'{}'));
+    } else if(kontenTersimpanTugas.hasilText){
+      renderGeneric(kontenTersimpanTugas.hasilText, null);
+    } else {
+      throw new Error('Isi dokumen kosong');
+    }
+    setLoadingUI(false, null);
+  }catch(e){
+    console.error('Gagal memuat dokumen dari riwayat:', e);
+    setLoadingUI(false, 'Dokumen ini tidak lengkap tersimpan. Silakan buat ulang dari halaman Tugas/Makalah/Jurnal.');
+  }
+} else if(idTugasDibuka){
+  // Ada ?id= di URL tapi kontennya tidak ditemukan — dokumen dibuat sebelum pembaruan
+  // penyimpanan permanen. Jangan diam-diam generate ulang pakai data yang salah.
+  setLoadingUI(false, 'Dokumen ini dibuat sebelum pembaruan sistem sehingga isi lengkapnya tidak tersimpan penuh. Silakan buat ulang dari halaman Tugas/Makalah/Jurnal.');
+} else {
+  generateContent();
+}
 
 // ===== Chart PNG rasterizer (untuk disisipkan ke file .docx asli) =====
 // Pakai Chart.js langsung dari spec yang sama dengan blok ```chart``` AI, supaya hasilnya

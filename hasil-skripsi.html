@@ -250,8 +250,21 @@
 <script>
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
-const data=JSON.parse(localStorage.getItem('skripsi_data')||'{}');
-const outline=JSON.parse(localStorage.getItem('skripsi_outline')||'[]');
+// ===== PERBAIKAN: buka dokumen LAMA dari "Dokumen Saya" / Riwayat =====
+// Sebelumnya halaman ini SELALU membaca dari slot localStorage tunggal
+// (skripsi_data/skripsi_outline/skripsi_hasil) yang ketimpa tiap kali skripsi baru
+// digenerate. Jadi kalau lupa download lalu buka lagi dokumen LAMA dari Dokumen Saya,
+// yang muncul adalah isi skripsi TERBARU (salah) atau malah kosong — dan halaman ini
+// balik minta dibuat dari halaman Skripsi lagi (seolah diarahkan ke halaman generate).
+// Sekarang: kalau dibuka lewat tautan berisi ?id=..., ambil isi lengkapnya dari
+// penyimpanan permanen per-dokumen (RiwayatStore.ambilKonten), bukan dari slot sesi.
+const paramsHasilSkripsi=new URLSearchParams(location.search);
+const idSkripsiDibuka=paramsHasilSkripsi.get('id');
+const kontenTersimpanSkripsi=(idSkripsiDibuka && typeof RiwayatStore!=='undefined' && RiwayatStore.ambilKonten) ? RiwayatStore.ambilKonten(idSkripsiDibuka) : null;
+const legacyTanpaKontenSkripsi = !!idSkripsiDibuka && !kontenTersimpanSkripsi;
+
+const data = kontenTersimpanSkripsi ? (kontenTersimpanSkripsi.data||{}) : (idSkripsiDibuka ? {} : JSON.parse(localStorage.getItem('skripsi_data')||'{}'));
+const outline = kontenTersimpanSkripsi ? (kontenTersimpanSkripsi.outline||[]) : (idSkripsiDibuka ? [] : JSON.parse(localStorage.getItem('skripsi_outline')||'[]'));
 const now=new Date();
 document.getElementById('hasilTanggal').textContent=`${now.getDate()} ${['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'][now.getMonth()]} ${now.getFullYear()}`;
 if(data.judul){
@@ -268,7 +281,7 @@ if(outline.length){
   `).join('<div style="border-top:1px solid var(--gray-100);margin:8px 0;"></div>');
 }
 // Ringkasan & isi lengkap (pakai hasil AI beneran kalau ada)
-const skripsiHasil=localStorage.getItem('skripsi_hasil')||'';
+const skripsiHasil = kontenTersimpanSkripsi ? (kontenTersimpanSkripsi.hasil||'') : (idSkripsiDibuka ? '' : (localStorage.getItem('skripsi_hasil')||''));
 if(skripsiHasil){
   document.getElementById('ringkasanText').textContent=skripsiHasil.substring(0,500)+(skripsiHasil.length>500?'...':'');
   const wc=skripsiHasil.trim().split(/\s+/).filter(Boolean).length;
@@ -281,22 +294,33 @@ if(skripsiHasil){
   // Catat sebagai riwayat & kuota nyata (id stabil supaya tidak dobel dihitung saat direfresh)
   const halamanCount=Math.max(1, Math.round(wc/275));
   document.getElementById('kuotaTerpakaiVal').textContent=halamanCount+' halaman';
-  const skripsiId='skripsi_'+(data.judul||'x').substring(0,40).replace(/\s+/g,'_')+'_'+wc;
-  if(typeof RiwayatStore!=='undefined'){
-    RiwayatStore.tambah({
-      id: skripsiId,
-      judul: data.judul || 'Skripsi',
-      kategori: 'skripsi',
-      kategoriLabel: 'Skripsi',
-      kataTerhitung: wc,
-      halaman: halamanCount,
-      status: 'done',
-      link: 'hasil-skripsi.html'
-    });
+  const skripsiId= kontenTersimpanSkripsi ? idSkripsiDibuka : ('skripsi_'+(data.judul||'x').substring(0,40).replace(/\s+/g,'_')+'_'+wc);
+  // Kalau ini dokumen LAMA yang lagi dibuka ulang (sudah pernah dicatat & sudah tersimpan
+  // permanen), jangan dicatat/dihitung kuotanya lagi — cukup ditampilkan & bisa diunduh ulang.
+  if(!kontenTersimpanSkripsi){
+    if(typeof RiwayatStore!=='undefined'){
+      RiwayatStore.tambah({
+        id: skripsiId,
+        judul: data.judul || 'Skripsi',
+        kategori: 'skripsi',
+        kategoriLabel: 'Skripsi',
+        kataTerhitung: wc,
+        halaman: halamanCount,
+        status: 'done',
+        link: 'hasil-skripsi.html'
+      });
+      // Simpan isi lengkap dokumen ini secara permanen per-id, supaya kapan pun nanti
+      // dibuka lagi dari Dokumen Saya / Riwayat (walau sudah generate skripsi lain
+      // setelahnya), isinya tetap bisa dimuat & diunduh ulang dengan benar.
+      if(RiwayatStore.simpanKonten){ RiwayatStore.simpanKonten(skripsiId, { data, outline, hasil: skripsiHasil }); }
+    }
+    if(typeof AkAccount!=='undefined'){ AkAccount.catatHalaman(skripsiId, halamanCount); }
   }
-  if(typeof AkAccount!=='undefined'){ AkAccount.catatHalaman(skripsiId, halamanCount); }
 } else if(data.judul){
   document.getElementById('ringkasanText').textContent=`Penelitian ini berjudul "${data.judul}". Penelitian ini menggunakan metode ${data.jenis||'kuantitatif'} untuk menganalisis topik yang telah ditentukan. Belum ada isi lengkap tersimpan — buat dari halaman Skripsi atau Konfirmasi Generate terlebih dahulu.`;
+} else if(legacyTanpaKontenSkripsi){
+  document.getElementById('ringkasanText').textContent='Dokumen ini dibuat sebelum pembaruan penyimpanan file, sehingga isi lengkapnya sudah tidak tersimpan lagi. Silakan buat ulang dari halaman Skripsi.';
+  showToast('Konten dokumen lama ini tidak tersimpan penuh, buat ulang ya.');
 }
 function switchTab(tab, btn){
   document.querySelectorAll('.tab-item').forEach(b=>b.classList.remove('active'));
@@ -320,8 +344,8 @@ function buatBodyHtmlSkripsi(text){
 }
 
 function downloadFile(type){
-  const text = localStorage.getItem('skripsi_hasil') || '';
-  if(!text){ showToast('Belum ada konten skripsi tersimpan. Buat dari halaman Skripsi dulu.'); return; }
+  const text = skripsiHasil || '';
+  if(!text){ showToast(legacyTanpaKontenSkripsi ? 'Dokumen lama ini tidak tersimpan penuh. Buat ulang dari halaman Skripsi.' : 'Belum ada konten skripsi tersimpan. Buat dari halaman Skripsi dulu.'); return; }
   const judul = (data.judul || 'Skripsi').substring(0,40).replace(/[^a-z0-9]+/gi,'_');
   const bodyHtml = buatBodyHtmlSkripsi(text);
 

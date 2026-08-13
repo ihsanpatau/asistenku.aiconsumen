@@ -67,10 +67,13 @@ function renderFavorit(){
     const icon=riwayatIconMap[it.kategori]||riwayatIconMap.tugas;
     const bg=it.iconBg||icon.bg;
     const label=it.kategoriLabel||kategoriLabelMap[it.kategori]||'Aktivitas';
+    // RiwayatStore.tautan() menyisipkan ?id=... supaya halaman hasil bisa memuat isi
+    // LENGKAP dokumen ini dari penyimpanan permanen, bukan cuma slot generate terakhir.
+    const tautanIt=(typeof RiwayatStore!=='undefined' && RiwayatStore.tautan) ? RiwayatStore.tautan(it) : (it.link||'');
     return `
       <div class="history-item">
-        <div class="history-icon" style="background:${bg};cursor:pointer;" onclick="${it.link?`window.location.href='${it.link}'`:''}"><svg viewBox="0 0 24 24" fill="white" width="18" height="18">${icon.svg}</svg></div>
-        <div class="history-body" style="cursor:pointer;" onclick="${it.link?`window.location.href='${it.link}'`:''}">
+        <div class="history-icon" style="background:${bg};cursor:pointer;" onclick="${tautanIt?`window.location.href='${tautanIt}'`:''}"><svg viewBox="0 0 24 24" fill="white" width="18" height="18">${icon.svg}</svg></div>
+        <div class="history-body" style="cursor:pointer;" onclick="${tautanIt?`window.location.href='${tautanIt}'`:''}">
           <div class="history-title">${(it.judul||'Tanpa judul').replace(/</g,'&lt;')}</div>
           <div class="history-time">${label} • ${RiwayatStore.waktuRelatif(it.waktu)}</div>
         </div>

@@ -145,7 +145,10 @@ function itemCardHtml(it){
   const kataInfo = it.kataTerhitung ? `${it.kataTerhitung.toLocaleString('id-ID')} kata` : '';
   const pillClass = it.status==='done' ? 'done' : it.status==='error' ? 'fail' : 'proc';
   const pillLabel = it.status==='done' ? 'Selesai' : it.status==='error' ? 'Gagal' : 'Diproses';
-  const clickable = it.link ? `style="cursor:pointer;" onclick="window.location.href='${it.link}'"` : '';
+  // RiwayatStore.tautan() menyisipkan ?id=... supaya halaman hasil bisa memuat isi
+  // LENGKAP dokumen ini dari penyimpanan permanen, bukan cuma slot generate terakhir.
+  const tautanIt = (typeof RiwayatStore!=='undefined' && RiwayatStore.tautan) ? RiwayatStore.tautan(it) : (it.link||'');
+  const clickable = tautanIt ? `style="cursor:pointer;" onclick="window.location.href='${tautanIt}'"` : '';
   const isFav = AkAccount.isFavorit(it.id);
   return `
     <div class="history-item">
