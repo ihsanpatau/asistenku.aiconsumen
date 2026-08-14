@@ -131,7 +131,7 @@ module.exports = async (req, res) => {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5",
+        model: "claude-sonnet-5", // PERBAIKAN: upgrade dari model lama (Sept 2025) ke generasi terbaru
         max_tokens: Math.min(
           16000,
           Math.max(4000, parseInt(targetKata || 3000) * 2)
@@ -160,7 +160,7 @@ module.exports = async (req, res) => {
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-5",
+          model: "claude-sonnet-5", // PERBAIKAN: upgrade dari model lama (Sept 2025) ke generasi terbaru
           max_tokens: 3000,
           system: "Balas HANYA JSON valid tanpa backtick.",
           messages: [
@@ -216,3 +216,8 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: "Kesalahan server: " + err.message });
   }
 };
+
+// PERBAIKAN: sama seperti api/generate.js — batas waktu fungsi server
+// diatur eksplisit ke 60 detik (aman untuk semua paket Vercel) supaya
+// generate jurnal panjang tidak mati diam-diam di tengah jalan.
+module.exports.config = { maxDuration: 60 };
