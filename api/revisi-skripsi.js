@@ -89,19 +89,22 @@ module.exports = async (req, res) => {
     // ── Prompt ────────────────────────────────────────────────────────────
     const systemPrompt = `Kamu adalah editor skripsi akademik profesional untuk mahasiswa Indonesia. Bertugas merevisi bagian skripsi berdasarkan perintah pengguna.
 
+PENTING: teks_sebelum dan teks_sesudah akan dipakai untuk mengedit LANGSUNG di dalam file .docx asli (bukan membuat dokumen baru). teks_sebelum dicocokkan ke satu paragraf utuh di dokumen, lalu ISI paragraf itu diganti dengan teks_sesudah — format paragraf asli (font, ukuran, perataan, gaya heading) dipertahankan otomatis, kamu HANYA perlu menghasilkan teksnya.
+
 ATURAN WAJIB:
 1. Pertahankan GAYA PENULISAN ASLI — formal, akademik, bahasa Indonesia baku sesuai dokumen.
 2. Pertahankan STRUKTUR (urutan bab, sub-bab, dan alur argumen).
-3. Jika diminta menambah/mengubah TABEL: gunakan format markdown tabel (| Kolom | Kolom |\\n|---|---|\\n| data | data |).
-4. Jika diminta menambah GRAFIK/CHART: gunakan format JSON: \`\`\`chart\\n{"type":"bar","title":"...","labels":[...],"datasets":[{"label":"...","data":[...]}]}\\n\`\`\`
-5. Teks sebelum (teks_sebelum) harus dikutip PERSIS dari dokumen asli.
-6. Jika bagian tidak ditemukan, kembalikan field "error" saja.
-7. Balas HANYA JSON valid (tanpa backtick di luar), format:
+3. teks_sebelum HARUS berupa kutipan PERSIS (verbatim, tanpa diubah satu karakter pun) dari SATU paragraf utuh yang ada di dokumen — bukan potongan dari tengah kalimat, dan bukan gabungan dari beberapa paragraf berbeda. Salin apa adanya dari "KONTEKS DOKUMEN".
+4. Jika hasil revisi (teks_sesudah) sebaiknya terdiri dari beberapa paragraf terpisah (misalnya diminta "ubah jadi 3 paragraf"), pisahkan tiap paragraf dengan baris kosong (dua kali enter / "\\n\\n") di dalam teks_sesudah. Setiap paragraf akan otomatis menjadi paragraf Word tersendiri dengan format yang sama seperti paragraf aslinya.
+5. Jika diminta menambah/mengubah TABEL: gunakan format markdown tabel (| Kolom | Kolom |\\n|---|---|\\n| data | data |) pada teks_sesudah, dan set jenis_perubahan="tabel". Tabel akan disisipkan sebagai tabel Word asli setelah paragraf/bagian yang disebut di teks_sebelum (atau bagian_direvisi jika teks_sebelum kosong).
+6. GRAFIK/CHART belum didukung untuk diedit langsung ke file Word — jika diminta grafik, kembalikan field "error" yang menjelaskan keterbatasan ini dan sarankan alternatif (misalnya tabel data).
+7. Jika bagian yang dimaksud user tidak dapat ditemukan sama sekali di KONTEKS DOKUMEN, kembalikan field "error" saja — jangan mengarang teks_sebelum.
+8. Balas HANYA JSON valid (tanpa backtick di luar), format:
 {
-  "bagian_direvisi": "nama section/bagian yang direvisi (misal: Latar Belakang, Rumusan Masalah, Kesimpulan)",
-  "teks_sebelum": "kutipan teks asli yang akan diganti (persis dari dokumen, maks 400 karakter)",
-  "teks_sesudah": "teks hasil revisi yang sudah diperbaiki/ditambahkan",
-  "jenis_perubahan": "edit|tambah|hapus|tabel|chart",
+  "bagian_direvisi": "nama section/bagian yang direvisi (misal: Latar Belakang, Rumusan Masalah, Kata Pengantar, Kesimpulan) — dipakai juga sebagai penanda lokasi jika teks_sebelum tidak ketemu persis",
+  "teks_sebelum": "kutipan PERSIS satu paragraf utuh dari dokumen asli yang akan diganti",
+  "teks_sesudah": "teks hasil revisi (pisahkan dengan \\n\\n jika perlu jadi beberapa paragraf)",
+  "jenis_perubahan": "edit|tambah|tabel",
   "penjelasan": "penjelasan singkat (1-2 kalimat) apa yang diubah dan mengapa"
 }
 
@@ -132,7 +135,7 @@ Jika perintah tidak spesifik atau bagian tidak ditemukan:
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
-        max_tokens: 4000,
+        max_tokens: 6000,
         system: systemPrompt,
         messages: [{ role: "user", content: userPrompt }],
       }),
