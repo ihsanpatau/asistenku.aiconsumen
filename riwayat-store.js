@@ -3,9 +3,25 @@ const RiwayatStore = (function () {
   const KEY = "ak_riwayat_items";
 
   // Dokumen & riwayat otomatis dihapus (beserta isi lengkapnya) setelah sekian hari,
-  // supaya localStorage browser pengguna tidak menumpuk/penuh tanpa batas. Dipakai juga
-  // oleh riwayat.html untuk menampilkan info ke pengguna.
+  // supaya localStorage browser pengguna tidak menumpuk/penuh tanpa batas.
+  // PERBAIKAN: sebelumnya batas 7 hari ini berlaku untuk SEMUA pengguna tanpa
+  // kecuali — padahal paket STANDAR (& paket berbayar lain) menjanjikan
+  // "Riwayat tanpa batas" (lihat upgrade.html). Jadi pengguna yang sudah bayar
+  // pun riwayat & dokumennya tetap terhapus paksa setelah 7 hari. Sekarang
+  // fungsi pembersihan mengecek dulu paket aktif pengguna (retensiTanpaBatas())
+  // — kalau bukan paket gratis, tidak ada yang dihapus otomatis sama sekali.
   const MASA_BERLAKU_HARI = 7;
+
+  function retensiTanpaBatas() {
+    try {
+      const plan = (
+        localStorage.getItem("user_plan") || "gratis"
+      ).toLowerCase();
+      return plan !== "gratis";
+    } catch (e) {
+      return false;
+    }
+  }
 
   function bacaMentah() {
     try {
@@ -21,8 +37,10 @@ const RiwayatStore = (function () {
   // MASA_BERLAKU_HARI hari. Dipanggil otomatis setiap kali daftar riwayat dibaca
   // (lewat semua()), jadi tidak perlu proses/cron terpisah — begitu ada entri yang
   // sudah kedaluwarsa, otomatis lenyap sendiri saat halaman manapun dibuka.
+  // TIDAK dijalankan sama sekali kalau paket pengguna punya "Riwayat tanpa batas".
   function bersihkanKedaluwarsa() {
     const list = bacaMentah();
+    if (retensiTanpaBatas()) return list;
     const batas = Date.now() - MASA_BERLAKU_HARI * 24 * 60 * 60 * 1000;
     const gugur = [];
     const sisa = [];
@@ -253,11 +271,128 @@ const RiwayatStore = (function () {
   }
 
   // Berapa hari lagi sebuah item akan otomatis dihapus (dipakai buat info di riwayat.html).
+  // Mengembalikan null kalau paket pengguna punya "Riwayat tanpa batas" (tidak ada hitung mundur).
   function hariTersisa(iso) {
+    if (retensiTanpaBatas()) return null;
     const t = new Date(iso).getTime();
     if (isNaN(t)) return null;
     const sisaMs = t + MASA_BERLAKU_HARI * 24 * 60 * 60 * 1000 - Date.now();
     return Math.max(0, Math.ceil(sisaMs / (24 * 60 * 60 * 1000)));
+  }
+
+  // ================================================================
+  // PERBAIKAN: "tempat khusus simpan file" — backup file hasil generate ke
+  // Supabase Storage (bukan cuma localStorage browser). Ini penting karena
+  // localStorage browser bisa hilang kapan saja (cache dibersihkan, ganti HP/
+  // browser, mode private, dsb) — beda dengan penyimpanan di server yang tetap
+  // ada meski begitu. Dipakai terutama oleh skripsi.html supaya kalau mahasiswa
+  // lupa unduh, filenya tetap bisa diambil lagi lewat Riwayat/Dokumen kapan pun,
+  // bahkan kalau localStorage browsernya sendiri sudah hilang/dibersihkan.
+  //
+  // Struktur penyimpanan: bucket 'dokumen-hasil', path "{user_id}/{id}.docx" —
+  // path-nya deterministik (dibangun dari id yang sama dipakai RiwayatStore),
+  // jadi tidak perlu kolom database tambahan untuk mencatat lokasi filenya.
+  // WAJIB jalankan sql/perbaikan-storage-dokumen-hasil.sql di Supabase dulu
+  // (bikin bucket + izin akses) sebelum fitur ini bisa jalan.
+  // ================================================================
+  const STORAGE_BUCKET = "dokumen-hasil";
+
+  function _userId() {
+    try {
+      const u = JSON.parse(localStorage.getItem("ak_user") || "{}");
+      return u.id || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function _tokenValid() {
+    let token = localStorage.getItem("ak_token");
+    if (typeof AkAccount !== "undefined" && AkAccount.getValidToken) {
+      try {
+        token = await AkAccount.getValidToken();
+      } catch (e) {}
+    }
+    return token;
+  }
+
+  // Unggah file (Blob) hasil dokumen ke Supabase Storage, best-effort — kalau
+  // gagal (offline, bucket belum dibuat, dsb), TIDAK mengganggu apa pun; file
+  // tetap tersimpan penuh di localStorage seperti biasa lewat simpanKonten().
+  async function unggahFile(id, blob, filename) {
+    if (!id || !blob) return false;
+    try {
+      if (typeof AK_SUPABASE_URL === "undefined") return false;
+      const userId = _userId();
+      const token = await _tokenValid();
+      if (!userId || !token) return false;
+      const ext = (filename || "").split(".").pop() || "docx";
+      const path = `${userId}/${id}.${ext}`;
+      const res = await fetch(
+        `${AK_SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`,
+        {
+          method: "POST",
+          headers: {
+            apikey: AK_SUPABASE_ANON_KEY,
+            Authorization: "Bearer " + token,
+            "Content-Type":
+              blob.type ||
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "x-upsert": "true",
+          },
+          body: blob,
+        }
+      );
+      if (!res.ok) {
+        console.error(
+          "RiwayatStore: gagal unggah file ke Storage (" + res.status + ")"
+        );
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.error("RiwayatStore: error unggah file ke Storage:", e);
+      return false;
+    }
+  }
+
+  // Unduh balik file dari Supabase Storage & langsung trigger download browser.
+  // Dipakai sebagai jalur cadangan di hasil-skripsi.html saat isi lengkap di
+  // localStorage sudah tidak ada (mis. localStorage dibersihkan / ganti device),
+  // tapi file cadangannya masih ada di server.
+  async function unduhDariCloud(id, filenameJatuhTempo) {
+    if (!id) return false;
+    try {
+      if (typeof AK_SUPABASE_URL === "undefined") return false;
+      const userId = _userId();
+      const token = await _tokenValid();
+      if (!userId || !token) return false;
+      const ext = "docx";
+      const path = `${userId}/${id}.${ext}`;
+      const res = await fetch(
+        `${AK_SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`,
+        {
+          headers: {
+            apikey: AK_SUPABASE_ANON_KEY,
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+      if (!res.ok) return false;
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filenameJatuhTempo || id + ".docx";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      return true;
+    } catch (e) {
+      console.error("RiwayatStore: error unduh dari Storage:", e);
+      return false;
+    }
   }
 
   return {
@@ -273,5 +408,8 @@ const RiwayatStore = (function () {
     tautan,
     hariTersisa,
     masaBerlakuHari: MASA_BERLAKU_HARI,
+    retensiTanpaBatas,
+    unggahFile,
+    unduhDariCloud,
   };
 })();
