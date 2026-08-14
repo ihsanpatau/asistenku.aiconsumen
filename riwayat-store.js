@@ -1,4 +1,4 @@
-/* riwayat-store.js – penyimpanan riwayat aktivitas nyata (bukan data contoh/template). Semua halaman yang menghasilkan dokumen (Tugas & Project, Skripsi, Makalah, dll.) memanggil RiwayatStore.tambah() setelah AI benar-benar selesai memproses. Halaman yang menampilkan riwayat (tugas.html, riwayat.html) memanggil RiwayatStore.semua() / RiwayatStore.byKategori() supaya yang muncul selalu sesuai aktivitas asli pengguna. */
+/* riwayat-store.js – penyimpanan riwayat aktivitas nyata (bukan data contoh/template). Semua halaman yang menghasilkan dokumen (Tugas & Project, Skripsi, Makalah, dll.) memanggil RiwayatStore.tambah() setelah AI benar-benar selesai memproses. Halaman yang menampilkan riwayat (tugas.html, riwayat.html) memanggil RiwayatStore.semua() / RiwayatStore.byKategori() supaya yang muncul selalu sesuai aktivitas asli pengguna. Setiap tambah() juga mengirim ringkasan ke Supabase (tabel 'document_log', lihat syncKeSupabase()) supaya panel ADMIN bisa melihat jumlah dokumen yang dibuat tiap pengguna — sebelumnya data ini cuma ada di localStorage browser pengguna dan tidak terlihat admin sama sekali. */
 const RiwayatStore = (function () {
   const KEY = "ak_riwayat_items";
 
@@ -65,6 +65,54 @@ const RiwayatStore = (function () {
       )
     );
     simpan(list.slice(0, 100)); // batasi maksimum 100 entri
+    // Kirim juga ke Supabase (tabel 'document_log') supaya ADMIN bisa melihat
+    // berapa file yang dibuat tiap pengguna (hari ini/minggu/bulan) — sebelumnya
+    // data ini HANYA tersimpan di localStorage browser pengguna, sama sekali
+    // tidak terlihat dari panel admin. "chat" dilewati karena itu bukan file/
+    // dokumen (chat dihitung terpisah lewat 'usage_tracking' yang sudah ada).
+    if (item.kategori !== "chat") syncKeSupabase(item);
+  }
+
+  // Kirim SATU baris ringkas ke Supabase, best-effort (fire-and-forget).
+  // Kalau gagal (offline, RLS belum di-setup, dsb) TIDAK mengganggu apapun —
+  // localStorage di atas tetap jadi sumber utama tampilan riwayat konsumen.
+  // Wajib jalankan sql/tambahan-document-log.sql di Supabase SQL Editor dulu
+  // supaya tabel 'document_log' ada, kalau belum baris ini akan gagal senyap.
+  function syncKeSupabase(item) {
+    try {
+      const token = localStorage.getItem("ak_token");
+      if (!token) return;
+      if (
+        typeof AK_SUPABASE_URL === "undefined" ||
+        typeof AK_SUPABASE_ANON_KEY === "undefined"
+      )
+        return; // shared-config.js belum dimuat di halaman ini
+      let user = {};
+      try {
+        user = JSON.parse(localStorage.getItem("ak_user") || "{}");
+      } catch (e) {}
+      if (!user.id) return;
+      fetch(AK_SUPABASE_URL + "/rest/v1/document_log", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: AK_SUPABASE_ANON_KEY,
+          Authorization: "Bearer " + token,
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+          user_email: user.email || null,
+          kategori: item.kategori || "lainnya",
+          judul: (item.judul || "").toString().substring(0, 200),
+          halaman:
+            item.halaman ||
+            (item.kataTerhitung
+              ? Math.max(1, Math.round(item.kataTerhitung / 275))
+              : 0),
+        }),
+      }).catch(function () {});
+    } catch (e) {}
   }
 
   function hapus(id) {
