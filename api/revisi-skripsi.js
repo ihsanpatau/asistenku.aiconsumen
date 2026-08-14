@@ -134,7 +134,8 @@ Jika perintah tidak spesifik atau bagian tidak ditemukan:
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5",
+        // PERBAIKAN: upgrade dari model lama (Sept 2025) ke generasi terbaru
+        model: "claude-sonnet-5",
         max_tokens: 6000,
         system: systemPrompt,
         messages: [{ role: "user", content: userPrompt }],
@@ -192,3 +193,8 @@ Jika perintah tidak spesifik atau bagian tidak ditemukan:
     return res.status(500).json({ error: "Kesalahan server: " + err.message });
   }
 };
+
+// PERBAIKAN: sama seperti api/generate.js — batas waktu fungsi server
+// diatur eksplisit ke 60 detik (aman untuk semua paket Vercel) supaya
+// proses revisi skripsi tidak mati diam-diam di tengah jalan.
+module.exports.config = { maxDuration: 60 };
