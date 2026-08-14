@@ -335,6 +335,7 @@ let docRawText = '';              // Full text dokumen asli
 let revisionHistory = [];         // [{cmd, before, after}] semua revisi
 let viewMode = 'track';           // 'track' | 'final'
 let isProcessing = false;
+let revisiDocId = null;           // id unik dokumen revisi ini, dipakai utk RiwayatStore & kuota
 
 // ─── Toast ──────────────────────────────────────────────────────────────────
 function showToast(msg, d=2800){
@@ -391,6 +392,23 @@ async function startRevisi(){
     const rawResult = await window.mammoth.extractRawText({ arrayBuffer: arrayBuffer.slice(0) });
     docRawText = rawResult.value || '';
     if(!docRawText.trim()){ throw new Error('Isi dokumen kosong atau tidak bisa dibaca.'); }
+
+    // Catat dokumen ini ke Riwayat / Dokumen Saya begitu berhasil dimuat, supaya
+    // aktivitas "Revisi Skripsi" ikut muncul di riwayat.html & favorit.html
+    // (sebelumnya fitur ini tidak pernah tercatat sama sekali di riwayat).
+    revisiDocId = 'revisi_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    if(typeof RiwayatStore !== 'undefined'){
+      RiwayatStore.tambah({
+        id: revisiDocId,
+        judul: uploadedFile.name.replace(/\.docx$/i,''),
+        kategori: 'revisi-skripsi',
+        kategoriLabel: 'Revisi Skripsi',
+        subtitle: uploadedFile.name,
+        format: 'word',
+        status: 'done',
+        link: 'revisi-skripsi.html'
+      });
+    }
 
     document.getElementById('editorFilename').textContent = uploadedFile.name;
     switchToEditor();
@@ -514,6 +532,18 @@ async function sendRevision(){
   if(!cmd){ showToast('Ketik perintah revisi terlebih dahulu'); return; }
   if(!docRawText){ showToast('Dokumen belum dimuat'); return; }
 
+  // --- GERBANG KUOTA PESAN --- (setiap perintah revisi dihitung sebagai 1 pesan,
+  // sama seperti chat di DoktrAI, supaya "Sisa Kuota Hari Ini" ikut berkurang
+  // dan konsisten dengan fitur chat lain)
+  if(typeof AkAccount !== 'undefined'){
+    const cekKuota = AkAccount.cekKuotaPesan(1);
+    if(!cekKuota.ok){
+      if(typeof AkQuotaPopup !== 'undefined') AkQuotaPopup.show(cekKuota.pesan);
+      else showToast(cekKuota.pesan);
+      return;
+    }
+  }
+
   input.value = '';
   isProcessing = true;
   document.getElementById('sendBtn').disabled = true;
@@ -566,6 +596,11 @@ Jika perintah tidak jelas atau bagian tidak ditemukan, kembalikan:
     const data = await response.json();
     if(!response.ok) throw new Error(data.error || 'Gagal merevisi');
     const result = data;
+
+    // Catat pemakaian kuota pesan SETELAH AI benar-benar merespons (bukan cuma
+    // saat tombol ditekan), supaya sisa kuota di Beranda selalu sesuai jumlah
+    // permintaan revisi yang benar-benar diproses AI.
+    if(typeof AkAccount !== 'undefined') AkAccount.catatPesan(1);
 
     if(result.error){
       aiMsgEl.className = 'msg msg-ai';
