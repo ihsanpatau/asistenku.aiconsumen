@@ -486,7 +486,22 @@ async function buildSkripsiDocxBlobRingan(text, judul, jenis, bidang, penulis, s
 
 async function downloadFile(type){
   const text = skripsiHasil || '';
-  if(!text){ showToast(legacyTanpaKontenSkripsi ? 'Dokumen lama ini tidak tersimpan penuh. Buat ulang dari halaman Skripsi.' : 'Belum ada konten skripsi tersimpan. Buat dari halaman Skripsi dulu.'); return; }
+  if(!text){
+    // PERBAIKAN: sebelumnya kalau isi lengkap tidak ada di localStorage
+    // (mis. dokumen lama, atau localStorage browser sudah dibersihkan/ganti
+    // perangkat), pengguna langsung dapat pesan gagal dan TIDAK ADA jalan
+    // lain. Sekarang dicoba dulu jalur cadangan: ambil file .docx yang sudah
+    // otomatis diunggah ke Supabase Storage saat dokumen ini pertama kali
+    // dibuat (lihat skripsi.html). Kalau ketemu, unduh langsung dari sana.
+    if(idSkripsiDibuka && typeof RiwayatStore !== 'undefined' && RiwayatStore.unduhDariCloud){
+      showToast('Mengambil file dari penyimpanan cloud...');
+      const namaFile = (data.judul || 'Skripsi').substring(0,40).replace(/[^a-z0-9]+/gi,'_') + '.docx';
+      const berhasil = await RiwayatStore.unduhDariCloud(idSkripsiDibuka, namaFile);
+      if(berhasil){ showToast('File berhasil diunduh dari cloud!'); return; }
+    }
+    showToast(legacyTanpaKontenSkripsi ? 'Dokumen lama ini tidak tersimpan penuh. Buat ulang dari halaman Skripsi.' : 'Belum ada konten skripsi tersimpan. Buat dari halaman Skripsi dulu.');
+    return;
+  }
   const judul = (data.judul || 'Skripsi').substring(0,40).replace(/[^a-z0-9]+/gi,'_');
   // "Sampul" cuma relevan untuk dokumen BAB penuh / outline, bukan untuk potongan
   // kecil seperti Abstrak/Rumusan Masalah/Daftar Pustaka saja.

@@ -65,12 +65,17 @@
       <button class="tab-btn" onclick="filterTab(this,'chat')">Chat AI</button>
     </div>
 
-    <!-- Info retensi 7 hari: biar pengguna tahu dokumen otomatis dihapus supaya
-         penyimpanan tidak penuh, dan diingatkan untuk mengunduh yang penting. -->
-    <div style="margin:0 16px 14px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:14px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
+    <!-- Info retensi 7 hari: biar pengguna PAKET GRATIS tahu dokumen otomatis
+         dihapus supaya penyimpanan tidak penuh, dan diingatkan untuk mengunduh
+         yang penting. PERBAIKAN: sebelumnya banner ini selalu tampil untuk
+         SEMUA orang, padahal paket berbayar (STANDAR dst.) sudah "Riwayat
+         tanpa batas" — banner-nya jadi salah info untuk pengguna yang sudah
+         bayar. Sekarang otomatis disembunyikan lewat JS kalau paketnya bukan
+         gratis (lihat initRetensiBanner() di bawah). -->
+    <div id="retensiBanner" style="margin:0 16px 14px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:14px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
       <div style="font-size:11.5px;color:#92400E;line-height:1.5;">
-        <strong>Riwayat &amp; dokumen otomatis terhapus setelah 7 hari</strong> agar penyimpanan tidak penuh. Pastikan dokumen penting sudah diunduh sebelum masa berlakunya habis.
+        <strong>Riwayat &amp; dokumen otomatis terhapus setelah 7 hari</strong> agar penyimpanan tidak penuh. Pastikan dokumen penting sudah diunduh sebelum masa berlakunya habis, atau <a href="upgrade.html" style="color:#92400E;text-decoration:underline;font-weight:700;">upgrade paket</a> untuk riwayat tanpa batas.
       </div>
     </div>
 
@@ -104,6 +109,17 @@
 <script>
 function showToast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 if(!localStorage.getItem('ak_token')){window.location.href='login.html';}
+
+// PERBAIKAN: sembunyikan banner "terhapus 7 hari" untuk pengguna paket
+// berbayar, karena paket mereka sudah "Riwayat tanpa batas" — lihat
+// RiwayatStore.retensiTanpaBatas() di riwayat-store.js.
+function initRetensiBanner(){
+  if(typeof RiwayatStore !== 'undefined' && RiwayatStore.retensiTanpaBatas && RiwayatStore.retensiTanpaBatas()){
+    const b = document.getElementById('retensiBanner');
+    if(b) b.style.display='none';
+  }
+}
+initRetensiBanner();
 
 const riwayatIconMap = {
   tugas:   { bg:'linear-gradient(135deg,#2B579A,#1E3E75)', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' },

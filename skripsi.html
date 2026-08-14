@@ -1363,6 +1363,20 @@ ATURAN PENULISAN PENTING:
             hasil: result
           });
         }
+        // ================================================================
+        // PERBAIKAN: "tempat khusus simpan file" — begitu dokumen selesai
+        // dibuat, file .docx-nya langsung dibangun & diunggah ke Supabase
+        // Storage sebagai cadangan (bukan cuma tersimpan di localStorage
+        // browser). Ini supaya kalau mahasiswa lupa unduh dan localStorage
+        // browsernya nanti terhapus/ganti perangkat, filenya TETAP bisa
+        // diambil lagi lewat Riwayat/Dokumen (lihat hasil-skripsi.html —
+        // fallback unduh dari cloud). Dijalankan diam-diam di latar belakang,
+        // tidak menunda tampilan hasil ke pengguna.
+        if (typeof RiwayatStore !== 'undefined' && RiwayatStore.unggahFile) {
+          buildFileBlob('word').then(({ blob, filename }) => {
+            RiwayatStore.unggahFile(skripsiItemId, blob, filename);
+          }).catch(() => {});
+        }
       }
     } else {
       throw new Error('No content');
