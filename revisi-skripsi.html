@@ -325,6 +325,7 @@
 <script>
 if(!localStorage.getItem('ak_token')){ window.location.href='login.html'; }
 if(window.pdfjsLib){ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; }
+document.addEventListener('DOMContentLoaded', cobaMuatRevisiDariRiwayat);
 
 // ─── State ──────────────────────────────────────────────────────────────────
 let uploadedFile = null;
@@ -336,6 +337,47 @@ let revisionHistory = [];         // [{cmd, before, after}] semua revisi
 let viewMode = 'track';           // 'track' | 'final'
 let isProcessing = false;
 let revisiDocId = null;           // id unik dokumen revisi ini, dipakai utk RiwayatStore & kuota
+
+// ================================================================
+// PERBAIKAN: sebelumnya dokumen revisi TIDAK PERNAH bisa dibuka ulang dari
+// "Dokumen Saya" / Riwayat — item riwayatnya tercatat (lihat startRevisi di bawah),
+// tapi isi & hasil revisiannya tidak pernah disimpan permanen, jadi begitu diklik
+// lagi dari Riwayat, halaman ini cuma kembali ke layar upload kosong (seolah-olah
+// belum pernah dikerjakan). Sekarang: isi editor (HTML dokumen + riwayat revisi)
+// disimpan lewat RiwayatStore.simpanKonten() setiap kali sebuah revisi berhasil
+// diterapkan / setelah file dimuat, dan kalau halaman dibuka dengan ?id=..., isi
+// itu dimuat balik langsung ke editor tanpa perlu upload ulang file aslinya.
+function simpanProgresRevisi(){
+  if(!revisiDocId || typeof RiwayatStore === 'undefined' || !RiwayatStore.simpanKonten) return;
+  try{
+    RiwayatStore.simpanKonten(revisiDocId, {
+      filename: uploadedFile ? uploadedFile.name : (revisiKontenTersimpan && revisiKontenTersimpan.filename) || 'skripsi.docx',
+      docHtml: document.getElementById('docPaper') ? document.getElementById('docPaper').innerHTML : '',
+      docRawText,
+      revisionHistory
+    });
+  }catch(e){}
+}
+
+let revisiKontenTersimpan = null;
+function cobaMuatRevisiDariRiwayat(){
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  if(!id || typeof RiwayatStore === 'undefined' || !RiwayatStore.ambilKonten) return false;
+  const konten = RiwayatStore.ambilKonten(id);
+  if(!konten || !konten.docHtml) return false;
+  revisiKontenTersimpan = konten;
+  revisiDocId = id;
+  document.getElementById('docPaper').innerHTML = konten.docHtml;
+  document.getElementById('docPaper').querySelectorAll('[data-sec-id]').forEach(el=>{});
+  docRawText = konten.docRawText || '';
+  revisionHistory = konten.revisionHistory || [];
+  document.getElementById('editorFilename').textContent = konten.filename || 'skripsi.docx';
+  switchToEditor();
+  applyViewMode();
+  showToast('Dokumen revisi sebelumnya berhasil dimuat ✅');
+  return true;
+}
 
 // ─── Toast ──────────────────────────────────────────────────────────────────
 function showToast(msg, d=2800){
@@ -412,6 +454,7 @@ async function startRevisi(){
 
     document.getElementById('editorFilename').textContent = uploadedFile.name;
     switchToEditor();
+    simpanProgresRevisi(); // simpan versi awal supaya bisa dibuka ulang meski belum direvisi
     hideLoading();
     showToast('Dokumen berhasil dimuat ✅');
   } catch(e){
@@ -615,12 +658,14 @@ Jika perintah tidak jelas atau bagian tidak ditemukan, kembalikan:
           <span style="font-size:11px;margin-top:4px;display:block;">${escHtml(result.penjelasan)}</span>`;
         revisionHistory.push({ cmd, before: result.teks_sebelum, after: result.teks_sesudah, bagian: result.bagian_direvisi });
         applyViewMode();
+        simpanProgresRevisi(); // simpan progres terbaru supaya tidak hilang kalau halaman ditutup
       } else {
         aiMsgEl.innerHTML = `⚠️ Tidak bisa menemukan teks yang persis di dokumen.<br>
           <span style="font-size:11px;">Teks hasil revisi AI:<br><i>${escHtml((result.teks_sesudah||'').substring(0,200))}</i></span>`;
         // Tampilkan hasil revisi sebagai blok baru di bawah
         appendNewBlock(result);
         applyViewMode();
+        simpanProgresRevisi();
       }
     }
 
@@ -843,22 +888,12 @@ async function downloadDocx(){
   }
 }
 
-// Buat .docx minimal dari teks (client-side, menggunakan JSZip via CDN)
+// PERBAIKAN: sebelumnya fungsi ini memanggil /api/generate ("format teks ini...")
+// tapi HASILNYA DIBUANG (variabel `response` tidak pernah dipakai) — jadi setiap
+// kali user klik "Unduh .docx", kuota permintaan AI kepotong sia-sia tanpa dipakai
+// sama sekali, dan tetap jatuh ke docx client-side yang sama. Panggilan API yang
+// tidak berguna itu sudah dihapus — langsung build docx dari teks final.
 async function buildSimpleDocx(text, filename){
-  // Gunakan endpoint generate untuk buat docx yang lebih proper
-  // dengan mengirim teks ke server
-  const token = await AkAccount.getValidToken();
-  const response = await fetch('/api/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-    body: JSON.stringify({
-      system: 'Kamu adalah formatter dokumen. Format teks berikut menjadi dokumen akademik yang rapi. Pertahankan semua isi, struktur bab, dan tabel yang ada. Jangan ubah isi, hanya rapikan formatnya.',
-      academicMode: true,
-      max_tokens: 100,
-      messages: [{ role: 'user', content: 'OK' }]
-    })
-  });
-  // Buat docx client-side sebagai fallback sederhana
   return buildClientDocx(text);
 }
 

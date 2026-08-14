@@ -1351,8 +1351,14 @@ ATURAN PENULISAN PENTING:
           link: 'hasil-skripsi.html'
         });
         if (RiwayatStore.simpanKonten) {
+          // PERBAIKAN: sebelumnya "penulis" & "spasi" TIDAK ikut disimpan di sini,
+          // padahal keduanya dipakai untuk sampul & format Word. Akibatnya kalau
+          // dokumen ini dibuka lagi lewat hasil-skripsi.html, nama penulis di sampul
+          // selalu kosong/dummy dan hasil unduhan tidak mengikuti spasi yang dipilih.
+          const penulisUntukSimpan = document.getElementById('namaPenulisSkripsi')?.value.trim() || '';
+          const spasiUntukSimpan = document.getElementById('spasiBaris')?.value || '1.5';
           RiwayatStore.simpanKonten(skripsiItemId, {
-            data: { judul, jenis, deskripsi, bidang, halaman, jenisDokumen },
+            data: { judul, jenis, deskripsi, bidang, halaman, jenisDokumen, penulis: penulisUntukSimpan, spasi: spasiUntukSimpan },
             outline: [],
             hasil: result
           });

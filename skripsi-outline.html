@@ -9,6 +9,14 @@
 <link rel="stylesheet" href="style.css">
 <script src="theme.js"></script>
 <script src="i18n.js"></script>
+<!-- PERBAIKAN: halaman ini memanggil AkAccount.getValidToken() saat generate outline,
+     tapi sebelumnya TIDAK memuat shared-config.js/riwayat-store.js/account.js sama
+     sekali -> AkAccount undefined -> "Buat Outline" selalu gagal dengan error
+     "AkAccount is not defined" begitu tombol ditekan. -->
+<script src="shared-config.js"></script>
+<script src="riwayat-store.js"></script>
+<script src="account.js"></script>
+<script src="sync-plan.js"></script>
 <style>
 .outline-item {
   background: var(--white);

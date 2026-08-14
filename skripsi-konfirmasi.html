@@ -9,6 +9,17 @@
 <link rel="stylesheet" href="style.css">
 <script src="theme.js"></script>
 <script src="i18n.js"></script>
+<!-- PERBAIKAN: halaman ini memanggil AkAccount.getValidToken() di dalam generateBab()
+     saat "Mulai Generate Skripsi" ditekan, tapi sebelumnya TIDAK memuat
+     shared-config.js/riwayat-store.js/account.js sama sekali -> AkAccount undefined ->
+     setiap generate BAB langsung gagal ("AkAccount is not defined") sebelum sempat
+     memanggil AI, sehingga skripsi_hasil tidak pernah terisi dan hasil-skripsi.html
+     ujung-ujungnya cuma menampilkan halaman kosong/template. -->
+<script src="shared-config.js"></script>
+<script src="riwayat-store.js"></script>
+<script src="account.js"></script>
+<script src="sync-plan.js"></script>
+<script src="quota-popup.js"></script>
 <style>
 .confirm-row { display:flex; justify-content:space-between; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--gray-100); font-size:13px; }
 .confirm-row:last-child { border-bottom:none; }
@@ -149,6 +160,17 @@ async function generateBab(babLabel, babDesc){
 }
 
 async function startGenerate(){
+  // --- GERBANG KUOTA: cek dulu sebelum mulai generate 5 BAB, sama seperti
+  // Makalah/Jurnal/Tugas — sebelumnya halaman ini tidak pernah mengecek kuota
+  // sama sekali karena AkAccount belum dimuat. ---
+  if (typeof AkAccount !== 'undefined') {
+    const estimasiHalaman = parseInt(data.halaman, 10) || 80;
+    const cek = AkAccount.cekKuotaHalaman(estimasiHalaman);
+    if (!cek.ok) {
+      if (typeof AkQuotaPopup !== 'undefined') AkQuotaPopup.show(cek.pesan); else showToast(cek.pesan);
+      return;
+    }
+  }
   document.getElementById('btnGenerate').style.display='none';
   document.getElementById('generatingView').style.display='block';
   const babList=[

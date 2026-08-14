@@ -17,6 +17,11 @@
 <script src="riwayat-store.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
+<!-- PERBAIKAN: sebelumnya tombol "Word" di halaman ini cuma membungkus teks mentah
+     jadi HTML lalu di-save-as .doc (bukan docx asli, tanpa sampul/format Bab).
+     Sekarang pakai library docx.js yang sama seperti skripsi.html supaya hasil
+     unduhannya adalah .docx asli dengan sampul, heading Bab, dan tabel yang rapi. -->
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <style>
 .preview-page {
   background: var(--white);
@@ -168,8 +173,14 @@
           <div style="display:flex;justify-content:center;margin-bottom:12px;">
             <svg width="50" height="50" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="#1A2B6D" stroke-width="4"/><circle cx="50" cy="50" r="35" fill="none" stroke="#1A2B6D" stroke-width="2"/><path d="M30 60 Q50 30 70 60" fill="none" stroke="#1A2B6D" stroke-width="2"/><circle cx="50" cy="50" r="5" fill="#1A2B6D"/></svg>
           </div>
-          <p style="text-align:center;font-size:11px;">Oleh:<br><strong>ANDI PRATAMA</strong><br>NIM. 2020123456</p>
-          <p style="text-align:center;font-size:10px;margin-top:12px;text-transform:uppercase;">PROGRAM STUDI MANAJEMEN<br>FAKULTAS EKONOMI DAN BISNIS<br>UNIVERSITAS MAJU BERSAMA<br>2026</p>
+          <!-- PERBAIKAN: sebelumnya baris di bawah ini HARDCODED "ANDI PRATAMA" / NIM
+               2020123456 / "UNIVERSITAS MAJU BERSAMA" untuk SEMUA dokumen siapa pun —
+               itu sebabnya sampul terasa "cuma template". Sekarang diisi dari data asli
+               (penulis/bidang tersimpan), dan kalau memang belum diisi penulis saat
+               generate, tampilkan titik-titik kosong (bukan nama orang lain) supaya
+               tidak menyesatkan. -->
+          <p style="text-align:center;font-size:11px;" id="previewPenulisBlok">Oleh:<br><strong id="previewPenulis">......................................</strong><br>NIM. ......................................</p>
+          <p style="text-align:center;font-size:10px;margin-top:12px;text-transform:uppercase;" id="previewBidangBlok"></p>
         </div>
       </div>
     </div>
@@ -208,14 +219,10 @@
           <div class="dl-icon" style="background:#DC2626;">PDF</div>
           <div class="dl-label">PDF (.pdf)</div>
         </div>
-        <div class="dl-btn" onclick="downloadFile('PPT')">
-          <div class="dl-icon" style="background:#D97706;">PPT</div>
-          <div class="dl-label">PowerPoint</div>
-        </div>
-        <div class="dl-btn" onclick="downloadFile('Excel')">
-          <div class="dl-icon" style="background:#16A34A;">XLS</div>
-          <div class="dl-label">Excel (.xlsx)</div>
-        </div>
+        <!-- PERBAIKAN: tombol PPT & Excel dihapus dari sini — dokumen skripsi selalu
+             berupa teks (bukan slide/spreadsheet), jadi kedua tombol ini sebelumnya
+             cuma menampilkan pesan "belum didukung" saat diklik. Kalau nanti mau
+             fitur "ubah skripsi jadi presentasi", itu sudah ada di presentasi.html. -->
         <div class="dl-btn" onclick="downloadFile('TXT')">
           <div class="dl-icon" style="background:#6B7280;">TXT</div>
           <div class="dl-label">TXT (.txt)</div>
@@ -276,6 +283,9 @@ if(data.judul){
   document.getElementById('hasilJudul').textContent=data.judul.substring(0,40)+'...';
   document.getElementById('previewSubtitle').textContent=data.judul.toUpperCase();
 }
+// PERBAIKAN: isi sampul preview dari data ASLI (bukan hardcoded "Andi Pratama" dkk).
+if(data.penulis){ document.getElementById('previewPenulis').textContent=data.penulis.toUpperCase(); }
+document.getElementById('previewBidangBlok').innerHTML = [data.bidang, now.getFullYear()].filter(Boolean).map(escapeHtmlHasilSkripsi).join('<br>');
 // Render outline
 if(outline.length){
   document.getElementById('outlineResult').innerHTML=outline.map((b,i)=>`
@@ -336,7 +346,8 @@ function switchTab(tab, btn){
 function escapeHtmlHasilSkripsi(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function inlineHasilSkripsi(s){ return escapeHtmlHasilSkripsi(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>'); }
 
-// Ubah teks hasil skripsi jadi paragraf HTML untuk export PDF/Word.
+// Ubah teks hasil skripsi jadi paragraf HTML untuk export PDF (Word sekarang
+// pakai docx.js asli di buildSkripsiDocxBlobRingan, lihat di bawah).
 // Sebelumnya fungsi ini cuma memecah per baris-kosong tanpa membuang sisa sintaks
 // markdown (garis pemisah "---", tanda bintang "**") yang kadang masih terbawa AI,
 // jadi ikut tercetak mentah di file yang diunduh.
@@ -348,25 +359,165 @@ function buatBodyHtmlSkripsi(text){
     .join('');
 }
 
-function downloadFile(type){
+// ==== PERBAIKAN: sebelumnya tombol "Word" cuma membungkus teks polos jadi HTML lalu
+// disimpan sebagai .doc (bukan docx asli, tanpa sampul, tanpa format heading Bab/tabel).
+// Fungsi di bawah ini adalah versi ringkas dari buildSkripsiDocxBlob() yang sudah
+// dipakai & terbukti bagus di skripsi.html — pakai library docx.js supaya hasil
+// unduhan benar-benar file .docx yang valid & rapi, dengan sampul (kalau ada judul)
+// dan tabel [TABEL]...[/TABEL] dirender sebagai tabel Word asli (bukan teks mentah). ====
+function extractTabelBlocksHasilSkripsi(text){
+  const tables = [];
+  const cleaned = (text||'').replace(/\[TABEL\]([\s\S]*?)\[\/TABEL\]/g, (match, inner) => {
+    const lines = inner.trim().split('\n').map(l=>l.trim()).filter(Boolean);
+    if(!lines.length) return '';
+    const judul = lines[0].includes('|') ? '' : lines.shift();
+    let sumber = '';
+    if(lines.length && /^sumber\s*:/i.test(lines[0])){
+      sumber = lines.shift().replace(/^sumber\s*:\s*/i,'').trim();
+    }
+    const rows = lines.map(l => l.split('|').map(c=>c.trim()));
+    tables.push({ judul, sumber, rows });
+    return `[[TABEL_${tables.length-1}]]`;
+  });
+  return { cleaned, tables };
+}
+
+async function buildSkripsiDocxBlobRingan(text, judul, jenis, bidang, penulis, spasi, includeCover){
+  const { Document, Packer, Paragraph, TextRun, AlignmentType, PageBreak, Table, TableRow, TableCell, WidthType, ShadingType } = docx;
+  const lineSpacingMap = { '1':240, '1.15':276, '1.5':360, '2':480 };
+  const lineVal = lineSpacingMap[spasi] || 360;
+  const children = [];
+
+  function buildDocxTable(t){
+    const rows = t.rows.map((row, ri) => new TableRow({
+      children: row.map(cell => new TableCell({
+        width: { size: Math.floor(9000/row.length), type: WidthType.DXA },
+        shading: ri===0 ? { type: ShadingType.SOLID, color: 'E5E7EB', fill: 'E5E7EB' } : undefined,
+        children: [new Paragraph({ alignment: AlignmentType.CENTER, children:[new TextRun({text:cell, bold: ri===0})] })]
+      }))
+    }));
+    const out = [];
+    if(t.judul) out.push(new Paragraph({ children:[new TextRun({text:t.judul, bold:true})], alignment: AlignmentType.CENTER, spacing:{before:300,after:100} }));
+    out.push(new Table({ width:{size:9000, type:WidthType.DXA}, rows }));
+    if(t.sumber) out.push(new Paragraph({ children:[new TextRun({text:'Sumber: '+t.sumber, italics:true, size:18})], alignment: AlignmentType.LEFT, spacing:{before:80,after:150} }));
+    else out.push(new Paragraph({ text:'', spacing:{after:200} }));
+    return out;
+  }
+
+  if(includeCover){
+    children.push(new Paragraph({ children:[new TextRun({text:(judul||'SKRIPSI').toUpperCase(), bold:true, size:30})], alignment: AlignmentType.CENTER, spacing:{after:500} }));
+    children.push(new Paragraph({ children:[new TextRun('Diajukan Untuk Memenuhi Salah Satu Syarat Memperoleh Gelar Sarjana')], alignment: AlignmentType.CENTER }));
+    if(jenis) children.push(new Paragraph({ children:[new TextRun('Jenis Penelitian: '+jenis)], alignment: AlignmentType.CENTER }));
+    children.push(new Paragraph({ children:[new TextRun(bidang||' ')], alignment: AlignmentType.CENTER, spacing:{after:500} }));
+    children.push(new Paragraph({ children:[new TextRun('Oleh:')], alignment: AlignmentType.CENTER, spacing:{before:700} }));
+    children.push(new Paragraph({ children:[new TextRun({text:penulis || '......................................', bold:true})], alignment: AlignmentType.CENTER }));
+    children.push(new Paragraph({ children:[new TextRun('NIM. ......................................')], alignment: AlignmentType.CENTER, spacing:{after:500} }));
+    children.push(new Paragraph({ children:[new PageBreak()] }));
+  }
+
+  const { cleaned, tables } = extractTabelBlocksHasilSkripsi(text);
+  const lines = (cleaned||'').split('\n');
+  let inPustaka = false;
+  let paraBuffer = [];
+  function flushPara(){
+    if(paraBuffer.length){
+      const joined = paraBuffer.join(' ').trim();
+      if(joined){
+        children.push(new Paragraph({
+          children:[new TextRun(joined)],
+          alignment: AlignmentType.JUSTIFIED,
+          indent: { firstLine: 720 },
+          spacing: { line: lineVal, after: 200 }
+        }));
+      }
+      paraBuffer = [];
+    }
+  }
+  lines.forEach(raw=>{
+    const line = (raw||'').trim();
+    if(!line){ flushPara(); return; }
+    if(/^(-{3,}|\*{3,}|_{3,})$/.test(line)){ flushPara(); return; }
+    const tableMatch = line.match(/^\[\[TABEL_(\d+)\]\]$/);
+    if(tableMatch){
+      flushPara();
+      const t = tables[parseInt(tableMatch[1],10)];
+      if(t) children.push(...buildDocxTable(t));
+      return;
+    }
+    if(/^DAFTAR PUSTAKA$/i.test(line)){
+      flushPara();
+      inPustaka = true;
+      children.push(new Paragraph({ children:[new TextRun({text:'DAFTAR PUSTAKA', bold:true})], alignment: AlignmentType.CENTER, spacing:{before:500, after:250} }));
+      return;
+    }
+    if(inPustaka){
+      children.push(new Paragraph({
+        children:[new TextRun(line)],
+        indent: { left:720, hanging:720 },
+        spacing: { line: lineVal, after: 160 }
+      }));
+      return;
+    }
+    if(/^BAB\s+[IVXLC]+/i.test(line)){
+      flushPara();
+      children.push(new Paragraph({ children:[new TextRun({text:line.toUpperCase(), bold:true})], alignment: AlignmentType.CENTER, spacing:{before:400} }));
+    } else if(/^[A-Z][A-Z\s]{3,59}$/.test(line) && line.split(' ').length<=6){
+      flushPara();
+      children.push(new Paragraph({ children:[new TextRun({text:line, bold:true})], alignment: AlignmentType.CENTER, spacing:{after:300} }));
+    } else if(/^\d+(\.\d+){1,2}\s+\S/.test(line)){
+      flushPara();
+      children.push(new Paragraph({ children:[new TextRun({text:line, bold:true})], spacing:{before:300, after:150} }));
+    } else if(/^[-*•]\s+/.test(line)){
+      flushPara();
+      children.push(new Paragraph({
+        children:[new TextRun('•  '+line.replace(/^[-*•]\s+/,''))],
+        indent: { left: 720 },
+        spacing: { line: lineVal, after: 120 }
+      }));
+    } else {
+      paraBuffer.push(line);
+    }
+  });
+  flushPara();
+
+  const docObj = new Document({ sections: [{ children }] });
+  return await Packer.toBlob(docObj);
+}
+
+async function downloadFile(type){
   const text = skripsiHasil || '';
   if(!text){ showToast(legacyTanpaKontenSkripsi ? 'Dokumen lama ini tidak tersimpan penuh. Buat ulang dari halaman Skripsi.' : 'Belum ada konten skripsi tersimpan. Buat dari halaman Skripsi dulu.'); return; }
   const judul = (data.judul || 'Skripsi').substring(0,40).replace(/[^a-z0-9]+/gi,'_');
-  const bodyHtml = buatBodyHtmlSkripsi(text);
+  // "Sampul" cuma relevan untuk dokumen BAB penuh / outline, bukan untuk potongan
+  // kecil seperti Abstrak/Rumusan Masalah/Daftar Pustaka saja.
+  const includeCover = ['BAB 1','BAB 2','BAB 3','BAB 4','BAB 5','outline'].includes(data.jenisDokumen);
 
   if(type==='PDF'){
+    const bodyHtml = (includeCover ? `<div style="text-align:center;padding:60px 10px 30px;">
+      <div style="font-size:15px;font-weight:800;text-transform:uppercase;line-height:1.5;margin-bottom:36px;">${escapeHtmlHasilSkripsi(data.judul||'Skripsi')}</div>
+      <div style="font-size:12px;">Diajukan Untuk Memenuhi Salah Satu Syarat Memperoleh Gelar Sarjana</div>
+      ${data.bidang?`<div style="font-size:12px;margin:8px 0 36px;">${escapeHtmlHasilSkripsi(data.bidang)}</div>`:'<div style="margin-bottom:36px;"></div>'}
+      <div style="font-size:12px;">Oleh:</div>
+      <div style="font-size:13px;font-weight:700;">${data.penulis?escapeHtmlHasilSkripsi(data.penulis):'......................................'}</div>
+      <div style="font-size:11px;">NIM. ......................................</div>
+      <div style="page-break-after:always;"></div></div>` : '') + buatBodyHtmlSkripsi(text);
     const win=window.open('','_blank');
     win.document.write(`<html><head><title>${judul}</title><meta charset="utf-8"><style>body{font-family:'Times New Roman',serif;font-size:12pt;line-height:1.8;padding:40px;text-align:justify;}p{margin:0 0 14px;text-indent:1.25cm;}</style></head><body>${bodyHtml}</body></html>`);
     win.document.close(); win.focus();
     setTimeout(()=>win.print(),400);
   } else if(type==='Word'){
-    const html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>${judul}</title></head><body style="font-family:'Times New Roman';font-size:12pt;line-height:1.8;">${bodyHtml}</body></html>`;
-    const blob=new Blob(['\ufeff',html],{type:'application/msword'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download=judul+'.doc';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast('File Word berhasil diunduh!');
+    if(typeof docx==='undefined'){ showToast('Modul pembuat Word gagal dimuat, cek koneksi internet lalu coba lagi.'); return; }
+    showToast('Menyiapkan file Word...');
+    try{
+      const blob = await buildSkripsiDocxBlobRingan(text, data.judul||'Skripsi', data.jenis||'', data.bidang||'', data.penulis||'', data.spasi||'1.5', includeCover);
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download=judul+'.docx';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('File Word (.docx) berhasil diunduh!');
+    }catch(e){
+      showToast('Gagal membuat file Word: '+e.message);
+    }
   } else if(type==='TXT'){
     const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
     const url=URL.createObjectURL(blob);
@@ -375,7 +526,7 @@ function downloadFile(type){
     URL.revokeObjectURL(url);
     showToast('File TXT berhasil diunduh!');
   } else {
-    showToast(type+' export belum didukung, gunakan Word/PDF/TXT untuk saat ini.');
+    showToast(type+' tidak berlaku untuk dokumen skripsi. Gunakan Word/PDF/TXT.');
   }
 }
 function showMenu(){showToast('Menu aksi');}
