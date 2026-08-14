@@ -63,7 +63,17 @@ const GAYA_PENULISAN_AKADEMIK_FALLBACK =
 // ada input yang salah/disalahgunakan. ---
 const DEFAULT_MAX_TOKENS = 8192; // naik dari 4096 lama, tetap aman utk request tanpa target eksplisit
 const MIN_MAX_TOKENS = 1024;
-const HARD_CAP_MAX_TOKENS = 32000; // jauh di bawah limit model (64k), cukup luas utk dokumen ±25 halaman
+// PERBAIKAN: sebelumnya 32000 — Claude Sonnet 5 SANGGUP output sampai 128.000
+// token, tapi angka itu tidak realistis selesai dalam 60 detik (batas waktu
+// fungsi server, lihat module.exports.config di bawah), jadi permintaan
+// besar berisiko dimatikan paksa di tengah jalan (menyebabkan popup "AI
+// Sedang Bekerja" macet selamanya). 24000 token dipilih supaya HAMPIR SELALU
+// selesai dengan aman dalam 60 detik; dokumen yang butuh lebih panjang dari
+// ini akan otomatis "disambung" lewat mekanisme continuation yang sudah ada
+// di hasil-tugas.html/skripsi.html (callAIWithContinuation), bukan dipotong
+// diam-diam. Kalau nanti maxDuration dinaikkan (lihat catatan di bawah),
+// angka ini bisa dinaikkan berbarengan.
+const HARD_CAP_MAX_TOKENS = 24000;
 
 function resolveMaxTokens(requested) {
   const n = Number(requested);
@@ -217,7 +227,11 @@ module.exports = async (req, res) => {
       : GAYA_PENULISAN;
 
     const body = {
-      model: "claude-sonnet-4-5",
+      // PERBAIKAN: sebelumnya pakai "claude-sonnet-4-5" (snapshot September 2025) —
+      // sudah beberapa generasi tertinggal. Sekarang pakai "claude-sonnet-5", model
+      // generasi terbaru, supaya kualitas tulisan AI (jurnal/tugas/skripsi/dll.)
+      // setara dengan Claude versi terkini, bukan versi lama.
+      model: "claude-sonnet-5",
       max_tokens: resolveMaxTokens(max_tokens),
       system: finalSystem,
       messages:
@@ -269,3 +283,17 @@ module.exports = async (req, res) => {
       .json({ error: "Terjadi kesalahan server: " + err.message });
   }
 };
+
+// PERBAIKAN: Vercel akan mematikan paksa fungsi server kalau berjalan lebih
+// lama dari batas waktunya — sebelumnya batas ini TIDAK diatur eksplisit di
+// sini, jadi kemungkinan besar ikut default yang lebih rendah (bisa cuma
+// 10 detik tergantung paket Vercel Anda), padahal generate dokumen panjang
+// (skripsi/jurnal/tugas) wajar butuh puluhan detik. Kalau fungsinya mati di
+// tengah jalan, popup "AI Sedang Bekerja" di browser bisa nyangkut selamanya
+// karena tidak pernah dapat balasan. 60 detik ini AMAN untuk semua paket
+// Vercel (Hobby & Pro) tanpa perlu setting tambahan apa pun. Kalau paket
+// Vercel Anda Pro/Enterprise dan mengaktifkan "Fluid Compute", angka ini
+// bisa dinaikkan sampai 300 (5 menit) untuk dokumen yang sangat panjang —
+// tanya dulu ke developer/Claude sebelum menaikkan, karena max_tokens di
+// atas juga perlu disesuaikan berbarengan.
+module.exports.config = { maxDuration: 60 };
