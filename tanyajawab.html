@@ -399,6 +399,7 @@ let edProcessing = false;
 let edRevisionHistory = [];
 let edDoc = null;              // instance DocxRealEditor — model XML asli file .docx
 let edChangeMap = new Map();   // blockId -> {before, badge, label} untuk overlay track-changes
+let edDocId = null;            // id unik dokumen tab Editor AI, dipakai utk RiwayatStore
 
 // ── Upload handlers ──────────────────────────────────────────
 function edDragOver(e){ e.preventDefault(); document.getElementById('edDrop').classList.add('drag-over'); }
@@ -439,6 +440,24 @@ async function edStartEditor(){
     const sv = document.getElementById('editorSplitView');
     sv.style.display = 'flex'; sv.style.flexDirection = 'column';
     showToast('Dokumen asli berhasil dimuat ✅');
+
+    // PERBAIKAN BUG: tab "Editor AI" sebelumnya TIDAK PERNAH mencatat ke
+    // Riwayat/Dokumen Saya sama sekali (beda dengan tab "Revisi Cepat" di
+    // bawah yang sudah dicatat). Sekarang dicatat begitu file berhasil
+    // dimuat, sama seperti pola di revisi-skripsi.html.
+    edDocId = 'ed_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    if (typeof RiwayatStore !== 'undefined') {
+      RiwayatStore.tambah({
+        id: edDocId,
+        judul: edFile.name.replace(/\.docx$/i, ''),
+        kategori: 'tanyajawab',
+        kategoriLabel: 'Revisi Skripsi',
+        subtitle: edFile.name,
+        format: 'word',
+        status: 'done',
+        link: 'tanyajawab.html'
+      });
+    }
   } catch(e){
     showToast('Gagal membaca file: ' + e.message);
   } finally {
@@ -470,7 +489,7 @@ function edRenderPaper(){
 function edBackToUpload(){
   document.getElementById('editorSplitView').style.display = 'none';
   document.getElementById('editorUploadPhase').style.display = 'block';
-  edDoc = null; edFile = null; edChangeMap = new Map(); edRevisionHistory = [];
+  edDoc = null; edFile = null; edChangeMap = new Map(); edRevisionHistory = []; edDocId = null;
   document.getElementById('edMsgs').innerHTML = '';
   document.getElementById('edDrop').classList.remove('filled');
   document.getElementById('edStartBtn').disabled = true;
