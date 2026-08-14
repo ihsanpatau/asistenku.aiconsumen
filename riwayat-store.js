@@ -76,12 +76,26 @@ const RiwayatStore = (function () {
   // Kirim SATU baris ringkas ke Supabase, best-effort (fire-and-forget).
   // Kalau gagal (offline, RLS belum di-setup, dsb) TIDAK mengganggu apapun —
   // localStorage di atas tetap jadi sumber utama tampilan riwayat konsumen.
-  // Wajib jalankan sql/tambahan-document-log.sql di Supabase SQL Editor dulu
-  // supaya tabel 'document_log' ada, kalau belum baris ini akan gagal senyap.
-  function syncKeSupabase(item) {
+  // Wajib jalankan sql/perbaikan-document-log-dan-akses-admin.sql di Supabase
+  // SQL Editor dulu supaya tabel 'document_log' ada, kalau belum baris ini
+  // akan gagal senyap.
+  //
+  // PERBAIKAN: sebelumnya fungsi ini membaca token mentah langsung dari
+  // localStorage('ak_token') TANPA mengecek apakah token itu sudah kedaluwarsa.
+  // Proses generate dokumen (apalagi skripsi 5 BAB) bisa makan waktu cukup lama,
+  // jadi kalau access token sudah expired persis pada saat sinkron ini dikirim,
+  // Supabase menolaknya (401) — request gagal SENYAP (fire-and-forget, tidak ada
+  // error yang terlihat), dan dokumen itu tidak pernah tercatat di 'document_log'
+  // walau sudah berhasil dibuat & muncul normal di Dokumen Saya (yang datanya
+  // dari localStorage, bukan dari server). Ini sebabnya panel admin bisa
+  // menunjukkan "Permintaan AI" yang benar (itu dicatat SERVER-SIDE lewat
+  // service role di api/generate.js, tidak kena masalah token expired) tapi
+  // "Dokumen Dibuat" tetap 0. Sekarang pakai AkAccount.getValidToken() (kalau
+  // tersedia) supaya token di-refresh dulu bila perlu, sama seperti semua
+  // panggilan API lain di aplikasi ini — dan errornya dicatat ke console supaya
+  // bisa dicek lewat DevTools kalau masih gagal.
+  async function syncKeSupabase(item) {
     try {
-      const token = localStorage.getItem("ak_token");
-      if (!token) return;
       if (
         typeof AK_SUPABASE_URL === "undefined" ||
         typeof AK_SUPABASE_ANON_KEY === "undefined"
@@ -92,7 +106,18 @@ const RiwayatStore = (function () {
         user = JSON.parse(localStorage.getItem("ak_user") || "{}");
       } catch (e) {}
       if (!user.id) return;
-      fetch(AK_SUPABASE_URL + "/rest/v1/document_log", {
+
+      let token = localStorage.getItem("ak_token");
+      if (typeof AkAccount !== "undefined" && AkAccount.getValidToken) {
+        try {
+          token = await AkAccount.getValidToken();
+        } catch (e) {
+          /* pakai token lama sebagai upaya terakhir */
+        }
+      }
+      if (!token) return;
+
+      const res = await fetch(AK_SUPABASE_URL + "/rest/v1/document_log", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -111,8 +136,19 @@ const RiwayatStore = (function () {
               ? Math.max(1, Math.round(item.kataTerhitung / 275))
               : 0),
         }),
-      }).catch(function () {});
-    } catch (e) {}
+      });
+      if (!res.ok) {
+        const teks = await res.text().catch(() => "");
+        console.error(
+          "RiwayatStore: gagal sinkron document_log ke Supabase (" +
+            res.status +
+            "): " +
+            teks
+        );
+      }
+    } catch (e) {
+      console.error("RiwayatStore: error sinkron document_log:", e);
+    }
   }
 
   function hapus(id) {
