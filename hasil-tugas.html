@@ -11,6 +11,11 @@
 <script src="i18n.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<!-- PERBAIKAN: shared-config.js perlu dimuat SEBELUM riwayat-store.js supaya
+     dokumen yang tercatat di halaman ini (Tugas, Makalah, Jurnal) ikut
+     disinkron ke Supabase (tabel 'document_log'), sehingga muncul di panel
+     admin. Sebelumnya halaman ini tidak memuat shared-config.js sama sekali. -->
+<script src="shared-config.js"></script>
 <script src="riwayat-store.js"></script>
 <script src="account.js"></script>
 <script src="sync-plan.js"></script>
